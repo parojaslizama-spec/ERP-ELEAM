@@ -337,12 +337,69 @@
       </div>
 
       <div class="input-section">
-        <h2>Personal</h2>
+        <h2>Cuidadores (turnos)</h2>
         <div class="field">
-          <div class="field-row"><label for="sueldoLiquido">Sueldo líquido objetivo</label><span class="field-value" id="sueldoLiquidoVal"></span></div>
-          <input type="number" id="sueldoLiquido" min="0" step="5000" />
-          <p class="hint" id="sueldoBrutoHint"></p>
+          <div class="field-row"><label for="ratioResidentes">Residentes por cuidador</label><span class="field-value" id="ratioResidentesVal"></span></div>
+          <input type="number" id="ratioResidentes" min="0.5" max="20" step="0.1" />
+          <p class="hint">Debe respetar el mínimo legal según nivel de dependencia (Decreto 20/2022).</p>
         </div>
+        <div class="field">
+          <div class="field-row"><label for="cuidadoresMinTurno">Mínimo de cuidadores (dotación)</label><span class="field-value" id="cuidadoresMinTurnoVal"></span></div>
+          <input type="number" id="cuidadoresMinTurno" min="2" step="1" />
+          <p class="hint">Para mantener 2 cuidadores simultáneos las 24 h, con turnos y descanso semanal.</p>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="sueldoCuidadorLiquido">Sueldo líquido</label><span class="field-value" id="sueldoCuidadorLiquidoVal"></span></div>
+          <input type="number" id="sueldoCuidadorLiquido" min="0" step="5000" />
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="bonoAsistencia">Bono de asistencia</label><span class="field-value" id="bonoAsistenciaVal"></span></div>
+          <input type="number" id="bonoAsistencia" min="0" step="5000" />
+          <p class="hint">Por no faltar a los turnos en el mes; se asume pagado a todos.</p>
+        </div>
+      </div>
+
+      <div class="input-section">
+        <h2>TENS</h2>
+        <div class="field">
+          <div class="field-row"><label for="tensCount">Dotación</label><span class="field-value" id="tensCountVal"></span></div>
+          <input type="number" id="tensCount" min="0" step="1" />
+          <p class="hint">Administra medicamentos y está siempre disponible ante cualquier llamado.</p>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="sueldoTensLiquido">Sueldo líquido</label><span class="field-value" id="sueldoTensLiquidoVal"></span></div>
+          <input type="number" id="sueldoTensLiquido" min="0" step="5000" />
+        </div>
+      </div>
+
+      <div class="input-section">
+        <h2>Cocinera</h2>
+        <div class="field">
+          <div class="field-row"><label for="cocineraCount">Dotación</label><span class="field-value" id="cocineraCountVal"></span></div>
+          <input type="number" id="cocineraCount" min="0" step="1" />
+          <p class="hint">Lunes a sábado, jornada diurna, máx. 40 hrs/semana.</p>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="sueldoCocineraLiquido">Sueldo líquido</label><span class="field-value" id="sueldoCocineraLiquidoVal"></span></div>
+          <input type="number" id="sueldoCocineraLiquido" min="0" step="5000" />
+        </div>
+      </div>
+
+      <div class="input-section">
+        <h2>Aseo</h2>
+        <div class="field">
+          <div class="field-row"><label for="aseoCount">Dotación</label><span class="field-value" id="aseoCountVal"></span></div>
+          <input type="number" id="aseoCount" min="0" step="1" />
+          <p class="hint">Lunes a sábado, jornada diurna, máx. 40 hrs/semana.</p>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="sueldoAseoLiquido">Sueldo líquido</label><span class="field-value" id="sueldoAseoLiquidoVal"></span></div>
+          <input type="number" id="sueldoAseoLiquido" min="0" step="5000" />
+        </div>
+      </div>
+
+      <div class="input-section">
+        <h2>Cargas sociales (todos los roles)</h2>
         <div class="field">
           <div class="field-row"><label for="descuentoPrevisional">Descuentos previsionales</label><span class="field-value" id="descuentoPrevisionalVal"></span></div>
           <input type="number" id="descuentoPrevisional" min="0" max="40" step="0.5" />
@@ -352,15 +409,6 @@
           <div class="field-row"><label for="factorCostoEmpresa">Factor costo empresa</label><span class="field-value" id="factorCostoEmpresaVal"></span></div>
           <input type="number" id="factorCostoEmpresa" min="1" max="2" step="0.01" />
           <p class="hint">Multiplica el sueldo bruto para incluir cargas legales y gratificación patronal.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="personalFijo">Personal fijo (aseo + cocina)</label><span class="field-value" id="personalFijoVal"></span></div>
-          <input type="number" id="personalFijo" min="0" step="1" />
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="ratioResidentes">Residentes por cuidador</label><span class="field-value" id="ratioResidentesVal"></span></div>
-          <input type="number" id="ratioResidentes" min="0.5" max="20" step="0.1" />
-          <p class="hint">Debe respetar el mínimo legal según nivel de dependencia (Decreto 20/2022).</p>
         </div>
       </div>
 
@@ -418,6 +466,7 @@
             <span><i style="background:var(--ink-faint)"></i>Fuera de capacidad</span>
           </div>
         </div>
+        <p class="hint" id="chartRangeNote"></p>
         <div class="chart-scroll">
           <svg id="chart" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
         </div>
@@ -451,11 +500,18 @@
     capacidadMaxima: 25,
     tarifaPromedio: 1050000,
     pisoTarifa: 800000,
-    sueldoLiquido: 850000,
+    ratioResidentes: 1.4,
+    cuidadoresMinTurno: 8,
+    sueldoCuidadorLiquido: 650000,
+    bonoAsistencia: 50000,
+    tensCount: 1,
+    sueldoTensLiquido: 800000,
+    cocineraCount: 2,
+    sueldoCocineraLiquido: 600000,
+    aseoCount: 1,
+    sueldoAseoLiquido: 600000,
     descuentoPrevisional: 20,
     factorCostoEmpresa: 1.32,
-    personalFijo: 3,
-    ratioResidentes: 1.4,
     costoVariable: 150000,
     costosFijos: 900000,
     pagoDueno: 2000000,
@@ -463,9 +519,11 @@
   };
 
   var STORAGE_KEY = "eleam-simulador-v1";
-  var fields = ["residentes","capacidadMaxima","tarifaPromedio","pisoTarifa","sueldoLiquido",
-    "descuentoPrevisional","factorCostoEmpresa","personalFijo","ratioResidentes","costoVariable",
-    "costosFijos","pagoDueno","metaGanancia"];
+  var fields = ["residentes","capacidadMaxima","tarifaPromedio","pisoTarifa",
+    "ratioResidentes","cuidadoresMinTurno","sueldoCuidadorLiquido","bonoAsistencia",
+    "tensCount","sueldoTensLiquido","cocineraCount","sueldoCocineraLiquido",
+    "aseoCount","sueldoAseoLiquido","descuentoPrevisional","factorCostoEmpresa",
+    "costoVariable","costosFijos","pagoDueno","metaGanancia"];
 
   var els = {};
   fields.forEach(function (f) { els[f] = document.getElementById(f); });
@@ -513,24 +571,40 @@
     return Math.max(0, Math.ceil(residentes / ratio));
   }
 
-  function sueldoBrutoDe(s) {
+  function costoPorTrabajador(liquidoMensual, s) {
     var descuento = Math.min(0.9, Math.max(0, s.descuentoPrevisional / 100));
-    return s.sueldoLiquido / (1 - descuento);
+    var bruto = liquidoMensual / (1 - descuento);
+    return bruto * s.factorCostoEmpresa;
   }
 
   function computeFor(residentes, s) {
-    var cu = cuidadores(residentes, s.ratioResidentes);
-    var personalTotal = s.personalFijo + cu;
-    var sueldoBruto = sueldoBrutoDe(s);
-    var costoPorTrabajador = sueldoBruto * s.factorCostoEmpresa;
-    var costoPersonal = personalTotal * costoPorTrabajador;
+    var cuidadoresPorRatio = cuidadores(residentes, s.ratioResidentes);
+    var cuidadoresTotal = Math.max(cuidadoresPorRatio, s.cuidadoresMinTurno);
+
+    var costoPorCuidador = costoPorTrabajador(s.sueldoCuidadorLiquido + s.bonoAsistencia, s);
+    var costoPorTens = costoPorTrabajador(s.sueldoTensLiquido, s);
+    var costoPorCocinera = costoPorTrabajador(s.sueldoCocineraLiquido, s);
+    var costoPorAseo = costoPorTrabajador(s.sueldoAseoLiquido, s);
+
+    var costoCuidadores = cuidadoresTotal * costoPorCuidador;
+    var costoTens = s.tensCount * costoPorTens;
+    var costoCocinera = s.cocineraCount * costoPorCocinera;
+    var costoAseo = s.aseoCount * costoPorAseo;
+    var costoPersonal = costoCuidadores + costoTens + costoCocinera + costoAseo;
+    var personalTotal = cuidadoresTotal + s.tensCount + s.cocineraCount + s.aseoCount;
+
     var costoVariableTotal = residentes * s.costoVariable;
     var costosTotales = costoPersonal + costoVariableTotal + s.costosFijos + s.pagoDueno;
     var ingresos = residentes * s.tarifaPromedio;
     var ganancia = ingresos - costosTotales;
     return {
-      residentes: residentes, cuidadores: cu, personalTotal: personalTotal,
-      sueldoBruto: sueldoBruto, costoPorTrabajador: costoPorTrabajador,
+      residentes: residentes,
+      cuidadoresPorRatio: cuidadoresPorRatio, cuidadoresTotal: cuidadoresTotal,
+      costoPorCuidador: costoPorCuidador, costoPorTens: costoPorTens,
+      costoPorCocinera: costoPorCocinera, costoPorAseo: costoPorAseo,
+      costoCuidadores: costoCuidadores, costoTens: costoTens,
+      costoCocinera: costoCocinera, costoAseo: costoAseo,
+      personalTotal: personalTotal,
       costoPersonal: costoPersonal, costoVariableTotal: costoVariableTotal,
       costosTotales: costosTotales, ingresos: ingresos, ganancia: ganancia
     };
@@ -567,13 +641,18 @@
     document.getElementById("capacidadMaximaVal").textContent = s.capacidadMaxima + " cupos";
     document.getElementById("tarifaPromedioVal").textContent = moneyFmt.format(s.tarifaPromedio);
     document.getElementById("pisoTarifaVal").textContent = moneyFmt.format(s.pisoTarifa);
-    document.getElementById("sueldoLiquidoVal").textContent = moneyFmt.format(s.sueldoLiquido);
+    document.getElementById("ratioResidentesVal").textContent = numFmt.format(s.ratioResidentes) + " : 1";
+    document.getElementById("cuidadoresMinTurnoVal").textContent = s.cuidadoresMinTurno + " personas";
+    document.getElementById("sueldoCuidadorLiquidoVal").textContent = moneyFmt.format(s.sueldoCuidadorLiquido);
+    document.getElementById("bonoAsistenciaVal").textContent = moneyFmt.format(s.bonoAsistencia);
+    document.getElementById("tensCountVal").textContent = s.tensCount + " personas";
+    document.getElementById("sueldoTensLiquidoVal").textContent = moneyFmt.format(s.sueldoTensLiquido);
+    document.getElementById("cocineraCountVal").textContent = s.cocineraCount + " personas";
+    document.getElementById("sueldoCocineraLiquidoVal").textContent = moneyFmt.format(s.sueldoCocineraLiquido);
+    document.getElementById("aseoCountVal").textContent = s.aseoCount + " personas";
+    document.getElementById("sueldoAseoLiquidoVal").textContent = moneyFmt.format(s.sueldoAseoLiquido);
     document.getElementById("descuentoPrevisionalVal").textContent = numFmt.format(s.descuentoPrevisional) + "%";
     document.getElementById("factorCostoEmpresaVal").textContent = numFmt.format(s.factorCostoEmpresa) + "x";
-    document.getElementById("sueldoBrutoHint").textContent =
-      "Equivale a " + moneyFmt.format(sueldoBrutoDe(s)) + " brutos por trabajador.";
-    document.getElementById("personalFijoVal").textContent = s.personalFijo + " personas";
-    document.getElementById("ratioResidentesVal").textContent = numFmt.format(s.ratioResidentes) + " : 1";
     document.getElementById("costoVariableVal").textContent = moneyFmt.format(s.costoVariable);
     document.getElementById("costosFijosVal").textContent = moneyFmt.format(s.costosFijos);
     document.getElementById("pagoDuenoVal").textContent = moneyFmt.format(s.pagoDueno);
@@ -607,7 +686,10 @@
 
     // breakdown
     var rows = [
-      { label: "Personal (" + cur.personalTotal + " personas)", amount: cur.costoPersonal },
+      { label: "Cuidadores (" + cur.cuidadoresTotal + ")", amount: cur.costoCuidadores },
+      { label: "TENS (" + s.tensCount + ")", amount: cur.costoTens },
+      { label: "Cocinera (" + s.cocineraCount + ")", amount: cur.costoCocinera },
+      { label: "Aseo (" + s.aseoCount + ")", amount: cur.costoAseo },
       { label: "Variable por residente", amount: cur.costoVariableTotal },
       { label: "Costos fijos", amount: s.costosFijos },
       { label: "Pago al dueño", amount: s.pagoDueno }
@@ -623,10 +705,23 @@
       '<span class="bd-amount">' + moneyFmt.format(cur.costosTotales) + '</span></div>';
     document.getElementById("breakdownRows").innerHTML = html;
 
+    var turnoFloorActivo = cur.cuidadoresTotal > cur.cuidadoresPorRatio;
     document.getElementById("dotacionNote").textContent =
-      "Con " + s.residentes + " residentes se requieren " + cur.cuidadores + " cuidadores (ratio " +
-      numFmt.format(s.ratioResidentes) + " : 1), más " + s.personalFijo + " de personal fijo. Costo empresa por trabajador: " +
-      moneyFmt.format(cur.costoPorTrabajador) + " (líquido " + moneyFmt.format(s.sueldoLiquido) + " + cargas). Verifica que cumpla la dotación mínima legal según el grado de dependencia real de los residentes.";
+      "Con " + s.residentes + " residentes, la razón da " + cur.cuidadoresPorRatio + " cuidadores" +
+      (turnoFloorActivo ? "; se ajusta a " + cur.cuidadoresTotal + " por el mínimo de turnos." : ".") +
+      " Personal total: " + cur.personalTotal + " (" + cur.cuidadoresTotal + " cuidadores, " + s.tensCount +
+      " TENS, " + s.cocineraCount + " cocinera(s), " + s.aseoCount + " aseo). Costo empresa por cuidador: " +
+      moneyFmt.format(cur.costoPorCuidador) + " (líquido " + moneyFmt.format(s.sueldoCuidadorLiquido + s.bonoAsistencia) +
+      " con bono + cargas). Verifica que la dotación cumpla el mínimo legal según el grado de dependencia real de los residentes.";
+
+    var rangeNoteEl = document.getElementById("chartRangeNote");
+    if (breakeven === null) {
+      rangeNoteEl.innerHTML = '<span class="warn-inline">Con estos supuestos, la ganancia no llega a $0 ni con ' + xMax + ' residentes — revisa tarifa, ratio o sueldos.</span>';
+    } else if (metaAt === null) {
+      rangeNoteEl.innerHTML = '<span class="warn-inline">La meta de ganancia no se alcanza ni con ' + xMax + ' residentes con estos supuestos.</span>';
+    } else {
+      rangeNoteEl.textContent = "";
+    }
 
     drawChart(s, xMax, breakeven, metaAt);
   }
