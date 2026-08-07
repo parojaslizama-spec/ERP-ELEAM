@@ -339,13 +339,19 @@
       <div class="input-section">
         <h2>Personal</h2>
         <div class="field">
-          <div class="field-row"><label for="sueldoMinimo">Sueldo mínimo bruto</label><span class="field-value" id="sueldoMinimoVal"></span></div>
-          <input type="number" id="sueldoMinimo" min="0" step="1000" />
+          <div class="field-row"><label for="sueldoLiquido">Sueldo líquido objetivo</label><span class="field-value" id="sueldoLiquidoVal"></span></div>
+          <input type="number" id="sueldoLiquido" min="0" step="5000" />
+          <p class="hint" id="sueldoBrutoHint"></p>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="descuentoPrevisional">Descuentos previsionales</label><span class="field-value" id="descuentoPrevisionalVal"></span></div>
+          <input type="number" id="descuentoPrevisional" min="0" max="40" step="0.5" />
+          <p class="hint">AFP + salud + seguro cesantía del trabajador, para pasar de líquido a bruto.</p>
         </div>
         <div class="field">
           <div class="field-row"><label for="factorCostoEmpresa">Factor costo empresa</label><span class="field-value" id="factorCostoEmpresaVal"></span></div>
           <input type="number" id="factorCostoEmpresa" min="1" max="2" step="0.01" />
-          <p class="hint">Multiplica el sueldo bruto para incluir cargas legales y gratificación.</p>
+          <p class="hint">Multiplica el sueldo bruto para incluir cargas legales y gratificación patronal.</p>
         </div>
         <div class="field">
           <div class="field-row"><label for="personalFijo">Personal fijo (aseo + cocina)</label><span class="field-value" id="personalFijoVal"></span></div>
@@ -445,7 +451,8 @@
     capacidadMaxima: 25,
     tarifaPromedio: 1050000,
     pisoTarifa: 800000,
-    sueldoMinimo: 553553,
+    sueldoLiquido: 850000,
+    descuentoPrevisional: 20,
     factorCostoEmpresa: 1.32,
     personalFijo: 3,
     ratioResidentes: 1.4,
@@ -456,9 +463,9 @@
   };
 
   var STORAGE_KEY = "eleam-simulador-v1";
-  var fields = ["residentes","capacidadMaxima","tarifaPromedio","pisoTarifa","sueldoMinimo",
-    "factorCostoEmpresa","personalFijo","ratioResidentes","costoVariable","costosFijos",
-    "pagoDueno","metaGanancia"];
+  var fields = ["residentes","capacidadMaxima","tarifaPromedio","pisoTarifa","sueldoLiquido",
+    "descuentoPrevisional","factorCostoEmpresa","personalFijo","ratioResidentes","costoVariable",
+    "costosFijos","pagoDueno","metaGanancia"];
 
   var els = {};
   fields.forEach(function (f) { els[f] = document.getElementById(f); });
@@ -506,16 +513,24 @@
     return Math.max(0, Math.ceil(residentes / ratio));
   }
 
+  function sueldoBrutoDe(s) {
+    var descuento = Math.min(0.9, Math.max(0, s.descuentoPrevisional / 100));
+    return s.sueldoLiquido / (1 - descuento);
+  }
+
   function computeFor(residentes, s) {
     var cu = cuidadores(residentes, s.ratioResidentes);
     var personalTotal = s.personalFijo + cu;
-    var costoPersonal = personalTotal * s.sueldoMinimo * s.factorCostoEmpresa;
+    var sueldoBruto = sueldoBrutoDe(s);
+    var costoPorTrabajador = sueldoBruto * s.factorCostoEmpresa;
+    var costoPersonal = personalTotal * costoPorTrabajador;
     var costoVariableTotal = residentes * s.costoVariable;
     var costosTotales = costoPersonal + costoVariableTotal + s.costosFijos + s.pagoDueno;
     var ingresos = residentes * s.tarifaPromedio;
     var ganancia = ingresos - costosTotales;
     return {
       residentes: residentes, cuidadores: cu, personalTotal: personalTotal,
+      sueldoBruto: sueldoBruto, costoPorTrabajador: costoPorTrabajador,
       costoPersonal: costoPersonal, costoVariableTotal: costoVariableTotal,
       costosTotales: costosTotales, ingresos: ingresos, ganancia: ganancia
     };
@@ -552,8 +567,11 @@
     document.getElementById("capacidadMaximaVal").textContent = s.capacidadMaxima + " cupos";
     document.getElementById("tarifaPromedioVal").textContent = moneyFmt.format(s.tarifaPromedio);
     document.getElementById("pisoTarifaVal").textContent = moneyFmt.format(s.pisoTarifa);
-    document.getElementById("sueldoMinimoVal").textContent = moneyFmt.format(s.sueldoMinimo);
+    document.getElementById("sueldoLiquidoVal").textContent = moneyFmt.format(s.sueldoLiquido);
+    document.getElementById("descuentoPrevisionalVal").textContent = numFmt.format(s.descuentoPrevisional) + "%";
     document.getElementById("factorCostoEmpresaVal").textContent = numFmt.format(s.factorCostoEmpresa) + "x";
+    document.getElementById("sueldoBrutoHint").textContent =
+      "Equivale a " + moneyFmt.format(sueldoBrutoDe(s)) + " brutos por trabajador.";
     document.getElementById("personalFijoVal").textContent = s.personalFijo + " personas";
     document.getElementById("ratioResidentesVal").textContent = numFmt.format(s.ratioResidentes) + " : 1";
     document.getElementById("costoVariableVal").textContent = moneyFmt.format(s.costoVariable);
@@ -607,7 +625,8 @@
 
     document.getElementById("dotacionNote").textContent =
       "Con " + s.residentes + " residentes se requieren " + cur.cuidadores + " cuidadores (ratio " +
-      numFmt.format(s.ratioResidentes) + " : 1), más " + s.personalFijo + " de personal fijo. Verifica que cumpla la dotación mínima legal según el grado de dependencia real de los residentes.";
+      numFmt.format(s.ratioResidentes) + " : 1), más " + s.personalFijo + " de personal fijo. Costo empresa por trabajador: " +
+      moneyFmt.format(cur.costoPorTrabajador) + " (líquido " + moneyFmt.format(s.sueldoLiquido) + " + cargas). Verifica que cumpla la dotación mínima legal según el grado de dependencia real de los residentes.";
 
     drawChart(s, xMax, breakeven, metaAt);
   }
