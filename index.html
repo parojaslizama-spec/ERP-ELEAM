@@ -399,6 +399,15 @@
       </div>
 
       <div class="input-section">
+        <h2>Beneficios generales (todos los roles)</h2>
+        <div class="field">
+          <div class="field-row"><label for="bonoGeneral">Bono general por trabajador</label><span class="field-value" id="bonoGeneralVal"></span></div>
+          <input type="range" id="bonoGeneral" min="20000" max="70000" step="5000" />
+          <p class="hint">Se suma al líquido de cuidadores, TENS, cocinera y aseo antes de calcular el costo empresa.</p>
+        </div>
+      </div>
+
+      <div class="input-section">
         <h2>Cargas sociales (todos los roles)</h2>
         <div class="field">
           <div class="field-row"><label for="descuentoPrevisional">Descuentos previsionales</label><span class="field-value" id="descuentoPrevisionalVal"></span></div>
@@ -497,7 +506,7 @@
 
   var DEFAULTS = {
     residentes: 11,
-    capacidadMaxima: 25,
+    capacidadMaxima: 40,
     tarifaPromedio: 1050000,
     pisoTarifa: 800000,
     ratioResidentes: 1.4,
@@ -510,6 +519,7 @@
     sueldoCocineraLiquido: 600000,
     aseoCount: 1,
     sueldoAseoLiquido: 600000,
+    bonoGeneral: 40000,
     descuentoPrevisional: 20,
     factorCostoEmpresa: 1.32,
     costoVariable: 150000,
@@ -522,7 +532,7 @@
   var fields = ["residentes","capacidadMaxima","tarifaPromedio","pisoTarifa",
     "ratioResidentes","cuidadoresMinTurno","sueldoCuidadorLiquido","bonoAsistencia",
     "tensCount","sueldoTensLiquido","cocineraCount","sueldoCocineraLiquido",
-    "aseoCount","sueldoAseoLiquido","descuentoPrevisional","factorCostoEmpresa",
+    "aseoCount","sueldoAseoLiquido","bonoGeneral","descuentoPrevisional","factorCostoEmpresa",
     "costoVariable","costosFijos","pagoDueno","metaGanancia"];
 
   var els = {};
@@ -581,10 +591,10 @@
     var cuidadoresPorRatio = cuidadores(residentes, s.ratioResidentes);
     var cuidadoresTotal = Math.max(cuidadoresPorRatio, s.cuidadoresMinTurno);
 
-    var costoPorCuidador = costoPorTrabajador(s.sueldoCuidadorLiquido + s.bonoAsistencia, s);
-    var costoPorTens = costoPorTrabajador(s.sueldoTensLiquido, s);
-    var costoPorCocinera = costoPorTrabajador(s.sueldoCocineraLiquido, s);
-    var costoPorAseo = costoPorTrabajador(s.sueldoAseoLiquido, s);
+    var costoPorCuidador = costoPorTrabajador(s.sueldoCuidadorLiquido + s.bonoAsistencia + s.bonoGeneral, s);
+    var costoPorTens = costoPorTrabajador(s.sueldoTensLiquido + s.bonoGeneral, s);
+    var costoPorCocinera = costoPorTrabajador(s.sueldoCocineraLiquido + s.bonoGeneral, s);
+    var costoPorAseo = costoPorTrabajador(s.sueldoAseoLiquido + s.bonoGeneral, s);
 
     var costoCuidadores = cuidadoresTotal * costoPorCuidador;
     var costoTens = s.tensCount * costoPorTens;
@@ -651,6 +661,7 @@
     document.getElementById("sueldoCocineraLiquidoVal").textContent = moneyFmt.format(s.sueldoCocineraLiquido);
     document.getElementById("aseoCountVal").textContent = s.aseoCount + " personas";
     document.getElementById("sueldoAseoLiquidoVal").textContent = moneyFmt.format(s.sueldoAseoLiquido);
+    document.getElementById("bonoGeneralVal").textContent = moneyFmt.format(s.bonoGeneral);
     document.getElementById("descuentoPrevisionalVal").textContent = numFmt.format(s.descuentoPrevisional) + "%";
     document.getElementById("factorCostoEmpresaVal").textContent = numFmt.format(s.factorCostoEmpresa) + "x";
     document.getElementById("costoVariableVal").textContent = moneyFmt.format(s.costoVariable);
@@ -711,8 +722,8 @@
       (turnoFloorActivo ? "; se ajusta a " + cur.cuidadoresTotal + " por el mínimo de turnos." : ".") +
       " Personal total: " + cur.personalTotal + " (" + cur.cuidadoresTotal + " cuidadores, " + s.tensCount +
       " TENS, " + s.cocineraCount + " cocinera(s), " + s.aseoCount + " aseo). Costo empresa por cuidador: " +
-      moneyFmt.format(cur.costoPorCuidador) + " (líquido " + moneyFmt.format(s.sueldoCuidadorLiquido + s.bonoAsistencia) +
-      " con bono + cargas). Verifica que la dotación cumpla el mínimo legal según el grado de dependencia real de los residentes.";
+      moneyFmt.format(cur.costoPorCuidador) + " (líquido " + moneyFmt.format(s.sueldoCuidadorLiquido + s.bonoAsistencia + s.bonoGeneral) +
+      " con bonos + cargas). El bono general de " + moneyFmt.format(s.bonoGeneral) + " está incluido en el líquido de los 4 roles. Verifica que la dotación cumpla el mínimo legal según el grado de dependencia real de los residentes.";
 
     var rangeNoteEl = document.getElementById("chartRangeNote");
     if (breakeven === null) {
