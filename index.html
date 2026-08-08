@@ -189,6 +189,8 @@
   }
   .hint { font-size: 11.5px; color: var(--ink-faint); margin-top: 4px; }
   .warn-inline { color: var(--warn); font-weight: 600; }
+  .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink); cursor: pointer; }
+  .check-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
 
   .btn-ghost {
     margin-top: 20px;
@@ -266,6 +268,29 @@
   .quick-jump button:hover { filter: brightness(0.96); }
   @media (prefers-color-scheme: dark) { .quick-jump button:hover { filter: brightness(1.15); } }
 
+  .proj-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .proj-card h3 { margin: 0 0 6px; font-family: var(--serif); font-weight: 500; font-size: 16px; }
+  .table-scroll { overflow-x: auto; margin-top: 10px; }
+  table.proj-table { border-collapse: collapse; width: 100%; min-width: 480px; font-size: 12.5px; }
+  table.proj-table th, table.proj-table td {
+    padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  table.proj-table th:first-child, table.proj-table td:first-child { text-align: left; font-family: var(--sans); }
+  table.proj-table thead th {
+    font-family: var(--sans); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--ink-faint); font-weight: 700; border-bottom: 1px solid var(--border); text-align: right;
+  }
+  table.proj-table thead th:first-child { text-align: left; }
+  table.proj-table tr.loan-month td { background: var(--warn-soft); }
+  table.proj-table td.pos { color: var(--good); font-weight: 600; }
+  table.proj-table td.neg { color: var(--critical); font-weight: 600; }
+  table.proj-table tfoot td { font-weight: 700; background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: none; }
+  .tag-credito {
+    font-family: var(--sans); font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+    color: var(--warn); background: var(--warn-soft); border-radius: 999px; padding: 1px 6px; margin-left: 4px;
+  }
+
   .breakdown-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
   .breakdown-card h3 { margin: 0 0 12px; font-family: var(--serif); font-weight: 500; font-size: 16px; }
   .bd-row {
@@ -313,8 +338,13 @@
       <div class="input-section">
         <h2>Ocupación</h2>
         <div class="field">
-          <div class="field-row"><label for="residentes">Residentes actuales</label><span class="field-value" id="residentesVal"></span></div>
-          <input type="range" id="residentes" min="0" max="30" step="1" />
+          <div class="field-row"><label for="residentesCompartida">Residentes — pieza compartida</label><span class="field-value" id="residentesCompartidaVal"></span></div>
+          <input type="range" id="residentesCompartida" min="0" max="30" step="1" />
+          <p class="hint">Hasta 2 residentes por pieza.</p>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="residentesIndividual">Residentes — pieza individual</label><span class="field-value" id="residentesIndividualVal"></span></div>
+          <input type="range" id="residentesIndividual" min="0" max="30" step="1" />
         </div>
         <div class="field">
           <div class="field-row"><label for="capacidadMaxima">Capacidad autorizada máxima</label><span class="field-value" id="capacidadMaximaVal"></span></div>
@@ -326,13 +356,14 @@
       <div class="input-section">
         <h2>Ingresos</h2>
         <div class="field">
-          <div class="field-row"><label for="tarifaPromedio">Tarifa promedio por residente</label><span class="field-value" id="tarifaPromedioVal"></span></div>
-          <input type="range" id="tarifaPromedio" min="700000" max="1600000" step="10000" />
-          <p class="hint" id="pisoWarning"></p>
+          <div class="field-row"><label for="tarifaCompartida">Tarifa — pieza compartida</label><span class="field-value" id="tarifaCompartidaVal"></span></div>
+          <input type="range" id="tarifaCompartida" min="800000" max="1300000" step="10000" />
+          <p class="hint">Desde $800.000 por residente.</p>
         </div>
         <div class="field">
-          <div class="field-row"><label for="pisoTarifa">Piso de tarifa aceptable</label><span class="field-value" id="pisoTarifaVal"></span></div>
-          <input type="number" id="pisoTarifa" min="0" step="10000" />
+          <div class="field-row"><label for="tarifaIndividual">Tarifa — pieza individual</label><span class="field-value" id="tarifaIndividualVal"></span></div>
+          <input type="range" id="tarifaIndividual" min="1500000" max="2200000" step="10000" />
+          <p class="hint">Desde $1.500.000 por residente.</p>
         </div>
       </div>
 
@@ -441,6 +472,31 @@
         </div>
       </div>
 
+      <div class="input-section">
+        <h2>Crédito operacional</h2>
+        <div class="field">
+          <div class="field-row"><label for="montoCredito">Monto del crédito</label><span class="field-value" id="montoCreditoVal"></span></div>
+          <input type="number" id="montoCredito" min="0" step="100000" />
+          <p class="hint">Para soportar operaciones. Solo referencial — lo que afecta la caja es la cuota mensual.</p>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="cuotaCredito">Cuota mensual</label><span class="field-value" id="cuotaCreditoVal"></span></div>
+          <input type="number" id="cuotaCredito" min="0" step="10000" />
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="mesInicioCredito">Mes de inicio del pago</label><span class="field-value" id="mesInicioCreditoVal"></span></div>
+          <input type="month" id="mesInicioCredito" />
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="plazoCredito">Plazo</label><span class="field-value" id="plazoCreditoVal"></span></div>
+          <input type="number" id="plazoCredito" min="1" max="120" step="1" />
+        </div>
+        <div class="field field-check">
+          <label class="check-row"><input type="checkbox" id="creditoActivo" /> Incluir la cuota en los cálculos</label>
+          <p class="hint" id="creditoTotalHint"></p>
+        </div>
+      </div>
+
       <button class="btn-ghost" id="resetBtn" type="button">Restablecer valores por defecto</button>
     </aside>
 
@@ -487,6 +543,27 @@
         </div>
       </div>
 
+      <div class="proj-card">
+        <h3>Proyección de ingresos a 12 meses</h3>
+        <p class="hint">Se recalcula sola cada vez que cambias un supuesto. Ocupación y tarifas se asumen constantes; el crédito operacional aparece solo en los meses que corresponda.</p>
+        <div class="table-scroll">
+          <table class="proj-table">
+            <thead>
+              <tr><th>Mes</th><th>Ingresos</th><th>Costos totales</th><th>Ganancia</th></tr>
+            </thead>
+            <tbody id="projRows"></tbody>
+            <tfoot>
+              <tr>
+                <td>Total 12 meses</td>
+                <td id="projTotalIngresos">—</td>
+                <td id="projTotalCostos">—</td>
+                <td id="projTotalGanancia">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
       <div class="breakdown-card">
         <h3>Desglose de costos al nivel actual</h3>
         <div id="breakdownRows"></div>
@@ -505,10 +582,11 @@
   "use strict";
 
   var DEFAULTS = {
-    residentes: 11,
+    residentesCompartida: 11,
+    residentesIndividual: 0,
     capacidadMaxima: 40,
-    tarifaPromedio: 1050000,
-    pisoTarifa: 800000,
+    tarifaCompartida: 800000,
+    tarifaIndividual: 1500000,
     ratioResidentes: 1.4,
     cuidadoresMinTurno: 8,
     sueldoCuidadorLiquido: 650000,
@@ -525,20 +603,30 @@
     costoVariable: 150000,
     costosFijos: 1405000,
     pagoDueno: 2000000,
-    metaGanancia: 3000000
+    metaGanancia: 3000000,
+    montoCredito: 8000000,
+    cuotaCredito: 600000,
+    plazoCredito: 36,
+    mesInicioCredito: "2026-11",
+    creditoActivo: true
   };
 
-  var STORAGE_KEY = "eleam-simulador-v1";
-  var fields = ["residentes","capacidadMaxima","tarifaPromedio","pisoTarifa",
+  var STORAGE_KEY = "eleam-simulador-v2";
+  var fields = ["residentesCompartida","residentesIndividual","capacidadMaxima",
+    "tarifaCompartida","tarifaIndividual",
     "ratioResidentes","cuidadoresMinTurno","sueldoCuidadorLiquido","bonoAsistencia",
     "tensCount","sueldoTensLiquido","cocineraCount","sueldoCocineraLiquido",
     "aseoCount","sueldoAseoLiquido","bonoGeneral","descuentoPrevisional","factorCostoEmpresa",
-    "costoVariable","costosFijos","pagoDueno","metaGanancia"];
+    "costoVariable","costosFijos","pagoDueno","metaGanancia",
+    "montoCredito","cuotaCredito","plazoCredito"];
 
   var els = {};
   fields.forEach(function (f) { els[f] = document.getElementById(f); });
+  els.mesInicioCredito = document.getElementById("mesInicioCredito");
+  els.creditoActivo = document.getElementById("creditoActivo");
 
   var state = loadState();
+  var lastManual = { c: state.residentesCompartida, i: state.residentesIndividual };
 
   var moneyFmt = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
   var numFmt = new Intl.NumberFormat("es-CL", { maximumFractionDigits: 1 });
@@ -558,6 +646,8 @@
 
   function syncInputsFromState() {
     fields.forEach(function (f) { els[f].value = state[f]; });
+    els.mesInicioCredito.value = state.mesInicioCredito;
+    els.creditoActivo.checked = !!state.creditoActivo;
   }
 
   fields.forEach(function (f) {
@@ -570,8 +660,27 @@
     });
   });
 
+  els.residentesCompartida.addEventListener("input", function () {
+    lastManual.c = parseFloat(els.residentesCompartida.value) || 0;
+  });
+  els.residentesIndividual.addEventListener("input", function () {
+    lastManual.i = parseFloat(els.residentesIndividual.value) || 0;
+  });
+
+  els.mesInicioCredito.addEventListener("input", function () {
+    state.mesInicioCredito = els.mesInicioCredito.value;
+    saveState();
+    recompute();
+  });
+  els.creditoActivo.addEventListener("change", function () {
+    state.creditoActivo = els.creditoActivo.checked;
+    saveState();
+    recompute();
+  });
+
   document.getElementById("resetBtn").addEventListener("click", function () {
     state = Object.assign({}, DEFAULTS);
+    lastManual = { c: state.residentesCompartida, i: state.residentesIndividual };
     saveState();
     syncInputsFromState();
     recompute();
@@ -587,7 +696,8 @@
     return bruto * s.factorCostoEmpresa;
   }
 
-  function computeFor(residentes, s) {
+  function computeForSplit(rCompartida, rIndividual, s) {
+    var residentes = rCompartida + rIndividual;
     var cuidadoresPorRatio = cuidadores(residentes, s.ratioResidentes);
     var cuidadoresTotal = Math.max(cuidadoresPorRatio, s.cuidadoresMinTurno);
 
@@ -604,20 +714,29 @@
     var personalTotal = cuidadoresTotal + s.tensCount + s.cocineraCount + s.aseoCount;
 
     var costoVariableTotal = residentes * s.costoVariable;
-    var costosTotales = costoPersonal + costoVariableTotal + s.costosFijos + s.pagoDueno;
-    var ingresos = residentes * s.tarifaPromedio;
+    var costoCredito = s.creditoActivo ? s.cuotaCredito : 0;
+    var costosTotales = costoPersonal + costoVariableTotal + s.costosFijos + s.pagoDueno + costoCredito;
+    var ingresos = rCompartida * s.tarifaCompartida + rIndividual * s.tarifaIndividual;
     var ganancia = ingresos - costosTotales;
     return {
-      residentes: residentes,
+      residentes: residentes, residentesCompartida: rCompartida, residentesIndividual: rIndividual,
       cuidadoresPorRatio: cuidadoresPorRatio, cuidadoresTotal: cuidadoresTotal,
       costoPorCuidador: costoPorCuidador, costoPorTens: costoPorTens,
       costoPorCocinera: costoPorCocinera, costoPorAseo: costoPorAseo,
       costoCuidadores: costoCuidadores, costoTens: costoTens,
       costoCocinera: costoCocinera, costoAseo: costoAseo,
       personalTotal: personalTotal,
-      costoPersonal: costoPersonal, costoVariableTotal: costoVariableTotal,
+      costoPersonal: costoPersonal, costoVariableTotal: costoVariableTotal, costoCredito: costoCredito,
       costosTotales: costosTotales, ingresos: ingresos, ganancia: ganancia
     };
+  }
+
+  function computeFor(residentesTotal, s) {
+    var curTotal = s.residentesCompartida + s.residentesIndividual;
+    var mixCompartida = curTotal > 0 ? s.residentesCompartida / curTotal : 1;
+    var rC = Math.min(residentesTotal, Math.max(0, Math.round(residentesTotal * mixCompartida)));
+    var rI = residentesTotal - rC;
+    return computeForSplit(rC, rI, s);
   }
 
   function findFirstAtOrAbove(target, s, xMax) {
@@ -640,17 +759,20 @@
 
   function recompute() {
     var s = state;
+    var totalResidentes = s.residentesCompartida + s.residentesIndividual;
     var xMax = Math.max(30, s.capacidadMaxima + 5);
-    els.residentes.max = Math.max(30, s.capacidadMaxima);
-    var cur = computeFor(s.residentes, s);
+    els.residentesCompartida.max = Math.max(30, s.capacidadMaxima);
+    els.residentesIndividual.max = Math.max(30, s.capacidadMaxima);
+    var cur = computeForSplit(s.residentesCompartida, s.residentesIndividual, s);
     var breakeven = findFirstAtOrAbove(0, s, xMax);
     var metaAt = findFirstAtOrAbove(s.metaGanancia, s, xMax);
 
     // field value labels
-    document.getElementById("residentesVal").textContent = s.residentes + " personas";
+    document.getElementById("residentesCompartidaVal").textContent = s.residentesCompartida + " personas";
+    document.getElementById("residentesIndividualVal").textContent = s.residentesIndividual + " personas";
     document.getElementById("capacidadMaximaVal").textContent = s.capacidadMaxima + " cupos";
-    document.getElementById("tarifaPromedioVal").textContent = moneyFmt.format(s.tarifaPromedio);
-    document.getElementById("pisoTarifaVal").textContent = moneyFmt.format(s.pisoTarifa);
+    document.getElementById("tarifaCompartidaVal").textContent = moneyFmt.format(s.tarifaCompartida);
+    document.getElementById("tarifaIndividualVal").textContent = moneyFmt.format(s.tarifaIndividual);
     document.getElementById("ratioResidentesVal").textContent = numFmt.format(s.ratioResidentes) + " : 1";
     document.getElementById("cuidadoresMinTurnoVal").textContent = s.cuidadoresMinTurno + " personas";
     document.getElementById("sueldoCuidadorLiquidoVal").textContent = moneyFmt.format(s.sueldoCuidadorLiquido);
@@ -669,12 +791,13 @@
     document.getElementById("pagoDuenoVal").textContent = moneyFmt.format(s.pagoDueno);
     document.getElementById("metaGananciaVal").textContent = moneyFmt.format(s.metaGanancia);
 
-    var pisoWarnEl = document.getElementById("pisoWarning");
-    if (s.tarifaPromedio < s.pisoTarifa) {
-      pisoWarnEl.innerHTML = '<span class="warn-inline">Bajo el piso de tarifa definido.</span>';
-    } else {
-      pisoWarnEl.textContent = "";
-    }
+    document.getElementById("montoCreditoVal").textContent = moneyFmt.format(s.montoCredito);
+    document.getElementById("cuotaCreditoVal").textContent = moneyFmt.format(s.cuotaCredito);
+    document.getElementById("plazoCreditoVal").textContent = s.plazoCredito + " meses";
+    var totalPagarCredito = s.cuotaCredito * s.plazoCredito;
+    var multCredito = s.montoCredito > 0 ? totalPagarCredito / s.montoCredito : 0;
+    document.getElementById("creditoTotalHint").textContent =
+      "Total a pagar: " + moneyFmt.format(totalPagarCredito) + " (" + numFmt.format(multCredito) + "× el monto del crédito).";
 
     // KPIs
     document.getElementById("kpiIngresosVal").textContent = moneyFmt.format(cur.ingresos);
@@ -693,7 +816,7 @@
     liveEl.classList.remove("state-warn", "state-critical");
     if (tone === "critical") liveEl.classList.add("state-critical");
     else if (tone === "warn") liveEl.classList.add("state-warn");
-    document.getElementById("liveValue").textContent = moneyFmt.format(cur.ganancia) + " · " + s.residentes + " residentes";
+    document.getElementById("liveValue").textContent = moneyFmt.format(cur.ganancia) + " · " + totalResidentes + " residentes";
 
     // breakdown
     var rows = [
@@ -705,6 +828,9 @@
       { label: "Costos fijos", amount: s.costosFijos },
       { label: "Pago al dueño", amount: s.pagoDueno }
     ];
+    if (cur.costoCredito > 0) {
+      rows.push({ label: "Cuota crédito operacional", amount: cur.costoCredito });
+    }
     var maxAmt = Math.max.apply(null, rows.map(function (r) { return r.amount; }).concat([1]));
     var html = rows.map(function (r) {
       var pct = Math.max(2, (r.amount / maxAmt) * 100);
@@ -718,7 +844,8 @@
 
     var turnoFloorActivo = cur.cuidadoresTotal > cur.cuidadoresPorRatio;
     document.getElementById("dotacionNote").textContent =
-      "Con " + s.residentes + " residentes, la razón da " + cur.cuidadoresPorRatio + " cuidadores" +
+      "Con " + totalResidentes + " residentes (" + s.residentesCompartida + " en pieza compartida, " + s.residentesIndividual +
+      " en individual), la razón da " + cur.cuidadoresPorRatio + " cuidadores" +
       (turnoFloorActivo ? "; se ajusta a " + cur.cuidadoresTotal + " por el mínimo de turnos." : ".") +
       " Personal total: " + cur.personalTotal + " (" + cur.cuidadoresTotal + " cuidadores, " + s.tensCount +
       " TENS, " + s.cocineraCount + " cocinera(s), " + s.aseoCount + " aseo). Costo empresa por cuidador: " +
@@ -734,10 +861,57 @@
       rangeNoteEl.textContent = "";
     }
 
-    drawChart(s, xMax, breakeven, metaAt);
+    drawChart(s, xMax, breakeven, metaAt, cur);
+    buildProjection(s, cur);
   }
 
-  function drawChart(s, xMax, breakeven, metaAt) {
+  var MESES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+
+  function parseMonthInput(str) {
+    var parts = (str || "").split("-");
+    var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1;
+    if (isNaN(y) || isNaN(m)) return null;
+    return { y: y, m: m };
+  }
+
+  function buildProjection(s, cur) {
+    var tbody = document.getElementById("projRows");
+    var now = new Date();
+    var startCredit = s.creditoActivo ? parseMonthInput(s.mesInicioCredito) : null;
+    var baseCostosSinCredito = cur.costoPersonal + cur.costoVariableTotal + s.costosFijos + s.pagoDueno;
+    var rowsHtml = "";
+    var totIngresos = 0, totCostos = 0, totGanancia = 0;
+
+    for (var i = 0; i < 12; i++) {
+      var d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      var isLoanMonth = false;
+      if (startCredit) {
+        var diff = (d.getFullYear() - startCredit.y) * 12 + (d.getMonth() - startCredit.m);
+        isLoanMonth = diff >= 0 && diff < s.plazoCredito;
+      }
+      var costoCreditoMes = isLoanMonth ? s.cuotaCredito : 0;
+      var costosMes = baseCostosSinCredito + costoCreditoMes;
+      var giMes = cur.ingresos - costosMes;
+      totIngresos += cur.ingresos; totCostos += costosMes; totGanancia += giMes;
+
+      var label = MESES[d.getMonth()] + " " + d.getFullYear();
+      rowsHtml += '<tr' + (isLoanMonth ? ' class="loan-month"' : '') + '>' +
+        '<td>' + label + (isLoanMonth ? ' <span class="tag-credito">crédito</span>' : '') + '</td>' +
+        '<td>' + moneyFmt.format(cur.ingresos) + '</td>' +
+        '<td>' + moneyFmt.format(costosMes) + '</td>' +
+        '<td class="' + (giMes < 0 ? "neg" : "pos") + '">' + moneyFmt.format(giMes) + '</td>' +
+        '</tr>';
+    }
+
+    tbody.innerHTML = rowsHtml;
+    document.getElementById("projTotalIngresos").textContent = moneyFmt.format(totIngresos);
+    document.getElementById("projTotalCostos").textContent = moneyFmt.format(totCostos);
+    var gEl = document.getElementById("projTotalGanancia");
+    gEl.textContent = moneyFmt.format(totGanancia);
+    gEl.className = totGanancia < 0 ? "neg" : "pos";
+  }
+
+  function drawChart(s, xMax, breakeven, metaAt, cur) {
     var svg = document.getElementById("chart");
     var W = 640, H = 300, padL = 74, padR = 16, padT = 16, padB = 46;
     var plotW = W - padL - padR, plotH = H - padT - padB;
@@ -778,8 +952,7 @@
         '" stroke-width="1.5" stroke-dasharray="' + (dash ? "4 3" : "0") + '" />';
     }
 
-    var currentPoint = computeFor(s.residentes, s);
-    var curX = xPix(s.residentes), curY = yPix(currentPoint.ganancia);
+    var curX = xPix(cur.residentes), curY = yPix(cur.ganancia);
 
     svg.innerHTML =
       '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="var(--surface)" />' +
@@ -797,26 +970,31 @@
       '<text x="16" y="' + (padT + plotH / 2) + '" font-size="11" fill="var(--ink-soft)" text-anchor="middle" font-family="var(--sans)" font-weight="600" transform="rotate(-90 16 ' + (padT + plotH / 2) + ')">Ganancia mensual (CLP)</text>';
   }
 
-  var jumpMap = {
-    actual: function (s) { return s.residentes; },
-    breakeven: function (s) {
-      var xMax = Math.max(30, s.capacidadMaxima + 5);
-      return findFirstAtOrAbove(0, s, xMax);
-    },
-    meta: function (s) {
-      var xMax = Math.max(30, s.capacidadMaxima + 5);
-      return findFirstAtOrAbove(s.metaGanancia, s, xMax);
-    },
-    max: function (s) { return s.capacidadMaxima; }
-  };
+  function applyTotalResidentes(total) {
+    var curTotal = state.residentesCompartida + state.residentesIndividual;
+    var mixCompartida = curTotal > 0 ? state.residentesCompartida / curTotal : 1;
+    var rC = Math.min(total, Math.max(0, Math.round(total * mixCompartida)));
+    var rI = total - rC;
+    state.residentesCompartida = rC;
+    state.residentesIndividual = rI;
+  }
 
   document.querySelectorAll(".quick-jump button").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var key = btn.getAttribute("data-jump");
-      var val = jumpMap[key](state);
-      if (val === null || val === undefined) return;
-      state.residentes = val;
-      els.residentes.value = val;
+      if (key === "actual") {
+        state.residentesCompartida = lastManual.c;
+        state.residentesIndividual = lastManual.i;
+      } else {
+        var xMax = Math.max(30, state.capacidadMaxima + 5);
+        var total = key === "breakeven" ? findFirstAtOrAbove(0, state, xMax)
+          : key === "meta" ? findFirstAtOrAbove(state.metaGanancia, state, xMax)
+          : state.capacidadMaxima;
+        if (total === null || total === undefined) return;
+        applyTotalResidentes(total);
+      }
+      els.residentesCompartida.value = state.residentesCompartida;
+      els.residentesIndividual.value = state.residentesIndividual;
       saveState();
       recompute();
     });
