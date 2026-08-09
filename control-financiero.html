@@ -87,6 +87,21 @@ table.data-table input:focus-visible { outline: 2px solid var(--accent); outline
 table.data-table .empty-row { text-align: center; color: var(--ink-faint); font-size: 12.5px; padding: 14px 0; }
 table.data-table tfoot td { font-weight: 700; font-family: var(--mono); font-variant-numeric: tabular-nums; background: var(--surface-2); border-bottom: none; }
 table.data-table tfoot .col-label { font-family: var(--sans); }
+table.data-table tfoot tr.extra-row td { font-weight: 500; background: var(--warn-soft); color: var(--ink); border-bottom: 1px solid var(--border); }
+table.data-table tfoot tr.extra-row .col-label { font-family: var(--sans); }
+
+.calc-note { margin: 10px 0 0; font-size: 13px; color: var(--ink-soft); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.params-card { padding: 14px 18px; }
+.params-toggle { width: 100%; background: none; border: none; padding: 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+.params-toggle h2 { margin: 0; }
+.params-chevron { font-size: 11px; color: var(--ink-faint); }
+.params-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-top: 14px; }
+.params-grid .field-row label { font-size: 12px; }
+.params-grid input[type="number"] {
+  width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--ink); font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13px; padding: 7px 9px;
+}
 
 .btn-del {
   width: 22px; height: 22px; border-radius: 50%; border: none; background: transparent; color: var(--ink-faint);
@@ -438,7 +453,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 (function () {
   "use strict";
   var h = React.createElement;
-  var STORAGE_KEY = "eleam-control-financiero-v1";
+  var STORAGE_KEY = "eleam-control-financiero-v2";
 
   var MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 
@@ -446,6 +461,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   var pctFmt = new Intl.NumberFormat("es-CL", { maximumFractionDigits: 1 });
 
   function money(n) { return moneyFmt.format(n || 0); }
+  function numFmt(n) { return pctFmt.format(n || 0); }
   function monthLabel(key) {
     var parts = key.split("-");
     var y = parts[0], m = parseInt(parts[1], 10) - 1;
@@ -461,13 +477,21 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   function uid() { return "id" + (uidCounter++) + "_" + Date.now().toString(36); }
 
   function emptyMonth() {
-    return { ingresos: [], ingresosExtra: [], personal: [], imposiciones: [], servicios: [] };
+    return { ingresos: [], ingresosExtra: [], personal: [], gastos: [], servicios: [] };
   }
 
   function seedRow(labelField, label) {
     var row = { id: uid(), monto: 0 };
     row[labelField] = label;
     return row;
+  }
+
+  function defaultParams() {
+    return {
+      afpPct: 11.44, saludPct: 7, afcTrabajadorPct: 0.6,
+      sisPct: 1.49, afcEmpresaPct: 2.4, mutualPct: 0.93, gratificacionPct: 25,
+      ivaPct: 19
+    };
   }
 
   function defaultData() {
@@ -479,18 +503,18 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       seedRow("nombre", "Cocina 1"), seedRow("nombre", "Cocina 2"),
       seedRow("nombre", "Aseo")
     ];
-    julio.imposiciones = [
-      seedRow("concepto", "Imposiciones (AFP/salud)"), seedRow("concepto", "IVA"), seedRow("concepto", "Contador")
+    julio.gastos = [
+      seedRow("concepto", "Contador"), seedRow("concepto", "Supermercado"), seedRow("concepto", "Insumos y materiales")
     ];
     julio.servicios = [
-      seedRow("concepto", "Supermercado"), seedRow("concepto", "Luz/Agua"), seedRow("concepto", "Gas")
+      seedRow("concepto", "Luz"), seedRow("concepto", "Agua"), seedRow("concepto", "Gas"), seedRow("concepto", "Calefacción")
     ];
 
     var agosto = JSON.parse(JSON.stringify(julio));
     agosto.ingresos = [];
     for (var i = 1; i <= 11; i++) agosto.ingresos.push(seedRow("nombre", "Residente " + i));
 
-    var data = { months: {} };
+    var data = { months: {}, params: defaultParams() };
     data.months["2026-07"] = julio;
     data.months["2026-08"] = agosto;
     return data;
@@ -499,7 +523,11 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   function loadData() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (!parsed.params) parsed.params = defaultParams();
+        return parsed;
+      }
     } catch (e) {}
     return defaultData();
   }
@@ -509,15 +537,47 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
   function sum(rows) { return rows.reduce(function (a, r) { return a + (parseFloat(r.monto) || 0); }, 0); }
 
-  function monthTotals(month) {
-    var totIngresos = sum(month.ingresos) + sum(month.ingresosExtra);
-    var totPersonal = sum(month.personal);
-    var totImposiciones = sum(month.imposiciones);
-    var totServicios = sum(month.servicios);
-    var totEgresos = totPersonal + totImposiciones + totServicios;
+  // Líquido -> bruto -> desglose de cargas legales (trabajador retenidas + empresa adicionales)
+  function payrollBreakdown(totLiquido, params) {
+    var pctTrabajador = params.afpPct + params.saludPct + params.afcTrabajadorPct;
+    var bruto = pctTrabajador < 100 ? totLiquido / (1 - pctTrabajador / 100) : totLiquido;
+    var afp = bruto * params.afpPct / 100;
+    var salud = bruto * params.saludPct / 100;
+    var afcTrabajador = bruto * params.afcTrabajadorPct / 100;
+    var totTrabajador = afp + salud + afcTrabajador;
+
+    var sis = bruto * params.sisPct / 100;
+    var afcEmpresa = bruto * params.afcEmpresaPct / 100;
+    var mutual = bruto * params.mutualPct / 100;
+    var gratificacion = bruto * params.gratificacionPct / 100;
+    var totEmpresa = sis + afcEmpresa + mutual + gratificacion;
+
     return {
-      totIngresos: totIngresos, totPersonal: totPersonal, totImposiciones: totImposiciones,
-      totServicios: totServicios, totEgresos: totEgresos, margen: totIngresos - totEgresos
+      bruto: bruto,
+      trabajador: { afp: afp, salud: salud, afc: afcTrabajador, total: totTrabajador },
+      empresa: { sis: sis, afc: afcEmpresa, mutual: mutual, gratificacion: gratificacion, total: totEmpresa },
+      costoTotal: totLiquido + totTrabajador + totEmpresa
+    };
+  }
+
+  function gastosBreakdown(totGastosNeto, params) {
+    var iva = totGastosNeto * params.ivaPct / 100;
+    return { neto: totGastosNeto, iva: iva, conIva: totGastosNeto + iva };
+  }
+
+  function monthTotals(month, params) {
+    var totIngresos = sum(month.ingresos) + sum(month.ingresosExtra);
+    var totPersonalLiquido = sum(month.personal);
+    var payroll = payrollBreakdown(totPersonalLiquido, params);
+    var totGastosNeto = sum(month.gastos);
+    var gastos = gastosBreakdown(totGastosNeto, params);
+    var totServicios = sum(month.servicios);
+    var totEgresos = payroll.costoTotal + gastos.conIva + totServicios;
+    return {
+      totIngresos: totIngresos,
+      totPersonalLiquido: totPersonalLiquido, payroll: payroll,
+      gastos: gastos, totServicios: totServicios,
+      totEgresos: totEgresos, margen: totIngresos - totEgresos
     };
   }
 
@@ -552,13 +612,74 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
                 );
               })
         ),
-        h("tfoot", null, h("tr", null,
-          h("td", { className: "col-label" }, "Subtotal"),
-          h("td", { className: "col-amount" }, money(sum(rows))),
-          h("td", { className: "col-action" })
-        ))
+        h("tfoot", null,
+          (props.extraRows || []).map(function (er, i) {
+            return h("tr", { key: "extra" + i, className: "extra-row" },
+              h("td", { className: "col-label" }, er.label),
+              h("td", { className: "col-amount" }, money(er.amount)),
+              h("td", { className: "col-action" })
+            );
+          }).concat([
+            h("tr", { key: "subtotal" },
+              h("td", { className: "col-label" }, props.subtotalLabel || "Subtotal"),
+              h("td", { className: "col-amount" }, money(props.subtotalOverride != null ? props.subtotalOverride : sum(rows))),
+              h("td", { className: "col-action" })
+            )
+          ])
+        )
       ),
       h("button", { className: "btn-add", type: "button", onClick: props.onAdd }, "+ " + props.addText)
+    );
+  }
+
+  // ---------------- LegalBreakdown (read-only) ----------------
+  function LegalBreakdown(props) {
+    return h("div", { className: "etable" },
+      h("table", { className: "data-table" },
+        h("thead", null, h("tr", null, h("th", { className: "col-label" }, props.title), h("th", { className: "col-amount" }, "Monto"), h("th", { className: "col-action" }))),
+        h("tbody", null, props.rows.map(function (r, i) {
+          return h("tr", { key: i }, h("td", { className: "col-label" }, r.label), h("td", { className: "col-amount" }, money(r.amount)), h("td", { className: "col-action" }));
+        })),
+        h("tfoot", null, h("tr", null,
+          h("td", { className: "col-label" }, "Subtotal"),
+          h("td", { className: "col-amount" }, money(props.total)),
+          h("td", { className: "col-action" })
+        ))
+      )
+    );
+  }
+
+  // ---------------- ParamsPanel ----------------
+  var PARAM_FIELDS = [
+    { key: "afpPct", label: "AFP (trabajador)" },
+    { key: "saludPct", label: "Salud (trabajador)" },
+    { key: "afcTrabajadorPct", label: "Seguro cesantía (trabajador)" },
+    { key: "sisPct", label: "SIS (empresa)" },
+    { key: "afcEmpresaPct", label: "Seguro cesantía (empresa)" },
+    { key: "mutualPct", label: "Mutual de seguridad (empresa)" },
+    { key: "gratificacionPct", label: "Gratificación legal (empresa)" },
+    { key: "ivaPct", label: "IVA" }
+  ];
+
+  function ParamsPanel(props) {
+    var _s = React.useState(false), open = _s[0], setOpen = _s[1];
+    return h("div", { className: "card params-card" },
+      h("button", { className: "params-toggle", type: "button", onClick: function () { setOpen(!open); } },
+        h("h2", null, "Parámetros legales (%)"),
+        h("span", { className: "params-chevron" }, open ? "▲" : "▼")
+      ),
+      !open ? h("p", { className: "sub" }, "AFP, salud, seguro de cesantía, SIS, mutual, gratificación e IVA — edítalos aquí si difieren de los tuyos.") : null,
+      open ? h("div", { className: "params-grid" },
+        PARAM_FIELDS.map(function (f) {
+          return h("div", { className: "field", key: f.key },
+            h("div", { className: "field-row" }, h("label", null, f.label)),
+            h("input", {
+              type: "number", step: "0.01", value: props.params[f.key],
+              onChange: function (e) { props.onChange(f.key, e.target.value === "" ? 0 : parseFloat(e.target.value)); }
+            })
+          );
+        })
+      ) : null
     );
   }
 
@@ -597,7 +718,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     if (months.length === 0) return null;
     var W = 720, H = 260, padL = 74, padR = 16, padT = 16, padB = 40;
     var plotW = W - padL - padR, plotH = H - padT - padB;
-    var series = months.map(function (k) { return { key: k, t: monthTotals(props.data.months[k]) }; });
+    var series = months.map(function (k) { return { key: k, t: monthTotals(props.data.months[k], props.data.params) }; });
     var maxVal = Math.max.apply(null, series.map(function (s) { return Math.max(s.t.totIngresos, s.t.totEgresos); }).concat([1]));
     var minMargen = Math.min.apply(null, series.map(function (s) { return s.t.margen; }).concat([0]));
     var yMin = Math.min(0, minMargen), yMax = maxVal * 1.1;
@@ -651,13 +772,30 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     });
     lines.push(["Total ingresos", totals.totIngresos].map(csvEscape).join(","));
     lines.push([]);
-    lines.push(["PERSONAL", "Monto"].map(csvEscape).join(","));
+    lines.push(["PERSONAL (líquido)", "Monto"].map(csvEscape).join(","));
     month.personal.forEach(function (r) { lines.push([r.nombre, r.monto].map(csvEscape).join(",")); });
-    lines.push(["Subtotal personal", totals.totPersonal].map(csvEscape).join(","));
+    lines.push(["Subtotal líquido", totals.totPersonalLiquido].map(csvEscape).join(","));
+    lines.push(["Sueldo bruto (calculado)", totals.payroll.bruto].map(csvEscape).join(","));
     lines.push([]);
-    lines.push(["IMPOSICIONES", "Monto"].map(csvEscape).join(","));
-    month.imposiciones.forEach(function (r) { lines.push([r.concepto, r.monto].map(csvEscape).join(",")); });
-    lines.push(["Subtotal imposiciones", totals.totImposiciones].map(csvEscape).join(","));
+    lines.push(["LEGALES TRABAJADOR (retenido, calculado)", "Monto"].map(csvEscape).join(","));
+    lines.push(["AFP", totals.payroll.trabajador.afp].map(csvEscape).join(","));
+    lines.push(["Salud", totals.payroll.trabajador.salud].map(csvEscape).join(","));
+    lines.push(["Seguro cesantía (AFC)", totals.payroll.trabajador.afc].map(csvEscape).join(","));
+    lines.push(["Subtotal legales trabajador", totals.payroll.trabajador.total].map(csvEscape).join(","));
+    lines.push([]);
+    lines.push(["LEGALES EMPRESA (calculado)", "Monto"].map(csvEscape).join(","));
+    lines.push(["SIS", totals.payroll.empresa.sis].map(csvEscape).join(","));
+    lines.push(["Seguro cesantía empresa", totals.payroll.empresa.afc].map(csvEscape).join(","));
+    lines.push(["Mutual de seguridad", totals.payroll.empresa.mutual].map(csvEscape).join(","));
+    lines.push(["Gratificación legal", totals.payroll.empresa.gratificacion].map(csvEscape).join(","));
+    lines.push(["Subtotal legales empresa", totals.payroll.empresa.total].map(csvEscape).join(","));
+    lines.push(["Costo total de personal (líquido + legales)", totals.payroll.costoTotal].map(csvEscape).join(","));
+    lines.push([]);
+    lines.push(["GASTOS (neto)", "Monto"].map(csvEscape).join(","));
+    month.gastos.forEach(function (r) { lines.push([r.concepto, r.monto].map(csvEscape).join(",")); });
+    lines.push(["Subtotal gastos neto", totals.gastos.neto].map(csvEscape).join(","));
+    lines.push(["IVA calculado", totals.gastos.iva].map(csvEscape).join(","));
+    lines.push(["Subtotal gastos con IVA", totals.gastos.conIva].map(csvEscape).join(","));
     lines.push([]);
     lines.push(["SERVICIOS", "Monto"].map(csvEscape).join(","));
     month.servicios.forEach(function (r) { lines.push([r.concepto, r.monto].map(csvEscape).join(",")); });
@@ -711,6 +849,11 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       persist();
     }
 
+    function updateParam(key, value) {
+      stateRef.current.params[key] = value;
+      persist();
+    }
+
     function handleNewMonth() {
       var keys = Object.keys(stateRef.current.months).sort();
       var lastKey = keys[keys.length - 1] || currentKey;
@@ -718,7 +861,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       if (stateRef.current.months[nextKey]) { setCurrentKey(nextKey); return; }
       var base = stateRef.current.months[lastKey];
       var cloned = JSON.parse(JSON.stringify(base || emptyMonth()));
-      ["ingresos", "ingresosExtra", "personal", "imposiciones", "servicios"].forEach(function (cat) {
+      ["ingresos", "ingresosExtra", "personal", "gastos", "servicios"].forEach(function (cat) {
         cloned[cat].forEach(function (r) { r.id = uid(); r.monto = 0; });
       });
       stateRef.current.months[nextKey] = cloned;
@@ -736,7 +879,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var data = stateRef.current;
     ensureMonth(currentKey);
     var month = data.months[currentKey];
-    var totals = monthTotals(month);
+    var totals = monthTotals(month, data.params);
     var sortedKeys = Object.keys(data.months).sort();
 
     return h("div", { className: "page" },
@@ -775,27 +918,71 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         h("div", { className: "total-row" }, h("span", null, "Total ingresos"), h("span", { className: "total-amount" }, money(totals.totIngresos)))
       ),
 
+      h(ParamsPanel, { params: data.params, onChange: updateParam }),
+
       h("div", { className: "card" },
-        h("h2", null, "Egresos"),
-        h("h3", { className: "subhead" }, "Gastos de personal"),
+        h("h2", null, "Egresos — Personal (líquido)"),
+        h("p", { className: "sub" }, "Ingresa el sueldo líquido de cada trabajador. El bruto y las cargas legales se calculan solos abajo."),
         h(EditableTable, {
-          rows: month.personal, labelField: "nombre", labelHeader: "Empleado", labelPlaceholder: "Nombre",
+          rows: month.personal, labelField: "nombre", labelHeader: "Empleado (líquido)", labelPlaceholder: "Nombre",
           emptyText: "Sin personal registrado este mes.", addText: "Agregar empleado",
+          subtotalLabel: "Subtotal líquido",
           onAdd: function () { addRow("personal", currentKey, "nombre", "Nuevo empleado"); },
           onUpdate: function (id, f, v) { updateRow("personal", currentKey, id, f, v); },
           onDelete: function (id) { deleteRow("personal", currentKey, id); }
         }),
-        h("h3", { className: "subhead" }, "Imposiciones"),
-        h(EditableTable, {
-          rows: month.imposiciones, labelField: "concepto", labelHeader: "Concepto", labelPlaceholder: "Ej. AFP",
-          emptyText: "Sin imposiciones registradas.", addText: "Agregar ítem",
-          onAdd: function () { addRow("imposiciones", currentKey, "concepto", "Nuevo ítem"); },
-          onUpdate: function (id, f, v) { updateRow("imposiciones", currentKey, id, f, v); },
-          onDelete: function (id) { deleteRow("imposiciones", currentKey, id); }
+        h("p", { className: "calc-note" }, "Sueldo bruto calculado: " + money(totals.payroll.bruto))
+      ),
+
+      h("div", { className: "card" },
+        h("h2", null, "Legales Trabajador"),
+        h("p", { className: "sub" }, "Retenido del sueldo bruto — AFP, salud, seguro de cesantía. Se calcula solo desde el líquido de arriba."),
+        h(LegalBreakdown, {
+          title: "Concepto",
+          rows: [
+            { label: "AFP (" + numFmt(data.params.afpPct) + "%)", amount: totals.payroll.trabajador.afp },
+            { label: "Salud (" + numFmt(data.params.saludPct) + "%)", amount: totals.payroll.trabajador.salud },
+            { label: "Seguro cesantía — AFC (" + numFmt(data.params.afcTrabajadorPct) + "%)", amount: totals.payroll.trabajador.afc }
+          ],
+          total: totals.payroll.trabajador.total
+        })
+      ),
+
+      h("div", { className: "card" },
+        h("h2", null, "Legales Empresa"),
+        h("p", { className: "sub" }, "Cargas que paga la empresa además del sueldo bruto — SIS, seguro de cesantía, mutual, gratificación."),
+        h(LegalBreakdown, {
+          title: "Concepto",
+          rows: [
+            { label: "SIS (" + numFmt(data.params.sisPct) + "%)", amount: totals.payroll.empresa.sis },
+            { label: "Seguro cesantía empresa (" + numFmt(data.params.afcEmpresaPct) + "%)", amount: totals.payroll.empresa.afc },
+            { label: "Mutual de seguridad (" + numFmt(data.params.mutualPct) + "%)", amount: totals.payroll.empresa.mutual },
+            { label: "Gratificación legal (" + numFmt(data.params.gratificacionPct) + "%)", amount: totals.payroll.empresa.gratificacion }
+          ],
+          total: totals.payroll.empresa.total
         }),
-        h("h3", { className: "subhead" }, "Servicios"),
+        h("div", { className: "total-row" }, h("span", null, "Costo total de personal (líquido + legales)"), h("span", { className: "total-amount" }, money(totals.payroll.costoTotal)))
+      ),
+
+      h("div", { className: "card" },
+        h("h2", null, "Gastos"),
+        h("p", { className: "sub" }, "Ingresa el monto neto de cada gasto — el IVA se calcula solo."),
         h(EditableTable, {
-          rows: month.servicios, labelField: "concepto", labelHeader: "Concepto", labelPlaceholder: "Ej. Luz/Agua",
+          rows: month.gastos, labelField: "concepto", labelHeader: "Concepto (neto)", labelPlaceholder: "Ej. Contador",
+          emptyText: "Sin gastos registrados.", addText: "Agregar gasto",
+          subtotalLabel: "Total gastos con IVA",
+          subtotalOverride: totals.gastos.conIva,
+          extraRows: [{ label: "IVA (" + numFmt(data.params.ivaPct) + "%)", amount: totals.gastos.iva }],
+          onAdd: function () { addRow("gastos", currentKey, "concepto", "Nuevo gasto"); },
+          onUpdate: function (id, f, v) { updateRow("gastos", currentKey, id, f, v); },
+          onDelete: function (id) { deleteRow("gastos", currentKey, id); }
+        })
+      ),
+
+      h("div", { className: "card" },
+        h("h2", null, "Servicios"),
+        h(EditableTable, {
+          rows: month.servicios, labelField: "concepto", labelHeader: "Concepto", labelPlaceholder: "Ej. Luz",
           emptyText: "Sin servicios registrados.", addText: "Agregar ítem",
           onAdd: function () { addRow("servicios", currentKey, "concepto", "Nuevo ítem"); },
           onUpdate: function (id, f, v) { updateRow("servicios", currentKey, id, f, v); },
