@@ -371,8 +371,8 @@
         <h2>Cuidadores (turnos)</h2>
         <div class="field">
           <div class="field-row"><label for="ratioResidentes">Residentes por cuidador</label><span class="field-value" id="ratioResidentesVal"></span></div>
-          <input type="number" id="ratioResidentes" min="0.5" max="20" step="0.1" />
-          <p class="hint">Debe respetar el mínimo legal según nivel de dependencia (Decreto 20/2022).</p>
+          <input type="range" id="ratioResidentes" min="0.5" max="3" step="0.1" />
+          <p class="hint">Debe respetar el mínimo legal según nivel de dependencia (Decreto 20/2022). Actual: 1,4. Opción C del plan sube esto a ~1,74–1,9 dentro del mínimo legal.</p>
         </div>
         <div class="field">
           <div class="field-row"><label for="cuidadoresMinTurno">Mínimo de cuidadores (dotación)</label><span class="field-value" id="cuidadoresMinTurnoVal"></span></div>
@@ -457,14 +457,17 @@
         <div class="field">
           <div class="field-row"><label for="costoVariable">Costo variable por residente</label><span class="field-value" id="costoVariableVal"></span></div>
           <input type="number" id="costoVariable" min="0" step="5000" />
+          <p class="hint">Promedio ponderado real (alimentación + insumos, 40% residentes dependientes): $154.870, según presupuesto-gastos-eleam.xlsx.</p>
         </div>
         <div class="field">
           <div class="field-row"><label for="costosFijos">Costos fijos operacionales</label><span class="field-value" id="costosFijosVal"></span></div>
           <input type="number" id="costosFijos" min="0" step="10000" />
+          <p class="hint warn-inline">Por verificar: el plan de negocio documenta $900.000 (luz, agua, gas, mantención, seguros, contador, patente); este campo tiene cargado $1.405.000. Confirma cuál es el real.</p>
         </div>
         <div class="field">
           <div class="field-row"><label for="pagoDueno">Pago fijo al dueño</label><span class="field-value" id="pagoDuenoVal"></span></div>
           <input type="number" id="pagoDueno" min="0" step="10000" />
+          <p class="hint">No negociable por ahora — trátalo como costo fijo duro.</p>
         </div>
         <div class="field">
           <div class="field-row"><label for="metaGanancia">Meta de ganancia mensual</label><span class="field-value" id="metaGananciaVal"></span></div>
@@ -600,7 +603,7 @@
     bonoGeneral: 40000,
     descuentoPrevisional: 20,
     factorCostoEmpresa: 1.32,
-    costoVariable: 150000,
+    costoVariable: 154870,
     costosFijos: 1405000,
     pagoDueno: 2000000,
     metaGanancia: 3000000,
