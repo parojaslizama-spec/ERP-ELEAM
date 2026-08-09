@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Horas, Asistencia y Liquidaciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E7;
+    --paper-dark:#efe8d6;
+    --ink:#2b2620;
+    --ink-soft:#5a5346;
+    --petroleo:#1D4E4E;
+    --petroleo-dark:#123636;
+    --dorado:#B98A2E;
+    --dorado-soft:#e4c98a;
+    --line:#d8cfb8;
+    --card:#fffdf6;
+    --danger:#8c3a2b;
+    --danger-bg:#f3e2dc;
+    --ok:#3a6b4a;
+    --weekend-bg:#ece3cc;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      repeating-linear-gradient(#F6F2E7 0px, #F6F2E7 27px, #ece4cd 28px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    line-height:1.45;
+    padding-bottom:60px;
+  }
+  h1,h2,h3{ font-family:'Lora',serif; font-weight:600; color:var(--petroleo-dark); margin:0 0 6px; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  label{ font-weight:600; font-size:12.5px; color:var(--ink-soft); display:block; margin-bottom:4px; }
+  input, select{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13.5px;
+    padding:7px 9px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:#fffef9;
+    color:var(--ink);
+    width:100%;
+  }
+  select{ font-family:'Inter',sans-serif; }
+  input:focus, select:focus{ outline:2px solid var(--dorado-soft); border-color:var(--dorado); }
+  button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    border:1px solid var(--petroleo);
+    background:var(--petroleo);
+    color:#fff;
+    padding:9px 16px;
+    border-radius:5px;
+    transition:background .15s, transform .05s;
+  }
+  button:hover{ background:var(--petroleo-dark); }
+  button:active{ transform:translateY(1px); }
+  button.secondary{ background:transparent; color:var(--petroleo); }
+  button.secondary:hover{ background:var(--paper-dark); }
+  button.gold{ background:var(--dorado); border-color:var(--dorado); }
+  button.gold:hover{ background:#9c7325; }
+  button.danger{ background:transparent; border-color:var(--danger); color:var(--danger); padding:5px 10px; font-size:12px; }
+  button.danger:hover{ background:var(--danger-bg); }
+
+  /* Header */
+  .top-header{
+    background:linear-gradient(180deg, var(--petroleo) 0%, var(--petroleo-dark) 100%);
+    color:#f3ead3;
+    padding:18px 28px;
+    border-bottom:4px solid var(--dorado);
+  }
+  .top-header .header-inner{ max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{ font-family:'Lora',serif; font-size:26px; color:var(--dorado-soft); }
+  .empresa-fields{ display:flex; gap:10px; flex-wrap:wrap; }
+  .empresa-fields input{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.25);
+    color:#f6f2e7;
+    font-family:'Lora',serif;
+    font-size:14px;
+    min-width:220px;
+  }
+  .empresa-fields input::placeholder{ color:#cdd8d3; }
+  .empresa-fields input:focus{ outline:2px solid var(--dorado); }
+  .subtitle{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--dorado-soft); margin-top:2px; }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  /* Tabs */
+  .tabbar{ display:flex; gap:4px; margin:22px 0 18px; border-bottom:2px solid var(--line); }
+  .tab-btn{
+    background:transparent; border:1px solid transparent; border-bottom:none;
+    color:var(--ink-soft); font-family:'Lora',serif; font-size:15px; font-weight:600;
+    padding:10px 20px; border-radius:6px 6px 0 0;
+  }
+  .tab-btn:hover{ background:var(--paper-dark); color:var(--petroleo-dark); }
+  .tab-btn.active{
+    background:var(--card); color:var(--petroleo-dark);
+    border-color:var(--line);
+    box-shadow:0 -2px 0 var(--dorado) inset;
+    margin-bottom:-2px;
+    border-bottom:2px solid var(--card);
+  }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; animation:fade .15s ease; }
+  @keyframes fade{ from{opacity:0} to{opacity:1} }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px 22px;
+    margin-bottom:20px;
+    box-shadow:0 1px 3px rgba(30,25,10,.06);
+  }
+  .card h2{ font-size:18px; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:16px; }
+  .card h3{ font-size:15px; margin-top:0; }
+
+  .grid-form{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px,1fr)); gap:14px; align-items:end; }
+  .grid-form .full{ grid-column:1/-1; }
+  .field-hint{ font-size:11px; color:var(--ink-soft); margin-top:3px; }
+
+  table{ width:100%; border-collapse:collapse; margin-top:6px; }
+  th{
+    text-align:left; font-family:'Inter',sans-serif; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--dorado); border-bottom:2px solid var(--petroleo); padding:8px 10px; background:var(--paper-dark);
+  }
+  td{ padding:8px 10px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:middle; }
+  tbody tr:hover{ background:#fbf7ea; }
+  td.num, th.num{ font-family:'JetBrains Mono',monospace; text-align:right; }
+  .empty-row td{ text-align:center; color:var(--ink-soft); padding:24px; font-style:italic; }
+
+  .selector-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:end; margin-bottom:18px; }
+  .selector-row .field{ min-width:180px; }
+  .selector-row .field.small{ min-width:110px; }
+
+  /* Calendar */
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .cal-head{ font-family:'Lora',serif; font-weight:600; text-align:center; color:var(--petroleo); font-size:12.5px; padding-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
+  .cal-cell{
+    background:#fffef9; border:1px solid var(--line); border-radius:6px; padding:8px;
+    display:flex; flex-direction:column; gap:6px; min-height:110px;
+  }
+  .cal-cell.empty{ background:transparent; border:none; }
+  .cal-cell.weekend{ background:var(--weekend-bg); }
+  .cal-daynum{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px; display:flex; justify-content:space-between; align-items:baseline; color:var(--petroleo-dark); }
+  .cal-dayname{ font-family:'Inter',sans-serif; font-weight:500; font-size:10px; color:var(--ink-soft); text-transform:uppercase; }
+  .cal-estado{ font-size:11.5px; padding:5px 6px; }
+  .cal-horas{ font-size:12.5px; padding:5px 6px; }
+  .cal-horas:disabled{ background:#eee7d4; color:#a89e88; }
+
+  .summary-cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-top:18px; }
+  .stat{
+    background:var(--paper-dark); border:1px solid var(--line); border-left:4px solid var(--petroleo);
+    border-radius:6px; padding:12px 14px;
+  }
+  .stat.warn{ border-left-color:var(--danger); }
+  .stat.gold{ border-left-color:var(--dorado); }
+  .stat .stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); font-weight:600; }
+  .stat .stat-value{ font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--petroleo-dark); margin-top:4px; }
+
+  .liq-columns{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:820px){ .liq-columns{ grid-template-columns:1fr; } }
+  .liq-total-row{ display:flex; justify-content:space-between; padding:10px 0; border-top:2px solid var(--petroleo); margin-top:8px; font-weight:700; }
+  .liq-total-row .amt{ font-family:'JetBrains Mono',monospace; font-size:16px; }
+  .liquido-box{
+    background:var(--petroleo); color:#fff; border-radius:8px; padding:18px 20px; margin-top:18px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .liquido-box .lbl{ font-family:'Lora',serif; font-size:16px; }
+  .liquido-box .val{ font-family:'JetBrains Mono',monospace; font-size:26px; font-weight:700; color:var(--dorado-soft); }
+  .actions-row{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  .save-flash{ font-size:12.5px; color:var(--ok); font-weight:600; margin-left:6px; }
+  .badge{ display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; background:var(--dorado-soft); color:#5c4315; }
+
+  /* Print */
+  #printArea{ display:none; }
+  @media print{
+    body *{ visibility:hidden; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ display:block; position:absolute; top:0; left:0; width:100%; background:#fff; }
+    .copia{ page-break-after:always; padding:30px 40px; }
+    .copia:last-child{ page-break-after:auto; }
+    .slip-header{ display:flex; justify-content:space-between; border-bottom:2px solid #1D4E4E; padding-bottom:10px; margin-bottom:14px; }
+    .slip-tag{ display:inline-block; background:#B98A2E; color:#fff; padding:3px 12px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .slip-title{ font-family:'Lora',serif; font-size:20px; color:#1D4E4E; margin:0; }
+    .slip-sub{ font-size:12px; color:#555; }
+    .slip-block{ margin-bottom:14px; font-size:13px; }
+    .slip-block b{ color:#1D4E4E; }
+    table.slip-table{ width:100%; border-collapse:collapse; margin-bottom:10px; font-size:12.5px; }
+    table.slip-table th{ background:#f0ead6; border:1px solid #ccc; padding:5px 8px; text-align:left; color:#1D4E4E; }
+    table.slip-table td{ border:1px solid #ccc; padding:5px 8px; }
+    table.slip-table td.num{ text-align:right; font-family:'JetBrains Mono',monospace; }
+    .slip-total{ display:flex; justify-content:space-between; font-weight:700; font-size:15px; border-top:2px solid #1D4E4E; padding-top:8px; margin-top:6px; }
+    .slip-firmas{ display:flex; justify-content:space-between; margin-top:60px; }
+    .firma-box{ width:40%; text-align:center; font-size:12px; }
+    .firma-line{ border-top:1px solid #333; margin-bottom:6px; padding-top:4px; }
+  }
+  footer.note{ max-width:1180px; margin:30px auto 0; padding:0 24px; font-size:11.5px; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<header class="top-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">&#9998;</div>
+      <div>
+        <div class="empresa-fields">
+          <input id="empresa-nombre" placeholder="Nombre de la empresa">
+          <input id="empresa-rut" placeholder="RUT empresa (ej. 76.123.456-7)">
+        </div>
+        <div class="subtitle">Libro de control &middot; horas, asistencia y liquidaciones</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="tabbar">
+    <button class="tab-btn active" data-tab="trabajadores">Trabajadores</button>
+    <button class="tab-btn" data-tab="asistencia">Asistencia y horas</button>
+    <button class="tab-btn" data-tab="liquidaciones">Liquidaciones</button>
+  </nav>
+
+  <!-- TAB 1: TRABAJADORES -->
+  <section id="tab-trabajadores" class="tab-panel active">
+    <div class="card">
+      <h2>Agregar trabajador</h2>
+      <form id="form-trabajador">
+        <div class="grid-form">
+          <div>
+            <label for="trab-nombre">Nombre completo</label>
+            <input id="trab-nombre" required style="font-family:'Inter',sans-serif;">
+          </div>
+          <div>
+            <label for="trab-rut">RUT</label>
+            <input id="trab-rut" placeholder="12.345.678-9" required>
+          </div>
+          <div>
+            <label for="trab-cargo">Cargo</label>
+            <input id="trab-cargo" style="font-family:'Inter',sans-serif;">
+          </div>
+          <div>
+            <label for="trab-sueldo">Sueldo base (CLP)</label>
+            <input id="trab-sueldo" type="number" min="0" step="1000" required>
+          </div>
+          <div>
+            <label for="trab-afp">% AFP</label>
+            <input id="trab-afp" type="number" min="0" step="0.01" value="11.44">
+          </div>
+          <div>
+            <label for="trab-salud-tipo">Sistema de salud</label>
+            <select id="trab-salud-tipo">
+              <option value="fonasa">Fonasa (7%)</option>
+              <option value="isapre">Isapre (monto fijo)</option>
+            </select>
+          </div>
+          <div id="trab-salud-monto-wrap" style="display:none;">
+            <label for="trab-salud-monto">Monto plan Isapre (CLP)</label>
+            <input id="trab-salud-monto" type="number" min="0" step="1000" value="0">
+          </div>
+          <div>
+            <label for="trab-contrato">Tipo de contrato</label>
+            <select id="trab-contrato">
+              <option value="indefinido">Indefinido (cesant&iacute;a 0,6%)</option>
+              <option value="plazo_fijo">Plazo fijo (cesant&iacute;a 0%)</option>
+            </select>
+          </div>
+          <div>
+            <label for="trab-horas">Horas jornada diaria</label>
+            <input id="trab-horas" type="number" min="1" max="24" step="0.5" value="8">
+          </div>
+          <div class="full">
+            <button type="submit">Agregar trabajador</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>N&oacute;mina</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th><th>RUT</th><th>Cargo</th>
+            <th class="num">Sueldo base</th><th class="num">AFP %</th>
+            <th>Salud</th><th class="num">Cesant&iacute;a %</th><th class="num">Horas/d&iacute;a</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tabla-trabajadores"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TAB 2: ASISTENCIA -->
+  <section id="tab-asistencia" class="tab-panel">
+    <div class="card">
+      <h2>Asistencia y horas</h2>
+      <div class="selector-row">
+        <div class="field">
+          <label for="asis-trabajador">Trabajador</label>
+          <select id="asis-trabajador"></select>
+        </div>
+        <div class="field small">
+          <label for="asis-mes">Mes</label>
+          <select id="asis-mes"></select>
+        </div>
+        <div class="field small">
+          <label for="asis-anio">A&ntilde;o</label>
+          <input id="asis-anio" type="number" min="2015" max="2100">
+        </div>
+        <div>
+          <button id="btn-autofill" class="gold" type="button">Rellenar mes como "Trabajado"</button>
+        </div>
+      </div>
+      <div id="cal-head-row" class="cal-grid" style="margin-bottom:4px;"></div>
+      <div id="calendar-grid" class="cal-grid"></div>
+      <div id="asis-resumen" class="summary-cards"></div>
+    </div>
+  </section>
+
+  <!-- TAB 3: LIQUIDACIONES -->
+  <section id="tab-liquidaciones" class="tab-panel">
+    <div class="card">
+      <h2>Liquidaci&oacute;n de sueldo</h2>
+      <div class="selector-row">
+        <div class="field">
+          <label for="liq-trabajador">Trabajador</label>
+          <select id="liq-trabajador"></select>
+        </div>
+        <div class="field small">
+          <label for="liq-mes">Mes</label>
+          <select id="liq-mes"></select>
+        </div>
+        <div class="field small">
+          <label for="liq-anio">A&ntilde;o</label>
+          <input id="liq-anio" type="number" min="2015" max="2100">
+        </div>
+      </div>
+
+      <div id="liq-content" style="display:none;">
+        <div class="liq-columns">
+          <div>
+            <h3>Haberes</h3>
+            <div class="grid-form" style="grid-template-columns:1fr 1fr;">
+              <div><label for="liq-sueldo-base">Sueldo base</label><input id="liq-sueldo-base" type="number" min="0" step="1000"></div>
+              <div><label for="liq-gratificacion">Gratificaci&oacute;n legal</label><input id="liq-gratificacion" type="number" min="0" step="1000"></div>
+              <div><label for="liq-bonos">Bonos</label><input id="liq-bonos" type="number" min="0" step="1000"></div>
+              <div></div>
+              <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5"></div>
+              <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100"></div>
+            </div>
+            <div class="liq-total-row"><span>Total haberes</span><span class="amt mono" id="liq-total-haberes">$ 0</span></div>
+          </div>
+          <div>
+            <h3>Descuentos</h3>
+            <div class="grid-form" style="grid-template-columns:1fr 1fr;">
+              <div><label for="liq-dias-falta">D&iacute;as de falta (injustificada)</label><input id="liq-dias-falta" type="number" min="0" step="1"></div>
+              <div><label>Descuento por inasistencia</label><input id="liq-desc-inasistencia" type="text" disabled class="mono"></div>
+              <div><label>AFP (%)</label><input id="liq-afp-monto" type="text" disabled class="mono"></div>
+              <div><label>Salud</label><input id="liq-salud-monto" type="text" disabled class="mono"></div>
+              <div><label>Seguro cesant&iacute;a</label><input id="liq-cesantia-monto" type="text" disabled class="mono"></div>
+              <div><label for="liq-impuesto">Impuesto &uacute;nico</label><input id="liq-impuesto" type="number" min="0" step="100"></div>
+              <div><label for="liq-otros">Otros descuentos</label><input id="liq-otros" type="number" min="0" step="100"></div>
+            </div>
+            <div class="liq-total-row"><span>Total descuentos</span><span class="amt mono" id="liq-total-descuentos">$ 0</span></div>
+          </div>
+        </div>
+
+        <div class="liquido-box">
+          <span class="lbl">L&iacute;quido a pagar</span>
+          <span class="val mono" id="liq-liquido">$ 0</span>
+        </div>
+
+        <div class="actions-row">
+          <button id="btn-guardar-liq" class="secondary" type="button">Guardar liquidaci&oacute;n</button>
+          <button id="btn-imprimir-liq" class="gold" type="button">Imprimir / Guardar PDF</button>
+          <span id="liq-save-flash" class="save-flash"></span>
+        </div>
+      </div>
+      <div id="liq-empty" class="field-hint">Selecciona un trabajador, mes y a&ntilde;o para preparar la liquidaci&oacute;n.</div>
+    </div>
+  </section>
+</div>
+
+<footer class="note">Los datos se guardan solo en este navegador &mdash; no se env&iacute;an a ning&uacute;n servidor. Respalda peri&oacute;dicamente si es informaci&oacute;n cr&iacute;tica.</footer>
+
+<div id="printArea"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  if(!window.storage){
+    window.storage = {
+      get:function(key, def){
+        try{
+          var raw = localStorage.getItem('rha_'+key);
+          return raw===null ? def : JSON.parse(raw);
+        }catch(e){ return def; }
+      },
+      set:function(key, value){
+        try{ localStorage.setItem('rha_'+key, JSON.stringify(value)); }catch(e){}
+      }
+    };
+  }
+
+  var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  var ESTADOS = [
+    ['trabajado','Trabajado'],
+    ['falta_injustificada','Falta injustificada'],
+    ['falta_justificada','Falta justificada'],
+    ['licencia','Licencia médica'],
+    ['vacaciones','Vacaciones'],
+    ['no_aplica','No aplica']
+  ];
+
+  var empresa = window.storage.get('empresa', {nombre:'', rut:''});
+  var trabajadores = window.storage.get('trabajadores', []);
+  var asistencia = window.storage.get('asistencia', {});
+  var liquidaciones = window.storage.get('liquidaciones', {});
+
+  function saveEmpresa(){ window.storage.set('empresa', empresa); }
+  function saveTrabajadores(){ window.storage.set('trabajadores', trabajadores); }
+  function saveAsistencia(){ window.storage.set('asistencia', asistencia); }
+  function saveLiquidaciones(){ window.storage.set('liquidaciones', liquidaciones); }
+
+  function uid(){ return 't_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+  function fmtCLP(n){ n = Math.round(Number(n)||0); return '$ '+n.toLocaleString('es-CL'); }
+  function num(v){ var n = parseFloat(v); return isNaN(n)?0:n; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  // ---------- HEADER EMPRESA ----------
+  var elEmpresaNombre = document.getElementById('empresa-nombre');
+  var elEmpresaRut = document.getElementById('empresa-rut');
+  elEmpresaNombre.value = empresa.nombre || '';
+  elEmpresaRut.value = empresa.rut || '';
+  elEmpresaNombre.addEventListener('input', function(){ empresa.nombre = elEmpresaNombre.value; saveEmpresa(); });
+  elEmpresaRut.addEventListener('input', function(){ empresa.rut = elEmpresaRut.value; saveEmpresa(); });
+
+  // ---------- TABS ----------
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var tabPanels = {
+    trabajadores: document.getElementById('tab-trabajadores'),
+    asistencia: document.getElementById('tab-asistencia'),
+    liquidaciones: document.getElementById('tab-liquidaciones')
+  };
+  tabBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.keys(tabPanels).forEach(function(k){ tabPanels[k].classList.remove('active'); });
+      tabPanels[btn.dataset.tab].classList.add('active');
+      if(btn.dataset.tab === 'asistencia') renderCalendar();
+      if(btn.dataset.tab === 'liquidaciones') loadLiquidacion();
+    });
+  });
+
+  // ---------- TRABAJADORES ----------
+  var saludTipoSel = document.getElementById('trab-salud-tipo');
+  var saludMontoWrap = document.getElementById('trab-salud-monto-wrap');
+  saludTipoSel.addEventListener('change', function(){
+    saludMontoWrap.style.display = saludTipoSel.value === 'isapre' ? 'block' : 'none';
+  });
+
+  document.getElementById('form-trabajador').addEventListener('submit', function(e){
+    e.preventDefault();
+    var nombre = document.getElementById('trab-nombre').value.trim();
+    var rut = document.getElementById('trab-rut').value.trim();
+    if(!nombre || !rut) return;
+    var contrato = document.getElementById('trab-contrato').value;
+    var t = {
+      id: uid(),
+      nombre: nombre,
+      rut: rut,
+      cargo: document.getElementById('trab-cargo').value.trim(),
+      sueldoBase: num(document.getElementById('trab-sueldo').value),
+      afpPct: num(document.getElementById('trab-afp').value),
+      saludTipo: saludTipoSel.value,
+      saludMonto: num(document.getElementById('trab-salud-monto').value),
+      contratoTipo: contrato,
+      cesantiaPct: contrato === 'indefinido' ? 0.6 : 0,
+      horasJornada: num(document.getElementById('trab-horas').value) || 8
+    };
+    trabajadores.push(t);
+    saveTrabajadores();
+    this.reset();
+    document.getElementById('trab-afp').value = 11.44;
+    document.getElementById('trab-horas').value = 8;
+    saludMontoWrap.style.display = 'none';
+    renderTrabajadores();
+    refreshSelectors();
+  });
+
+  function renderTrabajadores(){
+    var tbody = document.getElementById('tabla-trabajadores');
+    if(trabajadores.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="9">A&uacute;n no hay trabajadores registrados.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = trabajadores.map(function(t){
+      var salud = t.saludTipo === 'fonasa' ? 'Fonasa (7%)' : 'Isapre (' + fmtCLP(t.saludMonto) + ')';
+      return '<tr>'+
+        '<td>'+esc(t.nombre)+'</td>'+
+        '<td class="mono">'+esc(t.rut)+'</td>'+
+        '<td>'+esc(t.cargo)+'</td>'+
+        '<td class="num">'+fmtCLP(t.sueldoBase)+'</td>'+
+        '<td class="num">'+t.afpPct+'%</td>'+
+        '<td>'+salud+'</td>'+
+        '<td class="num">'+t.cesantiaPct+'%</td>'+
+        '<td class="num">'+t.horasJornada+'</td>'+
+        '<td><button class="danger" data-del="'+t.id+'">Eliminar</button></td>'+
+      '</tr>';
+    }).join('');
+  }
+  document.getElementById('tabla-trabajadores').addEventListener('click', function(e){
+    var btn = e.target.closest('[data-del]');
+    if(!btn) return;
+    var id = btn.dataset.del;
+    var t = trabajadores.find(function(x){ return x.id===id; });
+    if(!t) return;
+    if(!confirm('¿Eliminar a '+t.nombre+' de la nómina?')) return;
+    trabajadores = trabajadores.filter(function(x){ return x.id!==id; });
+    saveTrabajadores();
+    renderTrabajadores();
+    refreshSelectors();
+  });
+
+  // ---------- SELECT POBLADORES COMPARTIDOS ----------
+  function fillMesSelect(sel){
+    sel.innerHTML = MESES.map(function(m,i){ return '<option value="'+(i+1)+'">'+m+'</option>'; }).join('');
+  }
+  function fillTrabajadorSelect(sel){
+    var prev = sel.value;
+    if(trabajadores.length===0){
+      sel.innerHTML = '<option value="">(sin trabajadores)</option>';
+      return;
+    }
+    sel.innerHTML = trabajadores.map(function(t){ return '<option value="'+t.id+'">'+esc(t.nombre)+' — '+esc(t.rut)+'</option>'; }).join('');
+    if(trabajadores.some(function(t){ return t.id===prev; })) sel.value = prev;
+  }
+
+  var asisTrabSel = document.getElementById('asis-trabajador');
+  var asisMesSel = document.getElementById('asis-mes');
+  var asisAnioInput = document.getElementById('asis-anio');
+  var liqTrabSel = document.getElementById('liq-trabajador');
+  var liqMesSel = document.getElementById('liq-mes');
+  var liqAnioInput = document.getElementById('liq-anio');
+
+  var today = new Date();
+  fillMesSelect(asisMesSel); asisMesSel.value = today.getMonth()+1;
+  fillMesSelect(liqMesSel); liqMesSel.value = today.getMonth()+1;
+  asisAnioInput.value = today.getFullYear();
+  liqAnioInput.value = today.getFullYear();
+
+  function refreshSelectors(){
+    fillTrabajadorSelect(asisTrabSel);
+    fillTrabajadorSelect(liqTrabSel);
+  }
+  refreshSelectors();
+
+  [asisTrabSel, asisMesSel, asisAnioInput].forEach(function(el){ el.addEventListener('change', renderCalendar); });
+  [liqTrabSel, liqMesSel, liqAnioInput].forEach(function(el){ el.addEventListener('change', loadLiquidacion); });
+
+  // ---------- ASISTENCIA ----------
+  function keyAsis(trabId, year, month){ return trabId+'_'+year+'_'+month; }
+  function getMonthData(trabId, year, month){
+    var key = keyAsis(trabId, year, month);
+    if(!asistencia[key]) asistencia[key] = {};
+    return asistencia[key];
+  }
+  function estadoOptionsHtml(selected){
+    return ESTADOS.map(function(e){ return '<option value="'+e[0]+'"'+(e[0]===selected?' selected':'')+'>'+e[1]+'</option>'; }).join('');
+  }
+
+  var headRow = document.getElementById('cal-head-row');
+  headRow.innerHTML = DIAS.map(function(d){ return '<div class="cal-head">'+d+'</div>'; }).join('');
+
+  function currentTrabajador(sel){
+    var id = sel.value;
+    return trabajadores.find(function(t){ return t.id===id; });
+  }
+
+  function renderCalendar(){
+    var grid = document.getElementById('calendar-grid');
+    var trab = currentTrabajador(asisTrabSel);
+    var year = parseInt(asisAnioInput.value,10) || today.getFullYear();
+    var month = parseInt(asisMesSel.value,10) || (today.getMonth()+1);
+    if(!trab){
+      grid.innerHTML = '<div class="field-hint" style="grid-column:1/-1;">Selecciona un trabajador para ver su calendario.</div>';
+      document.getElementById('asis-resumen').innerHTML = '';
+      return;
+    }
+    var monthData = getMonthData(trab.id, year, month);
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var firstWeekday = (new Date(year, month-1, 1).getDay()+6)%7;
+    var html = '';
+    for(var i=0;i<firstWeekday;i++) html += '<div class="cal-cell empty"></div>';
+    for(var d=1; d<=daysInMonth; d++){
+      var wd = (new Date(year, month-1, d).getDay()+6)%7;
+      var isWeekend = wd===5 || wd===6;
+      if(!monthData[d]){
+        monthData[d] = isWeekend ? {estado:'no_aplica', horas:0} : {estado:'trabajado', horas: trab.horasJornada};
+      }
+      var info = monthData[d];
+      html += '<div class="cal-cell'+(isWeekend?' weekend':'')+'" data-day="'+d+'">'+
+        '<div class="cal-daynum">'+d+'<span class="cal-dayname">'+DIAS[wd]+'</span></div>'+
+        '<select class="cal-estado" data-day="'+d+'">'+estadoOptionsHtml(info.estado)+'</select>'+
+        '<input type="number" class="cal-horas" data-day="'+d+'" min="0" step="0.5" value="'+info.horas+'"'+(info.estado!=='trabajado'?' disabled':'')+'>'+
+      '</div>';
+    }
+    grid.innerHTML = html;
+    saveAsistencia();
+    renderResumen(trab, year, month);
+  }
+
+  document.getElementById('calendar-grid').addEventListener('change', function(e){
+    var trab = currentTrabajador(asisTrabSel);
+    if(!trab) return;
+    var year = parseInt(asisAnioInput.value,10);
+    var month = parseInt(asisMesSel.value,10);
+    var monthData = getMonthData(trab.id, year, month);
+
+    if(e.target.classList.contains('cal-estado')){
+      var day = e.target.dataset.day;
+      var estado = e.target.value;
+      var horasInput = e.target.closest('.cal-cell').querySelector('.cal-horas');
+      monthData[day].estado = estado;
+      if(estado === 'trabajado'){
+        horasInput.disabled = false;
+        if(!monthData[day].horas) monthData[day].horas = trab.horasJornada;
+        horasInput.value = monthData[day].horas;
+      }else{
+        horasInput.disabled = true;
+        horasInput.value = 0;
+        monthData[day].horas = 0;
+      }
+      saveAsistencia();
+      renderResumen(trab, year, month);
+    }
+    if(e.target.classList.contains('cal-horas')){
+      var day2 = e.target.dataset.day;
+      monthData[day2].horas = num(e.target.value);
+      saveAsistencia();
+      renderResumen(trab, year, month);
+    }
+  });
+
+  document.getElementById('btn-autofill').addEventListener('click', function(){
+    var trab = currentTrabajador(asisTrabSel);
+    if(!trab) return;
+    var year = parseInt(asisAnioInput.value,10);
+    var month = parseInt(asisMesSel.value,10);
+    var monthData = getMonthData(trab.id, year, month);
+    var daysInMonth = new Date(year, month, 0).getDate();
+    for(var d=1; d<=daysInMonth; d++){
+      var wd = (new Date(year, month-1, d).getDay()+6)%7;
+      var isWeekend = wd===5 || wd===6;
+      monthData[d] = isWeekend ? {estado:'no_aplica', horas:0} : {estado:'trabajado', horas: trab.horasJornada};
+    }
+    saveAsistencia();
+    renderCalendar();
+  });
+
+  function computeResumen(trab, year, month){
+    var monthData = getMonthData(trab.id, year, month);
+    var r = {diasTrabajados:0, horasTotales:0, horasExtra:0, faltaInjust:0, faltaJust:0, licencias:0, vacaciones:0};
+    Object.keys(monthData).forEach(function(day){
+      var info = monthData[day];
+      if(info.estado === 'trabajado'){
+        r.diasTrabajados++;
+        r.horasTotales += info.horas;
+        r.horasExtra += Math.max(0, info.horas - trab.horasJornada);
+      } else if(info.estado === 'falta_injustificada'){ r.faltaInjust++; }
+      else if(info.estado === 'falta_justificada'){ r.faltaJust++; }
+      else if(info.estado === 'licencia'){ r.licencias++; }
+      else if(info.estado === 'vacaciones'){ r.vacaciones++; }
+    });
+    return r;
+  }
+
+  function renderResumen(trab, year, month){
+    var r = computeResumen(trab, year, month);
+    var el = document.getElementById('asis-resumen');
+    el.innerHTML =
+      stat('Días trabajados', r.diasTrabajados, '') +
+      stat('Horas totales', r.horasTotales, '') +
+      stat('Horas extra', r.horasExtra, 'gold') +
+      stat('Faltas injustificadas', r.faltaInjust, r.faltaInjust>0?'warn':'') +
+      stat('Faltas justificadas', r.faltaJust, '') +
+      stat('Licencias médicas', r.licencias, '') +
+      stat('Vacaciones', r.vacaciones, '');
+  }
+  function stat(label, value, cls){
+    return '<div class="stat'+(cls?' '+cls:'')+'"><div class="stat-label">'+label+'</div><div class="stat-value">'+value+'</div></div>';
+  }
+
+  // ---------- LIQUIDACIONES ----------
+  function keyLiq(trabId, year, month){ return trabId+'_'+year+'_'+month; }
+
+  var liqFields = ['sueldo-base','gratificacion','bonos','he-cantidad','he-valor','dias-falta','impuesto','otros'];
+  function liqEl(name){ return document.getElementById('liq-'+name); }
+
+  function loadLiquidacion(){
+    var trab = currentTrabajador(liqTrabSel);
+    var contentEl = document.getElementById('liq-content');
+    var emptyEl = document.getElementById('liq-empty');
+    if(!trab){
+      contentEl.style.display = 'none';
+      emptyEl.style.display = 'block';
+      return;
+    }
+    contentEl.style.display = 'block';
+    emptyEl.style.display = 'none';
+
+    var year = parseInt(liqAnioInput.value,10);
+    var month = parseInt(liqMesSel.value,10);
+    var key = keyLiq(trab.id, year, month);
+    var resumen = computeResumen(trab, year, month);
+    var saved = liquidaciones[key];
+
+    var data = saved || {
+      sueldoBase: trab.sueldoBase,
+      gratificacion: 0,
+      bonos: 0,
+      heCantidad: Math.round(resumen.horasExtra*10)/10,
+      heValor: Math.round((trab.sueldoBase/30/trab.horasJornada)*1.5),
+      diasFalta: resumen.faltaInjust,
+      impuesto: 0,
+      otros: 0
+    };
+
+    liqEl('sueldo-base').value = data.sueldoBase;
+    liqEl('gratificacion').value = data.gratificacion;
+    liqEl('bonos').value = data.bonos;
+    liqEl('he-cantidad').value = data.heCantidad;
+    liqEl('he-valor').value = data.heValor;
+    liqEl('dias-falta').value = data.diasFalta;
+    liqEl('impuesto').value = data.impuesto;
+    liqEl('otros').value = data.otros;
+
+    document.getElementById('liq-save-flash').textContent = '';
+    recomputeLiquidacion();
+  }
+
+  function readLiqForm(){
+    return {
+      sueldoBase: num(liqEl('sueldo-base').value),
+      gratificacion: num(liqEl('gratificacion').value),
+      bonos: num(liqEl('bonos').value),
+      heCantidad: num(liqEl('he-cantidad').value),
+      heValor: num(liqEl('he-valor').value),
+      diasFalta: num(liqEl('dias-falta').value),
+      impuesto: num(liqEl('impuesto').value),
+      otros: num(liqEl('otros').value)
+    };
+  }
+
+  function calcularLiquidacion(trab, form){
+    var montoHorasExtra = form.heCantidad * form.heValor;
+    var totalHaberes = form.sueldoBase + form.gratificacion + form.bonos + montoHorasExtra;
+    var baseImponible = form.sueldoBase + form.gratificacion + montoHorasExtra;
+    var sueldoDiario = form.sueldoBase / 30;
+    var descInasistencia = sueldoDiario * form.diasFalta;
+    var afpMonto = baseImponible * (trab.afpPct/100);
+    var saludMonto = trab.saludTipo === 'fonasa' ? baseImponible * 0.07 : trab.saludMonto;
+    var cesantiaMonto = baseImponible * (trab.cesantiaPct/100);
+    var totalDescuentos = afpMonto + saludMonto + cesantiaMonto + descInasistencia + form.impuesto + form.otros;
+    var liquido = totalHaberes - totalDescuentos;
+    return {
+      montoHorasExtra: montoHorasExtra, totalHaberes: totalHaberes, baseImponible: baseImponible,
+      sueldoDiario: sueldoDiario, descInasistencia: descInasistencia, afpMonto: afpMonto,
+      saludMonto: saludMonto, cesantiaMonto: cesantiaMonto, totalDescuentos: totalDescuentos, liquido: liquido
+    };
+  }
+
+  function recomputeLiquidacion(){
+    var trab = currentTrabajador(liqTrabSel);
+    if(!trab) return;
+    var form = readLiqForm();
+    var c = calcularLiquidacion(trab, form);
+    liqEl('desc-inasistencia').value = fmtCLP(c.descInasistencia);
+    liqEl('afp-monto').value = fmtCLP(c.afpMonto) + ' ('+trab.afpPct+'%)';
+    liqEl('salud-monto').value = trab.saludTipo==='fonasa' ? fmtCLP(c.saludMonto)+' (Fonasa 7%)' : fmtCLP(c.saludMonto)+' (Isapre)';
+    liqEl('cesantia-monto').value = fmtCLP(c.cesantiaMonto) + ' ('+trab.cesantiaPct+'%)';
+    document.getElementById('liq-total-haberes').textContent = fmtCLP(c.totalHaberes);
+    document.getElementById('liq-total-descuentos').textContent = fmtCLP(c.totalDescuentos);
+    document.getElementById('liq-liquido').textContent = fmtCLP(c.liquido);
+  }
+
+  document.getElementById('liq-content').addEventListener('input', function(e){
+    if(e.target.tagName === 'INPUT' && !e.target.disabled) recomputeLiquidacion();
+  });
+
+  document.getElementById('btn-guardar-liq').addEventListener('click', function(){
+    var trab = currentTrabajador(liqTrabSel);
+    if(!trab) return;
+    var year = parseInt(liqAnioInput.value,10);
+    var month = parseInt(liqMesSel.value,10);
+    var key = keyLiq(trab.id, year, month);
+    liquidaciones[key] = readLiqForm();
+    saveLiquidaciones();
+    var flash = document.getElementById('liq-save-flash');
+    flash.textContent = 'Guardado ✓';
+    setTimeout(function(){ flash.textContent=''; }, 2500);
+  });
+
+  document.getElementById('btn-imprimir-liq').addEventListener('click', function(){
+    var trab = currentTrabajador(liqTrabSel);
+    if(!trab) return;
+    var year = parseInt(liqAnioInput.value,10);
+    var month = parseInt(liqMesSel.value,10);
+    var form = readLiqForm();
+    var c = calcularLiquidacion(trab, form);
+    var periodo = MESES[month-1] + ' ' + year;
+
+    function copia(tag){
+      var saludLabel = trab.saludTipo==='fonasa' ? 'Salud (Fonasa 7%)' : 'Salud (Isapre)';
+      return '<div class="copia">'+
+        '<div class="slip-header">'+
+          '<div>'+
+            '<p class="slip-title">'+esc(empresa.nombre||'Empresa')+'</p>'+
+            '<div class="slip-sub">RUT: '+esc(empresa.rut||'-')+'</div>'+
+          '</div>'+
+          '<div style="text-align:right;">'+
+            '<span class="slip-tag">'+tag+'</span>'+
+            '<div class="slip-sub" style="margin-top:6px;">Liquidación de sueldo &mdash; '+periodo+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="slip-block">'+
+          '<b>Trabajador:</b> '+esc(trab.nombre)+' &nbsp;|&nbsp; <b>RUT:</b> '+esc(trab.rut)+' &nbsp;|&nbsp; <b>Cargo:</b> '+esc(trab.cargo||'-')+
+        '</div>'+
+        '<table class="slip-table"><thead><tr><th>Haberes</th><th class="num" style="text-align:right;">Monto</th></tr></thead><tbody>'+
+          '<tr><td>Sueldo base</td><td class="num">'+fmtCLP(form.sueldoBase)+'</td></tr>'+
+          '<tr><td>Gratificación legal</td><td class="num">'+fmtCLP(form.gratificacion)+'</td></tr>'+
+          '<tr><td>Bonos</td><td class="num">'+fmtCLP(form.bonos)+'</td></tr>'+
+          '<tr><td>Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')</td><td class="num">'+fmtCLP(c.montoHorasExtra)+'</td></tr>'+
+        '</tbody></table>'+
+        '<div class="slip-total"><span>Total haberes</span><span>'+fmtCLP(c.totalHaberes)+'</span></div>'+
+        '<table class="slip-table" style="margin-top:14px;"><thead><tr><th>Descuentos</th><th class="num" style="text-align:right;">Monto</th></tr></thead><tbody>'+
+          '<tr><td>AFP ('+trab.afpPct+'%)</td><td class="num">'+fmtCLP(c.afpMonto)+'</td></tr>'+
+          '<tr><td>'+saludLabel+'</td><td class="num">'+fmtCLP(c.saludMonto)+'</td></tr>'+
+          '<tr><td>Seguro cesantía ('+trab.cesantiaPct+'%)</td><td class="num">'+fmtCLP(c.cesantiaMonto)+'</td></tr>'+
+          '<tr><td>Descuento por inasistencia ('+form.diasFalta+' día(s))</td><td class="num">'+fmtCLP(c.descInasistencia)+'</td></tr>'+
+          '<tr><td>Impuesto único</td><td class="num">'+fmtCLP(form.impuesto)+'</td></tr>'+
+          '<tr><td>Otros descuentos</td><td class="num">'+fmtCLP(form.otros)+'</td></tr>'+
+        '</tbody></table>'+
+        '<div class="slip-total"><span>Total descuentos</span><span>'+fmtCLP(c.totalDescuentos)+'</span></div>'+
+        '<div class="slip-total" style="color:#1D4E4E; font-size:17px;"><span>LÍQUIDO A PAGAR</span><span>'+fmtCLP(c.liquido)+'</span></div>'+
+        '<div class="slip-firmas">'+
+          '<div class="firma-box"><div class="firma-line">&nbsp;</div>Firma Trabajador</div>'+
+          '<div class="firma-box"><div class="firma-line">&nbsp;</div>Firma Empleador</div>'+
+        '</div>'+
+      '</div>';
+    }
+
+    document.getElementById('printArea').innerHTML = copia('Copia empleador') + copia('Copia trabajador');
+    window.print();
+  });
+
+  // ---------- INIT ----------
+  renderTrabajadores();
+  renderCalendar();
+  loadLiquidacion();
+})();
+</script>
+</body>
+</html>
