@@ -1,4 +1,5 @@
 <!doctype html>
+<meta charset="utf-8">
 <title>Control financiero ELEAM</title>
 <style>
 :root {
@@ -121,6 +122,7 @@ table.data-table tfoot tr.extra-row .col-label { font-family: var(--sans); }
 .total-row .total-amount { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--accent); }
 
 .export-card .export-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+.export-status { margin: 12px 0 0; font-size: 13px; color: var(--ink); background: var(--surface-2); border-radius: 6px; padding: 8px 12px; }
 .btn-primary {
   background: var(--accent); color: var(--accent-ink); border: none; border-radius: 8px;
   padding: 10px 16px; font-size: 13.5px; font-weight: 600; cursor: pointer;
@@ -823,6 +825,24 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var stateRef = React.useRef(initial);
     var _a = React.useState(0), tick = _a[0], setTick = _a[1];
     var _b = React.useState(sortedInitial[sortedInitial.length - 1] || "2026-08"), currentKey = _b[0], setCurrentKey = _b[1];
+    var _c = React.useState(""), exportStatus = _c[0], setExportStatus = _c[1];
+
+    function handleExportCsv() {
+      try {
+        exportCsv(currentKey, month, totals);
+        setExportStatus("✓ Descarga iniciada: eleam-" + currentKey + ".csv — revisa la carpeta de descargas de tu navegador.");
+      } catch (e) {
+        setExportStatus("✗ No se pudo exportar: " + e.message + ". Si estás viendo esto dentro de una vista previa/artefacto, abre el archivo directo en una pestaña del navegador e inténtalo de nuevo.");
+      }
+    }
+    function handlePrint() {
+      try {
+        window.print();
+        setExportStatus("Se abrió el diálogo de impresión — elige \"Guardar como PDF\" ahí.");
+      } catch (e) {
+        setExportStatus("✗ No se pudo abrir Imprimir: " + e.message + ". Abre el archivo directo en una pestaña del navegador e inténtalo de nuevo.");
+      }
+    }
 
     function forceUpdate() { setTick(function (x) { return x + 1; }); }
 
@@ -993,11 +1013,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
       h("div", { className: "card export-card" },
         h("h2", null, "Exportar"),
-        h("p", { className: "sub" }, "CSV se abre directo en Excel. Para PDF, usa “Imprimir” y elige “Guardar como PDF” en el diálogo de impresión."),
+        h("p", { className: "sub" }, "CSV se abre directo en Excel. Para PDF, usa “Imprimir” y elige “Guardar como PDF” en el diálogo de impresión. Si nada pasa al hacer clic, probablemente estás dentro de una vista previa incrustada — abre el archivo directo en una pestaña del navegador."),
         h("div", { className: "export-buttons" },
-          h("button", { className: "btn-primary", type: "button", onClick: function () { exportCsv(currentKey, month, totals); } }, "Exportar CSV (Excel)"),
-          h("button", { className: "btn-ghost", type: "button", onClick: function () { window.print(); } }, "Imprimir / Guardar PDF")
-        )
+          h("button", { className: "btn-primary", type: "button", onClick: handleExportCsv }, "Exportar CSV (Excel)"),
+          h("button", { className: "btn-ghost", type: "button", onClick: handlePrint }, "Imprimir / Guardar PDF")
+        ),
+        exportStatus ? h("p", { className: "export-status" }, exportStatus) : null
       ),
 
       h("footer", { className: "note" }, "Los datos se guardan solo en este navegador (localStorage) — no se envían a ningún servidor. Si limpias los datos del navegador, se pierden; exporta a CSV regularmente como respaldo.")
