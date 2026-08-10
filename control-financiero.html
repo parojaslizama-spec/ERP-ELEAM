@@ -485,8 +485,11 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   function getEmpresaGlobal() {
     try { return JSON.parse(localStorage.getItem("rha_empresa") || "{}"); } catch (e) { return {}; }
   }
-  function calcularLiquidoTrabajador(trab, form) {
-    var f = form || { sueldoBase: trab.sueldoBase, gratificacion: 0, bonos: 0, heCantidad: 0, heValor: 0, diasFalta: 0, impuesto: 0, otros: 0 };
+  // Calcula el detalle completo de la liquidación de un trabajador — no solo el líquido, también
+  // el total de haberes, la base imponible y cada descuento, para que Gastos pueda sumar el costo
+  // real (horas extra, bonos, impuesto, otros descuentos, AFP/salud/cesantía individuales) sin perder nada.
+  function calcularDetalleTrabajador(trab, form) {
+    var f = form || { sueldoBase: trab.sueldoBase, gratificacion: 0, bonos: 0, bonoAsistencia: 0, bonoPuntualidad: 0, heCantidad: 0, heValor: 0, diasFalta: 0, impuesto: 0, otros: 0 };
     var montoHorasExtra = (f.heCantidad || 0) * (f.heValor || 0);
     var totalHaberes = (f.sueldoBase || 0) + (f.gratificacion || 0) + (f.bonos || 0) + (f.bonoAsistencia || 0) + (f.bonoPuntualidad || 0) + montoHorasExtra;
     var baseImponible = (f.sueldoBase || 0) + (f.gratificacion || 0) + montoHorasExtra;
@@ -495,7 +498,16 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var saludMonto = trab.saludTipo === "fonasa" ? baseImponible * 0.07 : (trab.saludMonto || 0);
     var cesantiaMonto = baseImponible * ((trab.cesantiaPct || 0) / 100);
     var totalDescuentos = afpMonto + saludMonto + cesantiaMonto + descInasistencia + (f.impuesto || 0) + (f.otros || 0);
-    return totalHaberes - totalDescuentos;
+    return {
+      liquido: totalHaberes - totalDescuentos,
+      totalHaberes: totalHaberes,
+      baseImponible: baseImponible,
+      descInasistencia: descInasistencia,
+      afp: afpMonto, salud: saludMonto, cesantia: cesantiaMonto
+    };
+  }
+  function calcularLiquidoTrabajador(trab, form) {
+    return calcularDetalleTrabajador(trab, form).liquido;
   }
   function personalAutoRows(monthKey) {
     var trabs = getTrabajadoresGlobal();
@@ -506,11 +518,14 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     return trabs.map(function (t) {
       var key = t.id + "_" + year + "_" + month;
       var saved = liqs[key];
-      var liquido = calcularLiquidoTrabajador(t, saved);
+      var detalle = calcularDetalleTrabajador(t, saved);
       return {
         id: t.id,
         nombre: t.nombre + (t.cargo ? " — " + t.cargo : ""),
-        monto: liquido,
+        monto: detalle.liquido,
+        costoBase: detalle.totalHaberes - detalle.descInasistencia,
+        baseImponible: detalle.baseImponible,
+        afp: detalle.afp, salud: detalle.salud, cesantia: detalle.cesantia,
         origen: saved ? "Liquidación de " + monthLabel(monthKey) : "Estimado (sueldo base)"
       };
     });
@@ -636,26 +651,33 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
   function sum(rows) { return (rows || []).reduce(function (a, r) { return a + (parseFloat(r.monto) || 0); }, 0); }
 
-  // Líquido -> bruto -> desglose de cargas legales (trabajador retenidas + empresa adicionales)
-  function payrollBreakdown(totLiquido, params) {
-    var pctTrabajador = params.afpPct + params.saludPct + params.afcTrabajadorPct;
-    var bruto = pctTrabajador < 100 ? totLiquido / (1 - pctTrabajador / 100) : totLiquido;
-    var afp = bruto * params.afpPct / 100;
-    var salud = bruto * params.saludPct / 100;
-    var afcTrabajador = bruto * params.afcTrabajadorPct / 100;
+  // Suma el costo real de cada trabajador (ya calculado individualmente en personalAutoRows, con su
+  // propio AFP, salud, horas extra, bonos, impuesto y descuentos) y le agrega encima las cargas que
+  // paga la empresa (SIS, cesantía empresa, mutual, gratificación) sobre la base imponible total.
+  // No reconstruye nada desde el líquido total — así no se pierden costos que antes quedaban fuera.
+  function payrollBreakdown(autoRows, params) {
+    var totLiquido = 0, totCostoBase = 0, totBaseImponible = 0, afp = 0, salud = 0, afcTrabajador = 0;
+    (autoRows || []).forEach(function (r) {
+      totLiquido += r.monto || 0;
+      totCostoBase += r.costoBase || 0;
+      totBaseImponible += r.baseImponible || 0;
+      afp += r.afp || 0;
+      salud += r.salud || 0;
+      afcTrabajador += r.cesantia || 0;
+    });
     var totTrabajador = afp + salud + afcTrabajador;
 
-    var sis = bruto * params.sisPct / 100;
-    var afcEmpresa = bruto * params.afcEmpresaPct / 100;
-    var mutual = bruto * params.mutualPct / 100;
-    var gratificacion = bruto * params.gratificacionPct / 100;
+    var sis = totBaseImponible * params.sisPct / 100;
+    var afcEmpresa = totBaseImponible * params.afcEmpresaPct / 100;
+    var mutual = totBaseImponible * params.mutualPct / 100;
+    var gratificacion = totBaseImponible * params.gratificacionPct / 100;
     var totEmpresa = sis + afcEmpresa + mutual + gratificacion;
 
     return {
-      bruto: bruto,
+      bruto: totBaseImponible,
       trabajador: { afp: afp, salud: salud, afc: afcTrabajador, total: totTrabajador },
       empresa: { sis: sis, afc: afcEmpresa, mutual: mutual, gratificacion: gratificacion, total: totEmpresa },
-      costoTotal: totLiquido + totTrabajador + totEmpresa
+      costoTotal: totCostoBase + totEmpresa
     };
   }
 
@@ -670,7 +692,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var totIngresos = totIngresosResidentes + sum(month.ingresosExtra);
     var autoRows = monthKey ? personalAutoRows(monthKey) : [];
     var totPersonalLiquido = sumAuto(autoRows);
-    var payroll = payrollBreakdown(totPersonalLiquido, params);
+    var payroll = payrollBreakdown(autoRows, params);
     var totGastosNeto = sum(month.gastos);
     var gastos = gastosBreakdown(totGastosNeto, params);
     var totServicios = sum(month.servicios);
