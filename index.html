@@ -1,1009 +1,209 @@
 <!doctype html>
-<title>Simulador financiero ELEAM</title>
+<meta charset="utf-8">
+<title>Residencia de ancianos · ELEAM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css">
 <style>
-  :root {
-    --bg: #eef0ee;
-    --surface: #ffffff;
-    --surface-2: #f6f8f6;
-    --ink: #1e2624;
-    --ink-soft: #57625d;
-    --ink-faint: #8b948f;
-    --border: #dbe0dc;
-    --accent: #1f5f5b;
-    --accent-ink: #ffffff;
-    --accent-soft: #d9e9e6;
-    --accent-soft-ink: #14403d;
-    --good: #2f7a4f;
-    --good-soft: #e1f0e5;
-    --warn: #96660f;
-    --warn-soft: #f5ead2;
-    --critical: #a83636;
-    --critical-soft: #f6e0df;
-    --shadow: 0 1px 2px rgba(30, 38, 36, 0.06), 0 8px 24px -12px rgba(30, 38, 36, 0.18);
-    --radius: 10px;
-    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Roboto, Arial, sans-serif;
-    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Consolas, monospace;
-  }
+:root {
+  --bg: #f8f4ec; --surface: #fffdf8; --surface-2: #f1ead9;
+  --ink: #3d3a33; --ink-soft: #6f6858; --ink-faint: #a49b86; --border: #e4dcc7;
+  --accent: #5f7c68; --accent-ink: #ffffff; --accent-soft: #e4ecdf; --accent-soft-ink: #3f5c47;
+  --gold: #c9a35e; --gold-soft: #f2e6c9; --gold-ink: #6b4f1e;
+  --good: #5f8a63; --good-soft: #e2eedf;
+  --warn: #b98a3d; --warn-soft: #f6ecd3;
+  --critical: #ad5c4c; --critical-soft: #f5e0da;
+  --shadow: 0 1px 2px rgba(61,58,51,.06), 0 8px 24px -12px rgba(61,58,51,.18);
+  --radius: 12px;
+  --serif: "Lora", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: "Inter", -apple-system, "Segoe UI", "Helvetica Neue", Roboto, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+.page { max-width: 1080px; margin: 0 auto; padding: 40px 20px 64px; }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #14181a;
-      --surface: #1b2124;
-      --surface-2: #20282b;
-      --ink: #e7ebe9;
-      --ink-soft: #a3aeaa;
-      --ink-faint: #6d7975;
-      --border: #2d373a;
-      --accent: #55b8b0;
-      --accent-ink: #0e2422;
-      --accent-soft: #1f3a38;
-      --accent-soft-ink: #a9dcd6;
-      --good: #55b481;
-      --good-soft: #1c3327;
-      --warn: #d9a648;
-      --warn-soft: #3a2f18;
-      --critical: #e07a72;
-      --critical-soft: #3b2220;
-      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #14181a; --surface: #1b2124; --surface-2: #20282b; --ink: #e7ebe9; --ink-soft: #a3aeaa;
-    --ink-faint: #6d7975; --border: #2d373a; --accent: #55b8b0; --accent-ink: #0e2422;
-    --accent-soft: #1f3a38; --accent-soft-ink: #a9dcd6; --good: #55b481; --good-soft: #1c3327;
-    --warn: #d9a648; --warn-soft: #3a2f18; --critical: #e07a72; --critical-soft: #3b2220;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
-  }
-  :root[data-theme="light"] {
-    --bg: #eef0ee; --surface: #ffffff; --surface-2: #f6f8f6; --ink: #1e2624; --ink-soft: #57625d;
-    --ink-faint: #8b948f; --border: #dbe0dc; --accent: #1f5f5b; --accent-ink: #ffffff;
-    --accent-soft: #d9e9e6; --accent-soft-ink: #14403d; --good: #2f7a4f; --good-soft: #e1f0e5;
-    --warn: #96660f; --warn-soft: #f5ead2; --critical: #a83636; --critical-soft: #f6e0df;
-    --shadow: 0 1px 2px rgba(30, 38, 36, 0.06), 0 8px 24px -12px rgba(30, 38, 36, 0.18);
-  }
+.hero { text-align: center; margin-bottom: 34px; }
+.hero .mark { font-size: 34px; }
+.hero .eyebrow { margin: 10px 0 4px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.hero h1 { margin: 0 auto 10px; font-family: var(--serif); font-weight: 500; font-size: clamp(24px,4vw,34px); max-width: 640px; letter-spacing: -.01em; }
+.hero p { margin: 0 auto; max-width: 560px; color: var(--ink-soft); font-size: 14.5px; }
 
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.5;
-  }
-  .page { max-width: 1180px; margin: 0 auto; padding: 28px 20px 64px; }
+.flow { display: flex; align-items: stretch; gap: 14px; margin: 34px 0; flex-wrap: wrap; justify-content: center; }
+.flow-arrow { display: flex; align-items: center; color: var(--gold); font-size: 20px; }
+@media (max-width: 760px) { .flow-arrow { display: none; } }
 
-  .topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 22px;
-  }
-  .eyebrow {
-    margin: 0 0 6px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  h1 {
-    margin: 0;
-    font-family: var(--serif);
-    font-weight: 500;
-    font-size: clamp(22px, 3vw, 30px);
-    text-wrap: balance;
-    letter-spacing: -0.01em;
-  }
-  .live-summary {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 8px 16px 8px 8px;
-    box-shadow: var(--shadow);
-  }
-  .live-summary .dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--good);
-    flex: none;
-  }
-  .live-summary.state-warn .dot { background: var(--warn); }
-  .live-summary.state-critical .dot { background: var(--critical); }
-  .live-summary .label { font-size: 12px; color: var(--ink-soft); }
-  .live-summary .value { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 15px; }
+.mod-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 22px 20px; text-decoration: none; color: var(--ink);
+  width: 260px; display: flex; flex-direction: column; gap: 10px; transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.mod-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 4px 4px rgba(61,58,51,.04), 0 14px 30px -14px rgba(61,58,51,.28); }
+.mod-card .num {
+  display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent-soft-ink); font-weight: 700; font-family: var(--serif); font-size: 15px;
+}
+.mod-card h2 { margin: 4px 0 0; font-family: var(--serif); font-weight: 600; font-size: 17px; }
+.mod-card p { margin: 0; font-size: 13px; color: var(--ink-soft); flex: 1; }
+.mod-card .go { font-size: 12.5px; font-weight: 700; color: var(--accent); }
 
-  .layout {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 20px;
-    align-items: start;
-  }
-  @media (max-width: 860px) {
-    .layout { grid-template-columns: 1fr; }
-  }
+.summary-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 20px 22px; margin-top: 10px;
+}
+.summary-card h2 { margin: 0 0 4px; font-family: var(--serif); font-weight: 500; font-size: 16px; }
+.summary-card p.sub { margin: 0 0 16px; font-size: 12.5px; color: var(--ink-faint); }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 12px; }
+.stat-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 13px 15px; }
+.stat-box .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); font-weight: 600; }
+.stat-box .stat-value { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 19px; font-weight: 700; margin-top: 5px; color: var(--ink); }
+.stat-box.tone-good .stat-value { color: var(--good); }
+.stat-box.tone-critical .stat-value { color: var(--critical); }
+.stat-box .stat-note { font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
 
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-  }
-
-  .inputs { padding: 20px; position: sticky; top: 20px; }
-  @media (max-width: 860px) { .inputs { position: static; } }
-
-  .input-section + .input-section { margin-top: 22px; }
-  .input-section h2 {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--ink-faint);
-    margin: 0 0 12px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 8px;
-  }
-  .field { margin-bottom: 14px; }
-  .field:last-child { margin-bottom: 0; }
-  .field-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 6px;
-  }
-  .field label { font-size: 13px; color: var(--ink); }
-  .field .field-value {
-    font-family: var(--mono);
-    font-variant-numeric: tabular-nums;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent);
-    white-space: nowrap;
-  }
-  input[type="range"] {
-    width: 100%;
-    accent-color: var(--accent);
-    height: 20px;
-  }
-  input[type="number"] {
-    width: 100%;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--ink);
-    font-family: var(--mono);
-    font-variant-numeric: tabular-nums;
-    font-size: 13px;
-    padding: 7px 9px;
-  }
-  input:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
-  }
-  .hint { font-size: 11.5px; color: var(--ink-faint); margin-top: 4px; }
-  .warn-inline { color: var(--warn); font-weight: 600; }
-  .check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink); cursor: pointer; }
-  .check-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
-
-  .btn-ghost {
-    margin-top: 20px;
-    width: 100%;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--ink-soft);
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-
-  .results { padding: 20px; display: flex; flex-direction: column; gap: 18px; }
-
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-  @media (max-width: 700px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-  .kpi {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-  }
-  .kpi .kpi-label { font-size: 11.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; }
-  .kpi .kpi-value {
-    font-family: var(--mono);
-    font-variant-numeric: tabular-nums;
-    font-size: 19px;
-    font-weight: 700;
-    margin-top: 6px;
-    letter-spacing: -0.01em;
-  }
-  .kpi.tone-good .kpi-value { color: var(--good); }
-  .kpi.tone-warn .kpi-value { color: var(--warn); }
-  .kpi.tone-critical .kpi-value { color: var(--critical); }
-  .kpi .kpi-pill {
-    display: inline-block;
-    margin-top: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 999px;
-  }
-  .kpi.tone-good .kpi-pill { background: var(--good-soft); color: var(--good); }
-  .kpi.tone-warn .kpi-pill { background: var(--warn-soft); color: var(--warn); }
-  .kpi.tone-critical .kpi-pill { background: var(--critical-soft); color: var(--critical); }
-
-  .chart-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: var(--surface); }
-  .chart-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
-  .chart-head h3 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 16px; }
-  .legend { display: flex; gap: 14px; font-size: 11.5px; color: var(--ink-soft); flex-wrap: wrap; }
-  .legend span { display: inline-flex; align-items: center; gap: 5px; }
-  .legend i { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
-
-  .chart-scroll { overflow-x: auto; margin-top: 6px; }
-  svg#chart { width: 100%; min-width: 520px; height: auto; display: block; }
-
-  .quick-jump { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-  .quick-jump button {
-    background: var(--accent-soft);
-    color: var(--accent-soft-ink);
-    border: none;
-    border-radius: 999px;
-    padding: 6px 13px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: var(--sans);
-  }
-  .quick-jump button:hover { filter: brightness(0.96); }
-  @media (prefers-color-scheme: dark) { .quick-jump button:hover { filter: brightness(1.15); } }
-
-  .proj-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
-  .proj-card h3 { margin: 0 0 6px; font-family: var(--serif); font-weight: 500; font-size: 16px; }
-  .table-scroll { overflow-x: auto; margin-top: 10px; }
-  table.proj-table { border-collapse: collapse; width: 100%; min-width: 480px; font-size: 12.5px; }
-  table.proj-table th, table.proj-table td {
-    padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--border);
-    font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap;
-  }
-  table.proj-table th:first-child, table.proj-table td:first-child { text-align: left; font-family: var(--sans); }
-  table.proj-table thead th {
-    font-family: var(--sans); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em;
-    color: var(--ink-faint); font-weight: 700; border-bottom: 1px solid var(--border); text-align: right;
-  }
-  table.proj-table thead th:first-child { text-align: left; }
-  table.proj-table tr.loan-month td { background: var(--warn-soft); }
-  table.proj-table td.pos { color: var(--good); font-weight: 600; }
-  table.proj-table td.neg { color: var(--critical); font-weight: 600; }
-  table.proj-table tfoot td { font-weight: 700; background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: none; }
-  .tag-credito {
-    font-family: var(--sans); font-size: 9.5px; font-weight: 700; text-transform: uppercase;
-    color: var(--warn); background: var(--warn-soft); border-radius: 999px; padding: 1px 6px; margin-left: 4px;
-  }
-
-  .breakdown-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
-  .breakdown-card h3 { margin: 0 0 12px; font-family: var(--serif); font-weight: 500; font-size: 16px; }
-  .bd-row {
-    display: grid;
-    grid-template-columns: 140px 1fr auto;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    padding: 6px 0;
-  }
-  .bd-row .bd-label { color: var(--ink-soft); }
-  .bd-row .bd-bar-track { background: var(--surface-2); border-radius: 4px; height: 8px; overflow: hidden; }
-  .bd-row .bd-bar-fill { height: 100%; border-radius: 4px; background: var(--accent); }
-  .bd-row .bd-amount { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
-  .bd-row.total { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 10px; font-weight: 700; }
-  .bd-note { font-size: 12px; color: var(--ink-faint); margin-top: 10px; }
-
-  footer.note {
-    margin-top: 22px;
-    font-size: 12px;
-    color: var(--ink-faint);
-    line-height: 1.6;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
-  }
+footer.note { text-align: center; font-size: 12px; color: var(--ink-faint); margin-top: 34px; line-height: 1.6; }
 </style>
 
 <div class="page">
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">ELEAM · Simulador financiero</p>
-      <h1>¿Cuántos residentes para llegar a la meta?</h1>
-    </div>
-    <div class="live-summary" id="liveSummary">
-      <span class="dot"></span>
-      <span class="label">Ganancia mensual estimada</span>
-      <span class="value" id="liveValue">—</span>
-    </div>
+  <header class="hero">
+    <div class="mark">&#127968;</div>
+    <p class="eyebrow">ELEAM · Sistema de gestión</p>
+    <h1>Residencia de ancianos</h1>
+    <p>Cuatro módulos conectados: el ingreso guarda los datos personales y la cuota de forma confidencial, la ficha médica lleva diagnósticos, medicamentos y cuidados, y los gastos se completan solos con esos datos.</p>
   </header>
 
-  <div class="layout">
-    <aside class="panel inputs" aria-label="Supuestos del simulador">
-      <div class="input-section">
-        <h2>Ocupación</h2>
-        <div class="field">
-          <div class="field-row"><label for="residentesCompartida">Residentes — pieza compartida</label><span class="field-value" id="residentesCompartidaVal"></span></div>
-          <input type="range" id="residentesCompartida" min="0" max="30" step="1" />
-          <p class="hint">Hasta 2 residentes por pieza.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="residentesIndividual">Residentes — pieza individual</label><span class="field-value" id="residentesIndividualVal"></span></div>
-          <input type="range" id="residentesIndividual" min="0" max="30" step="1" />
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="capacidadMaxima">Capacidad autorizada máxima</label><span class="field-value" id="capacidadMaximaVal"></span></div>
-          <input type="number" id="capacidadMaxima" min="1" max="60" step="1" />
-          <p class="hint">Requiere ampliar la autorización sanitaria SEREMI para superar este número.</p>
-        </div>
-      </div>
+  <div class="flow">
+    <a class="mod-card" href="control-residentes.html">
+      <span class="num">1</span>
+      <h2>Ingreso de residentes</h2>
+      <p>Datos personales, contactos de emergencia y cuota de incorporación. Confidencial — único módulo que permite eliminar residentes.</p>
+      <span class="go">Ir al módulo →</span>
+    </a>
+    <div class="flow-arrow">&rarr;</div>
+    <a class="mod-card" href="ficha-medica.html">
+      <span class="num">2</span>
+      <h2>Ficha médica y cuidados</h2>
+      <p>Diagnósticos con sus medicamentos, baños, cambios de posición, y control diario de cumplimiento.</p>
+      <span class="go">Ir al módulo →</span>
+    </a>
+    <div class="flow-arrow">&rarr;</div>
+    <a class="mod-card" href="control-horas.html">
+      <span class="num">3</span>
+      <h2>Trabajadores y liquidaciones</h2>
+      <p>Nómina, asistencia por turnos y liquidaciones de sueldo de todo el personal.</p>
+      <span class="go">Ir al módulo →</span>
+    </a>
+    <div class="flow-arrow">&rarr;</div>
+    <a class="mod-card" href="control-financiero.html">
+      <span class="num">4</span>
+      <h2>Gastos</h2>
+      <p>Ingresos y egresos del mes. Los ingresos y el costo de personal se completan solos desde los módulos 1 y 3.</p>
+      <span class="go">Ir al módulo →</span>
+    </a>
+  </div>
 
-      <div class="input-section">
-        <h2>Ingresos</h2>
-        <div class="field">
-          <div class="field-row"><label for="tarifaCompartida">Tarifa — pieza compartida</label><span class="field-value" id="tarifaCompartidaVal"></span></div>
-          <input type="range" id="tarifaCompartida" min="800000" max="1300000" step="10000" />
-          <p class="hint">Desde $800.000 por residente.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="tarifaIndividual">Tarifa — pieza individual</label><span class="field-value" id="tarifaIndividualVal"></span></div>
-          <input type="range" id="tarifaIndividual" min="1500000" max="2200000" step="10000" />
-          <p class="hint">Desde $1.500.000 por residente.</p>
-        </div>
-      </div>
-
-      <div class="input-section">
-        <h2>Cuidadores (turnos)</h2>
-        <div class="field">
-          <div class="field-row"><label for="ratioResidentes">Residentes por cuidador</label><span class="field-value" id="ratioResidentesVal"></span></div>
-          <input type="range" id="ratioResidentes" min="0.5" max="3" step="0.1" />
-          <p class="hint">Debe respetar el mínimo legal según nivel de dependencia (Decreto 20/2022). Actual: 1,4. Opción C del plan sube esto a ~1,74–1,9 dentro del mínimo legal.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="cuidadoresMinTurno">Mínimo de cuidadores (dotación)</label><span class="field-value" id="cuidadoresMinTurnoVal"></span></div>
-          <input type="number" id="cuidadoresMinTurno" min="2" step="1" />
-          <p class="hint">Para mantener 2 cuidadores simultáneos las 24 h, con turnos y descanso semanal.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="sueldoCuidadorLiquido">Sueldo líquido</label><span class="field-value" id="sueldoCuidadorLiquidoVal"></span></div>
-          <input type="number" id="sueldoCuidadorLiquido" min="0" step="5000" />
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="bonoAsistencia">Bono de asistencia</label><span class="field-value" id="bonoAsistenciaVal"></span></div>
-          <input type="number" id="bonoAsistencia" min="0" step="5000" />
-          <p class="hint">Por no faltar a los turnos en el mes; se asume pagado a todos.</p>
-        </div>
-      </div>
-
-      <div class="input-section">
-        <h2>TENS</h2>
-        <div class="field">
-          <div class="field-row"><label for="tensCount">Dotación</label><span class="field-value" id="tensCountVal"></span></div>
-          <input type="number" id="tensCount" min="0" step="1" />
-          <p class="hint">Administra medicamentos y está siempre disponible ante cualquier llamado.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="sueldoTensLiquido">Sueldo líquido</label><span class="field-value" id="sueldoTensLiquidoVal"></span></div>
-          <input type="number" id="sueldoTensLiquido" min="0" step="5000" />
-        </div>
-      </div>
-
-      <div class="input-section">
-        <h2>Cocinera</h2>
-        <div class="field">
-          <div class="field-row"><label for="cocineraCount">Dotación</label><span class="field-value" id="cocineraCountVal"></span></div>
-          <input type="number" id="cocineraCount" min="0" step="1" />
-          <p class="hint">Lunes a sábado, jornada diurna, máx. 40 hrs/semana.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="sueldoCocineraLiquido">Sueldo líquido</label><span class="field-value" id="sueldoCocineraLiquidoVal"></span></div>
-          <input type="number" id="sueldoCocineraLiquido" min="0" step="5000" />
-        </div>
-      </div>
-
-      <div class="input-section">
-        <h2>Aseo</h2>
-        <div class="field">
-          <div class="field-row"><label for="aseoCount">Dotación</label><span class="field-value" id="aseoCountVal"></span></div>
-          <input type="number" id="aseoCount" min="0" step="1" />
-          <p class="hint">Lunes a sábado, jornada diurna, máx. 40 hrs/semana.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="sueldoAseoLiquido">Sueldo líquido</label><span class="field-value" id="sueldoAseoLiquidoVal"></span></div>
-          <input type="number" id="sueldoAseoLiquido" min="0" step="5000" />
-        </div>
-      </div>
-
-      <div class="input-section">
-        <h2>Beneficios generales (todos los roles)</h2>
-        <div class="field">
-          <div class="field-row"><label for="bonoGeneral">Bono general por trabajador</label><span class="field-value" id="bonoGeneralVal"></span></div>
-          <input type="range" id="bonoGeneral" min="20000" max="70000" step="5000" />
-          <p class="hint">Se suma al líquido de cuidadores, TENS, cocinera y aseo antes de calcular el costo empresa.</p>
-        </div>
-      </div>
-
-      <div class="input-section">
-        <h2>Cargas sociales (todos los roles)</h2>
-        <div class="field">
-          <div class="field-row"><label for="descuentoPrevisional">Descuentos previsionales</label><span class="field-value" id="descuentoPrevisionalVal"></span></div>
-          <input type="number" id="descuentoPrevisional" min="0" max="40" step="0.5" />
-          <p class="hint">AFP + salud + seguro cesantía del trabajador, para pasar de líquido a bruto.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="factorCostoEmpresa">Factor costo empresa</label><span class="field-value" id="factorCostoEmpresaVal"></span></div>
-          <input type="number" id="factorCostoEmpresa" min="1" max="2" step="0.01" />
-          <p class="hint">Multiplica el sueldo bruto para incluir cargas legales y gratificación patronal.</p>
-        </div>
-      </div>
-
-      <div class="input-section">
-        <h2>Costos y meta</h2>
-        <div class="field">
-          <div class="field-row"><label for="costoVariable">Costo variable por residente</label><span class="field-value" id="costoVariableVal"></span></div>
-          <input type="number" id="costoVariable" min="0" step="5000" />
-          <p class="hint">Promedio ponderado real (alimentación + insumos, 40% residentes dependientes): $154.870, según presupuesto-gastos-eleam.xlsx.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="costosFijos">Costos fijos operacionales</label><span class="field-value" id="costosFijosVal"></span></div>
-          <input type="number" id="costosFijos" min="0" step="10000" />
-          <p class="hint warn-inline">Por verificar: el plan de negocio documenta $900.000 (luz, agua, gas, mantención, seguros, contador, patente); este campo tiene cargado $1.405.000. Confirma cuál es el real.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="pagoDueno">Pago fijo al dueño</label><span class="field-value" id="pagoDuenoVal"></span></div>
-          <input type="number" id="pagoDueno" min="0" step="10000" />
-          <p class="hint">No negociable por ahora — trátalo como costo fijo duro.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="metaGanancia">Meta de ganancia mensual</label><span class="field-value" id="metaGananciaVal"></span></div>
-          <input type="number" id="metaGanancia" min="0" step="50000" />
-        </div>
-      </div>
-
-      <div class="input-section">
-        <h2>Crédito operacional</h2>
-        <div class="field">
-          <div class="field-row"><label for="montoCredito">Monto del crédito</label><span class="field-value" id="montoCreditoVal"></span></div>
-          <input type="number" id="montoCredito" min="0" step="100000" />
-          <p class="hint">Para soportar operaciones. Solo referencial — lo que afecta la caja es la cuota mensual.</p>
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="cuotaCredito">Cuota mensual</label><span class="field-value" id="cuotaCreditoVal"></span></div>
-          <input type="number" id="cuotaCredito" min="0" step="10000" />
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="mesInicioCredito">Mes de inicio del pago</label><span class="field-value" id="mesInicioCreditoVal"></span></div>
-          <input type="month" id="mesInicioCredito" />
-        </div>
-        <div class="field">
-          <div class="field-row"><label for="plazoCredito">Plazo</label><span class="field-value" id="plazoCreditoVal"></span></div>
-          <input type="number" id="plazoCredito" min="1" max="120" step="1" />
-        </div>
-        <div class="field field-check">
-          <label class="check-row"><input type="checkbox" id="creditoActivo" /> Incluir la cuota en los cálculos</label>
-          <p class="hint" id="creditoTotalHint"></p>
-        </div>
-      </div>
-
-      <button class="btn-ghost" id="resetBtn" type="button">Restablecer valores por defecto</button>
-    </aside>
-
-    <section class="results">
-      <div class="kpi-grid">
-        <div class="kpi" id="kpiIngresos">
-          <div class="kpi-label">Ingresos mensuales</div>
-          <div class="kpi-value" id="kpiIngresosVal">—</div>
-        </div>
-        <div class="kpi" id="kpiCostos">
-          <div class="kpi-label">Costos totales</div>
-          <div class="kpi-value" id="kpiCostosVal">—</div>
-        </div>
-        <div class="kpi" id="kpiGanancia">
-          <div class="kpi-label">Ganancia mensual</div>
-          <div class="kpi-value" id="kpiGananciaVal">—</div>
-          <span class="kpi-pill" id="kpiGananciaPill"></span>
-        </div>
-        <div class="kpi" id="kpiMargen">
-          <div class="kpi-label">Margen</div>
-          <div class="kpi-value" id="kpiMargenVal">—</div>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-head">
-          <h3>Ganancia proyectada según N° de residentes</h3>
-          <div class="legend">
-            <span><i style="background:var(--accent)"></i>Actual</span>
-            <span><i style="background:var(--warn)"></i>Punto de equilibrio</span>
-            <span><i style="background:var(--good)"></i>Meta</span>
-            <span><i style="background:var(--ink-faint)"></i>Fuera de capacidad</span>
-          </div>
-        </div>
-        <p class="hint" id="chartRangeNote"></p>
-        <div class="chart-scroll">
-          <svg id="chart" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid meet"></svg>
-        </div>
-        <div class="quick-jump">
-          <button type="button" data-jump="actual">Ir a actual</button>
-          <button type="button" data-jump="breakeven">Ir a punto de equilibrio</button>
-          <button type="button" data-jump="meta">Ir a meta de ganancia</button>
-          <button type="button" data-jump="max">Ir a capacidad máxima</button>
-        </div>
-      </div>
-
-      <div class="proj-card">
-        <h3>Proyección de ingresos a 12 meses</h3>
-        <p class="hint">Se recalcula sola cada vez que cambias un supuesto. Ocupación y tarifas se asumen constantes; el crédito operacional aparece solo en los meses que corresponda.</p>
-        <div class="table-scroll">
-          <table class="proj-table">
-            <thead>
-              <tr><th>Mes</th><th>Ingresos</th><th>Costos totales</th><th>Ganancia</th></tr>
-            </thead>
-            <tbody id="projRows"></tbody>
-            <tfoot>
-              <tr>
-                <td>Total 12 meses</td>
-                <td id="projTotalIngresos">—</td>
-                <td id="projTotalCostos">—</td>
-                <td id="projTotalGanancia">—</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-
-      <div class="breakdown-card">
-        <h3>Desglose de costos al nivel actual</h3>
-        <div id="breakdownRows"></div>
-        <p class="bd-note" id="dotacionNote"></p>
-      </div>
-    </section>
+  <div class="summary-card" id="summaryCard">
+    <h2>Resumen general</h2>
+    <p class="sub">Datos guardados en este navegador — se actualizan solos a medida que usas los módulos. La cuota de cada residente es confidencial y no se muestra aquí.</p>
+    <div class="stat-grid" id="statGrid"></div>
   </div>
 
   <footer class="note">
-    Estimaciones editables — ajusta cada supuesto con tus datos reales. Los cálculos son referenciales y no constituyen asesoría financiera, legal o regulatoria formal; confirma dotación mínima y cupos autorizados con la SEREMI de Salud correspondiente.
+    Los datos se guardan solo en este navegador (localStorage) — no se envían a ningún servidor. Respalda periódicamente si es información crítica.
   </footer>
 </div>
 
+<script src="assets/nav.js"></script>
 <script>
 (function () {
   "use strict";
-
-  var DEFAULTS = {
-    residentesCompartida: 11,
-    residentesIndividual: 0,
-    capacidadMaxima: 40,
-    tarifaCompartida: 800000,
-    tarifaIndividual: 1500000,
-    ratioResidentes: 1.4,
-    cuidadoresMinTurno: 8,
-    sueldoCuidadorLiquido: 650000,
-    bonoAsistencia: 50000,
-    tensCount: 1,
-    sueldoTensLiquido: 800000,
-    cocineraCount: 2,
-    sueldoCocineraLiquido: 600000,
-    aseoCount: 1,
-    sueldoAseoLiquido: 600000,
-    bonoGeneral: 40000,
-    descuentoPrevisional: 20,
-    factorCostoEmpresa: 1.32,
-    costoVariable: 154870,
-    costosFijos: 1405000,
-    pagoDueno: 2000000,
-    metaGanancia: 3000000,
-    montoCredito: 8000000,
-    cuotaCredito: 600000,
-    plazoCredito: 36,
-    mesInicioCredito: "2026-11",
-    creditoActivo: true
-  };
-
-  var STORAGE_KEY = "eleam-simulador-v2";
-  var fields = ["residentesCompartida","residentesIndividual","capacidadMaxima",
-    "tarifaCompartida","tarifaIndividual",
-    "ratioResidentes","cuidadoresMinTurno","sueldoCuidadorLiquido","bonoAsistencia",
-    "tensCount","sueldoTensLiquido","cocineraCount","sueldoCocineraLiquido",
-    "aseoCount","sueldoAseoLiquido","bonoGeneral","descuentoPrevisional","factorCostoEmpresa",
-    "costoVariable","costosFijos","pagoDueno","metaGanancia",
-    "montoCredito","cuotaCredito","plazoCredito"];
-
-  var els = {};
-  fields.forEach(function (f) { els[f] = document.getElementById(f); });
-  els.mesInicioCredito = document.getElementById("mesInicioCredito");
-  els.creditoActivo = document.getElementById("creditoActivo");
-
-  var state = loadState();
-  var lastManual = { c: state.residentesCompartida, i: state.residentesIndividual };
-
   var moneyFmt = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
-  var numFmt = new Intl.NumberFormat("es-CL", { maximumFractionDigits: 1 });
-  var pctFmt = new Intl.NumberFormat("es-CL", { style: "percent", maximumFractionDigits: 1 });
 
-  function loadState() {
-    var s = Object.assign({}, DEFAULTS);
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) Object.assign(s, JSON.parse(raw));
-    } catch (e) {}
-    return s;
-  }
-  function saveState() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  function readJSON(key, def) {
+    try { var raw = localStorage.getItem(key); return raw === null ? def : JSON.parse(raw); } catch (e) { return def; }
   }
 
-  function syncInputsFromState() {
-    fields.forEach(function (f) { els[f].value = state[f]; });
-    els.mesInicioCredito.value = state.mesInicioCredito;
-    els.creditoActivo.checked = !!state.creditoActivo;
+  function box(label, value, note, tone) {
+    return '<div class="stat-box' + (tone ? " tone-" + tone : "") + '">' +
+      '<div class="stat-label">' + label + '</div>' +
+      '<div class="stat-value">' + value + '</div>' +
+      (note ? '<div class="stat-note">' + note + '</div>' : "") +
+      '</div>';
   }
 
-  fields.forEach(function (f) {
-    els[f].addEventListener("input", function () {
-      var v = parseFloat(els[f].value);
-      if (isNaN(v)) return;
-      state[f] = v;
-      saveState();
-      recompute();
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function parseHorarios(str) { return String(str || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
+
+  function buildCareItems(ficha) {
+    var items = [];
+    (ficha.diagnosticos || []).forEach(function (d) {
+      (d.medicamentos || []).forEach(function (m) {
+        var horarios = parseHorarios(m.horarios);
+        if (horarios.length === 0) horarios = ["(sin horario)"];
+        horarios.forEach(function (h) { items.push("med_" + m.id + "|" + h); });
+      });
     });
-  });
-
-  els.residentesCompartida.addEventListener("input", function () {
-    lastManual.c = parseFloat(els.residentesCompartida.value) || 0;
-  });
-  els.residentesIndividual.addEventListener("input", function () {
-    lastManual.i = parseFloat(els.residentesIndividual.value) || 0;
-  });
-
-  els.mesInicioCredito.addEventListener("input", function () {
-    state.mesInicioCredito = els.mesInicioCredito.value;
-    saveState();
-    recompute();
-  });
-  els.creditoActivo.addEventListener("change", function () {
-    state.creditoActivo = els.creditoActivo.checked;
-    saveState();
-    recompute();
-  });
-
-  document.getElementById("resetBtn").addEventListener("click", function () {
-    state = Object.assign({}, DEFAULTS);
-    lastManual = { c: state.residentesCompartida, i: state.residentesIndividual };
-    saveState();
-    syncInputsFromState();
-    recompute();
-  });
-
-  function cuidadores(residentes, ratio) {
-    return Math.max(0, Math.ceil(residentes / ratio));
+    (ficha.cuidadosGenerales || []).forEach(function (c) {
+      var horarios = parseHorarios(c.horarios);
+      if (horarios.length === 0) horarios = ["(sin horario)"];
+      horarios.forEach(function (h) { items.push("cui_" + c.id + "|" + h); });
+    });
+    return items;
   }
 
-  function costoPorTrabajador(liquidoMensual, s) {
-    var descuento = Math.min(0.9, Math.max(0, s.descuentoPrevisional / 100));
-    var bruto = liquidoMensual / (1 - descuento);
-    return bruto * s.factorCostoEmpresa;
-  }
+  function render() {
+    var residentes = readJSON("rha_residentes", []);
+    var activos = residentes.filter(function (r) { return !r.fechaEgreso || r.fechaEgreso > todayStr(); });
 
-  function computeForSplit(rCompartida, rIndividual, s) {
-    var residentes = rCompartida + rIndividual;
-    var cuidadoresPorRatio = cuidadores(residentes, s.ratioResidentes);
-    var cuidadoresTotal = Math.max(cuidadoresPorRatio, s.cuidadoresMinTurno);
+    var boxes = box("Residentes activos", activos.length, activos.length + " de " + residentes.length + " registrados · cuota confidencial en el módulo de Ingreso");
 
-    var costoPorCuidador = costoPorTrabajador(s.sueldoCuidadorLiquido + s.bonoAsistencia + s.bonoGeneral, s);
-    var costoPorTens = costoPorTrabajador(s.sueldoTensLiquido + s.bonoGeneral, s);
-    var costoPorCocinera = costoPorTrabajador(s.sueldoCocineraLiquido + s.bonoGeneral, s);
-    var costoPorAseo = costoPorTrabajador(s.sueldoAseoLiquido + s.bonoGeneral, s);
-
-    var costoCuidadores = cuidadoresTotal * costoPorCuidador;
-    var costoTens = s.tensCount * costoPorTens;
-    var costoCocinera = s.cocineraCount * costoPorCocinera;
-    var costoAseo = s.aseoCount * costoPorAseo;
-    var costoPersonal = costoCuidadores + costoTens + costoCocinera + costoAseo;
-    var personalTotal = cuidadoresTotal + s.tensCount + s.cocineraCount + s.aseoCount;
-
-    var costoVariableTotal = residentes * s.costoVariable;
-    var costoCredito = s.creditoActivo ? s.cuotaCredito : 0;
-    var costosTotales = costoPersonal + costoVariableTotal + s.costosFijos + s.pagoDueno + costoCredito;
-    var ingresos = rCompartida * s.tarifaCompartida + rIndividual * s.tarifaIndividual;
-    var ganancia = ingresos - costosTotales;
-    return {
-      residentes: residentes, residentesCompartida: rCompartida, residentesIndividual: rIndividual,
-      cuidadoresPorRatio: cuidadoresPorRatio, cuidadoresTotal: cuidadoresTotal,
-      costoPorCuidador: costoPorCuidador, costoPorTens: costoPorTens,
-      costoPorCocinera: costoPorCocinera, costoPorAseo: costoPorAseo,
-      costoCuidadores: costoCuidadores, costoTens: costoTens,
-      costoCocinera: costoCocinera, costoAseo: costoAseo,
-      personalTotal: personalTotal,
-      costoPersonal: costoPersonal, costoVariableTotal: costoVariableTotal, costoCredito: costoCredito,
-      costosTotales: costosTotales, ingresos: ingresos, ganancia: ganancia
-    };
-  }
-
-  function computeFor(residentesTotal, s) {
-    var curTotal = s.residentesCompartida + s.residentesIndividual;
-    var mixCompartida = curTotal > 0 ? s.residentesCompartida / curTotal : 1;
-    var rC = Math.min(residentesTotal, Math.max(0, Math.round(residentesTotal * mixCompartida)));
-    var rI = residentesTotal - rC;
-    return computeForSplit(rC, rI, s);
-  }
-
-  function findFirstAtOrAbove(target, s, xMax) {
-    for (var r = 0; r <= xMax; r++) {
-      if (computeFor(r, s).ganancia >= target) return r;
-    }
-    return null;
-  }
-
-  function setTone(el, tone) {
-    el.classList.remove("tone-good", "tone-warn", "tone-critical");
-    if (tone) el.classList.add("tone-" + tone);
-  }
-
-  function ganTone(g, meta) {
-    if (g < 0) return "critical";
-    if (g < meta) return "warn";
-    return "good";
-  }
-
-  function recompute() {
-    var s = state;
-    var totalResidentes = s.residentesCompartida + s.residentesIndividual;
-    var xMax = Math.max(30, s.capacidadMaxima + 5);
-    els.residentesCompartida.max = Math.max(30, s.capacidadMaxima);
-    els.residentesIndividual.max = Math.max(30, s.capacidadMaxima);
-    var cur = computeForSplit(s.residentesCompartida, s.residentesIndividual, s);
-    var breakeven = findFirstAtOrAbove(0, s, xMax);
-    var metaAt = findFirstAtOrAbove(s.metaGanancia, s, xMax);
-
-    // field value labels
-    document.getElementById("residentesCompartidaVal").textContent = s.residentesCompartida + " personas";
-    document.getElementById("residentesIndividualVal").textContent = s.residentesIndividual + " personas";
-    document.getElementById("capacidadMaximaVal").textContent = s.capacidadMaxima + " cupos";
-    document.getElementById("tarifaCompartidaVal").textContent = moneyFmt.format(s.tarifaCompartida);
-    document.getElementById("tarifaIndividualVal").textContent = moneyFmt.format(s.tarifaIndividual);
-    document.getElementById("ratioResidentesVal").textContent = numFmt.format(s.ratioResidentes) + " : 1";
-    document.getElementById("cuidadoresMinTurnoVal").textContent = s.cuidadoresMinTurno + " personas";
-    document.getElementById("sueldoCuidadorLiquidoVal").textContent = moneyFmt.format(s.sueldoCuidadorLiquido);
-    document.getElementById("bonoAsistenciaVal").textContent = moneyFmt.format(s.bonoAsistencia);
-    document.getElementById("tensCountVal").textContent = s.tensCount + " personas";
-    document.getElementById("sueldoTensLiquidoVal").textContent = moneyFmt.format(s.sueldoTensLiquido);
-    document.getElementById("cocineraCountVal").textContent = s.cocineraCount + " personas";
-    document.getElementById("sueldoCocineraLiquidoVal").textContent = moneyFmt.format(s.sueldoCocineraLiquido);
-    document.getElementById("aseoCountVal").textContent = s.aseoCount + " personas";
-    document.getElementById("sueldoAseoLiquidoVal").textContent = moneyFmt.format(s.sueldoAseoLiquido);
-    document.getElementById("bonoGeneralVal").textContent = moneyFmt.format(s.bonoGeneral);
-    document.getElementById("descuentoPrevisionalVal").textContent = numFmt.format(s.descuentoPrevisional) + "%";
-    document.getElementById("factorCostoEmpresaVal").textContent = numFmt.format(s.factorCostoEmpresa) + "x";
-    document.getElementById("costoVariableVal").textContent = moneyFmt.format(s.costoVariable);
-    document.getElementById("costosFijosVal").textContent = moneyFmt.format(s.costosFijos);
-    document.getElementById("pagoDuenoVal").textContent = moneyFmt.format(s.pagoDueno);
-    document.getElementById("metaGananciaVal").textContent = moneyFmt.format(s.metaGanancia);
-
-    document.getElementById("montoCreditoVal").textContent = moneyFmt.format(s.montoCredito);
-    document.getElementById("cuotaCreditoVal").textContent = moneyFmt.format(s.cuotaCredito);
-    document.getElementById("plazoCreditoVal").textContent = s.plazoCredito + " meses";
-    var totalPagarCredito = s.cuotaCredito * s.plazoCredito;
-    var multCredito = s.montoCredito > 0 ? totalPagarCredito / s.montoCredito : 0;
-    document.getElementById("creditoTotalHint").textContent =
-      "Total a pagar: " + moneyFmt.format(totalPagarCredito) + " (" + numFmt.format(multCredito) + "× el monto del crédito).";
-
-    // KPIs
-    document.getElementById("kpiIngresosVal").textContent = moneyFmt.format(cur.ingresos);
-    document.getElementById("kpiCostosVal").textContent = moneyFmt.format(cur.costosTotales);
-    document.getElementById("kpiGananciaVal").textContent = moneyFmt.format(cur.ganancia);
-    document.getElementById("kpiMargenVal").textContent = cur.ingresos > 0 ? pctFmt.format(cur.ganancia / cur.ingresos) : "—";
-
-    var tone = ganTone(cur.ganancia, s.metaGanancia);
-    setTone(document.getElementById("kpiGanancia"), tone);
-    var pillEl = document.getElementById("kpiGananciaPill");
-    pillEl.textContent = tone === "critical" ? "Pérdida" : tone === "warn" ? "Bajo la meta" : "Sobre la meta";
-    pillEl.className = "kpi-pill";
-
-    // live summary chip
-    var liveEl = document.getElementById("liveSummary");
-    liveEl.classList.remove("state-warn", "state-critical");
-    if (tone === "critical") liveEl.classList.add("state-critical");
-    else if (tone === "warn") liveEl.classList.add("state-warn");
-    document.getElementById("liveValue").textContent = moneyFmt.format(cur.ganancia) + " · " + totalResidentes + " residentes";
-
-    // breakdown
-    var rows = [
-      { label: "Cuidadores (" + cur.cuidadoresTotal + ")", amount: cur.costoCuidadores },
-      { label: "TENS (" + s.tensCount + ")", amount: cur.costoTens },
-      { label: "Cocinera (" + s.cocineraCount + ")", amount: cur.costoCocinera },
-      { label: "Aseo (" + s.aseoCount + ")", amount: cur.costoAseo },
-      { label: "Variable por residente", amount: cur.costoVariableTotal },
-      { label: "Costos fijos", amount: s.costosFijos },
-      { label: "Pago al dueño", amount: s.pagoDueno }
-    ];
-    if (cur.costoCredito > 0) {
-      rows.push({ label: "Cuota crédito operacional", amount: cur.costoCredito });
-    }
-    var maxAmt = Math.max.apply(null, rows.map(function (r) { return r.amount; }).concat([1]));
-    var html = rows.map(function (r) {
-      var pct = Math.max(2, (r.amount / maxAmt) * 100);
-      return '<div class="bd-row"><span class="bd-label">' + r.label + '</span>' +
-        '<span class="bd-bar-track"><span class="bd-bar-fill" style="width:' + pct + '%"></span></span>' +
-        '<span class="bd-amount">' + moneyFmt.format(r.amount) + '</span></div>';
-    }).join("");
-    html += '<div class="bd-row total"><span class="bd-label">Costos totales</span><span></span>' +
-      '<span class="bd-amount">' + moneyFmt.format(cur.costosTotales) + '</span></div>';
-    document.getElementById("breakdownRows").innerHTML = html;
-
-    var turnoFloorActivo = cur.cuidadoresTotal > cur.cuidadoresPorRatio;
-    document.getElementById("dotacionNote").textContent =
-      "Con " + totalResidentes + " residentes (" + s.residentesCompartida + " en pieza compartida, " + s.residentesIndividual +
-      " en individual), la razón da " + cur.cuidadoresPorRatio + " cuidadores" +
-      (turnoFloorActivo ? "; se ajusta a " + cur.cuidadoresTotal + " por el mínimo de turnos." : ".") +
-      " Personal total: " + cur.personalTotal + " (" + cur.cuidadoresTotal + " cuidadores, " + s.tensCount +
-      " TENS, " + s.cocineraCount + " cocinera(s), " + s.aseoCount + " aseo). Costo empresa por cuidador: " +
-      moneyFmt.format(cur.costoPorCuidador) + " (líquido " + moneyFmt.format(s.sueldoCuidadorLiquido + s.bonoAsistencia + s.bonoGeneral) +
-      " con bonos + cargas). El bono general de " + moneyFmt.format(s.bonoGeneral) + " está incluido en el líquido de los 4 roles. Verifica que la dotación cumpla el mínimo legal según el grado de dependencia real de los residentes.";
-
-    var rangeNoteEl = document.getElementById("chartRangeNote");
-    if (breakeven === null) {
-      rangeNoteEl.innerHTML = '<span class="warn-inline">Con estos supuestos, la ganancia no llega a $0 ni con ' + xMax + ' residentes — revisa tarifa, ratio o sueldos.</span>';
-    } else if (metaAt === null) {
-      rangeNoteEl.innerHTML = '<span class="warn-inline">La meta de ganancia no se alcanza ni con ' + xMax + ' residentes con estos supuestos.</span>';
+    var fichas = readJSON("rha_fichas", {});
+    var checklist = readJSON("rha_cuidados_checklist", {});
+    var hoy = todayStr();
+    var totalItems = 0, totalHechos = 0, residentesConTareas = 0;
+    activos.forEach(function (r) {
+      var ficha = fichas[r.id];
+      if (!ficha) return;
+      var items = buildCareItems(ficha);
+      if (items.length === 0) return;
+      residentesConTareas++;
+      var dayData = checklist[r.id + "_" + hoy] || {};
+      totalItems += items.length;
+      items.forEach(function (key) { if (dayData[key] && dayData[key].hecho) totalHechos++; });
+    });
+    if (totalItems > 0) {
+      var pct = Math.round((totalHechos / totalItems) * 100);
+      boxes += box("Cumplimiento de cuidados hoy", pct + "%", totalHechos + " de " + totalItems + " tareas realizadas · " + residentesConTareas + " residente(s) con ficha médica", pct < 80 ? "critical" : "good");
     } else {
-      rangeNoteEl.textContent = "";
+      boxes += box("Cumplimiento de cuidados hoy", "Sin datos", "Registra diagnósticos, medicamentos y cuidados en el módulo de Ficha médica");
     }
 
-    drawChart(s, xMax, breakeven, metaAt, cur);
-    buildProjection(s, cur);
-  }
+    var trabajadores = readJSON("rha_trabajadores", []);
+    var soporte = trabajadores.filter(function (t) { return t.tipo !== "esencial"; }).length;
+    var esencial = trabajadores.filter(function (t) { return t.tipo === "esencial"; }).length;
 
-  var MESES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+    boxes += box("Trabajadores registrados", trabajadores.length, soporte + " soporte · " + esencial + " esencial (turno 4×4)");
 
-  function parseMonthInput(str) {
-    var parts = (str || "").split("-");
-    var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1;
-    if (isNaN(y) || isNaN(m)) return null;
-    return { y: y, m: m };
-  }
-
-  function buildProjection(s, cur) {
-    var tbody = document.getElementById("projRows");
-    var now = new Date();
-    var startCredit = s.creditoActivo ? parseMonthInput(s.mesInicioCredito) : null;
-    var baseCostosSinCredito = cur.costoPersonal + cur.costoVariableTotal + s.costosFijos + s.pagoDueno;
-    var rowsHtml = "";
-    var totIngresos = 0, totCostos = 0, totGanancia = 0;
-
-    for (var i = 0; i < 12; i++) {
-      var d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-      var isLoanMonth = false;
-      if (startCredit) {
-        var diff = (d.getFullYear() - startCredit.y) * 12 + (d.getMonth() - startCredit.m);
-        isLoanMonth = diff >= 0 && diff < s.plazoCredito;
+    var fin = readJSON("eleam-control-financiero-v2", null);
+    if (fin && fin.months) {
+      var keys = Object.keys(fin.months).sort();
+      var lastKey = keys[keys.length - 1];
+      if (lastKey) {
+        boxes += box("Último mes con datos de gastos", lastKey, "Revisa el detalle en el módulo de Gastos");
       }
-      var costoCreditoMes = isLoanMonth ? s.cuotaCredito : 0;
-      var costosMes = baseCostosSinCredito + costoCreditoMes;
-      var giMes = cur.ingresos - costosMes;
-      totIngresos += cur.ingresos; totCostos += costosMes; totGanancia += giMes;
-
-      var label = MESES[d.getMonth()] + " " + d.getFullYear();
-      rowsHtml += '<tr' + (isLoanMonth ? ' class="loan-month"' : '') + '>' +
-        '<td>' + label + (isLoanMonth ? ' <span class="tag-credito">crédito</span>' : '') + '</td>' +
-        '<td>' + moneyFmt.format(cur.ingresos) + '</td>' +
-        '<td>' + moneyFmt.format(costosMes) + '</td>' +
-        '<td class="' + (giMes < 0 ? "neg" : "pos") + '">' + moneyFmt.format(giMes) + '</td>' +
-        '</tr>';
+    } else {
+      boxes += box("Gastos", "Sin datos aún", "Registra el primer mes en el módulo de Gastos");
     }
 
-    tbody.innerHTML = rowsHtml;
-    document.getElementById("projTotalIngresos").textContent = moneyFmt.format(totIngresos);
-    document.getElementById("projTotalCostos").textContent = moneyFmt.format(totCostos);
-    var gEl = document.getElementById("projTotalGanancia");
-    gEl.textContent = moneyFmt.format(totGanancia);
-    gEl.className = totGanancia < 0 ? "neg" : "pos";
+    document.getElementById("statGrid").innerHTML = boxes;
   }
 
-  function drawChart(s, xMax, breakeven, metaAt, cur) {
-    var svg = document.getElementById("chart");
-    var W = 640, H = 300, padL = 74, padR = 16, padT = 16, padB = 46;
-    var plotW = W - padL - padR, plotH = H - padT - padB;
-
-    var pts = [];
-    for (var r = 0; r <= xMax; r++) pts.push(computeFor(r, s));
-    var yVals = pts.map(function (p) { return p.ganancia; }).concat([0]);
-    var yMin = Math.min.apply(null, yVals);
-    var yMax = Math.max.apply(null, yVals);
-    var yPad = (yMax - yMin) * 0.1 || 100000;
-    yMin -= yPad; yMax += yPad;
-
-    function xPix(r) { return padL + (r / xMax) * plotW; }
-    function yPix(g) { return padT + (1 - (g - yMin) / (yMax - yMin)) * plotH; }
-
-    var zeroY = yPix(0);
-    var linePts = pts.map(function (p) { return xPix(p.residentes) + "," + yPix(p.ganancia); }).join(" ");
-    var areaPts = "M" + xPix(0) + "," + zeroY + " L" + pts.map(function (p) {
-      return xPix(p.residentes) + "," + yPix(p.ganancia);
-    }).join(" L") + " L" + xPix(xMax) + "," + zeroY + " Z";
-
-    var gridLines = "";
-    for (var gx = 0; gx <= xMax; gx += 5) {
-      gridLines += '<line x1="' + xPix(gx) + '" y1="' + padT + '" x2="' + xPix(gx) + '" y2="' + (H - padB) +
-        '" stroke="var(--border)" stroke-width="1" />';
-      gridLines += '<text x="' + xPix(gx) + '" y="' + (H - padB + 16) + '" font-size="10" fill="var(--ink-faint)" text-anchor="middle" font-family="var(--mono)">' + gx + '</text>';
-    }
-
-    var capX = xPix(Math.min(s.capacidadMaxima, xMax));
-    var capacityShade = s.capacidadMaxima < xMax
-      ? '<rect x="' + capX + '" y="' + padT + '" width="' + (padL + plotW - capX) + '" height="' + plotH + '" fill="var(--surface-2)" opacity="0.7" />'
-      : "";
-
-    function markerLine(r, color, dash) {
-      if (r === null || r === undefined) return "";
-      var x = xPix(r);
-      return '<line x1="' + x + '" y1="' + padT + '" x2="' + x + '" y2="' + (H - padB) + '" stroke="' + color +
-        '" stroke-width="1.5" stroke-dasharray="' + (dash ? "4 3" : "0") + '" />';
-    }
-
-    var curX = xPix(cur.residentes), curY = yPix(cur.ganancia);
-
-    svg.innerHTML =
-      '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="var(--surface)" />' +
-      capacityShade +
-      gridLines +
-      '<line x1="' + padL + '" y1="' + zeroY + '" x2="' + (padL + plotW) + '" y2="' + zeroY + '" stroke="var(--ink-faint)" stroke-width="1.2" />' +
-      '<path d="' + areaPts + '" fill="var(--accent-soft)" opacity="0.55" />' +
-      '<polyline points="' + linePts + '" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />' +
-      markerLine(breakeven, "var(--warn)", true) +
-      markerLine(metaAt, "var(--good)", true) +
-      (s.capacidadMaxima <= xMax ? markerLine(s.capacidadMaxima, "var(--ink-faint)", false) : "") +
-      '<circle cx="' + curX + '" cy="' + curY + '" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" />' +
-      '<text x="' + padL + '" y="' + (zeroY - 6) + '" font-size="10" fill="var(--ink-faint)" font-family="var(--mono)">$0</text>' +
-      '<text x="' + (padL + plotW / 2) + '" y="' + (H - 8) + '" font-size="11" fill="var(--ink-soft)" text-anchor="middle" font-family="var(--sans)" font-weight="600">N° de residentes</text>' +
-      '<text x="16" y="' + (padT + plotH / 2) + '" font-size="11" fill="var(--ink-soft)" text-anchor="middle" font-family="var(--sans)" font-weight="600" transform="rotate(-90 16 ' + (padT + plotH / 2) + ')">Ganancia mensual (CLP)</text>';
-  }
-
-  function applyTotalResidentes(total) {
-    var curTotal = state.residentesCompartida + state.residentesIndividual;
-    var mixCompartida = curTotal > 0 ? state.residentesCompartida / curTotal : 1;
-    var rC = Math.min(total, Math.max(0, Math.round(total * mixCompartida)));
-    var rI = total - rC;
-    state.residentesCompartida = rC;
-    state.residentesIndividual = rI;
-  }
-
-  document.querySelectorAll(".quick-jump button").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      var key = btn.getAttribute("data-jump");
-      if (key === "actual") {
-        state.residentesCompartida = lastManual.c;
-        state.residentesIndividual = lastManual.i;
-      } else {
-        var xMax = Math.max(30, state.capacidadMaxima + 5);
-        var total = key === "breakeven" ? findFirstAtOrAbove(0, state, xMax)
-          : key === "meta" ? findFirstAtOrAbove(state.metaGanancia, state, xMax)
-          : state.capacidadMaxima;
-        if (total === null || total === undefined) return;
-        applyTotalResidentes(total);
-      }
-      els.residentesCompartida.value = state.residentesCompartida;
-      els.residentesIndividual.value = state.residentesIndividual;
-      saveState();
-      recompute();
-    });
-  });
-
-  syncInputsFromState();
-  recompute();
+  render();
+  window.addEventListener("storage", render);
 })();
 </script>

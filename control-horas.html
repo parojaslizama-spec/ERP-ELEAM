@@ -7,28 +7,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css">
 <style>
   :root{
-    --paper:#F6F2E7;
-    --paper-dark:#efe8d6;
-    --ink:#2b2620;
-    --ink-soft:#5a5346;
-    --petroleo:#1D4E4E;
-    --petroleo-dark:#123636;
-    --dorado:#B98A2E;
-    --dorado-soft:#e4c98a;
-    --line:#d8cfb8;
-    --card:#fffdf6;
-    --danger:#8c3a2b;
-    --danger-bg:#f3e2dc;
-    --ok:#3a6b4a;
-    --weekend-bg:#ece3cc;
+    --paper:#F8F4EC;
+    --paper-dark:#f0e9d7;
+    --ink:#3d3a33;
+    --ink-soft:#6f6858;
+    --petroleo:#5f7c68;
+    --petroleo-dark:#48604f;
+    --dorado:#c9a35e;
+    --dorado-soft:#eeddb3;
+    --line:#e0d7bf;
+    --card:#fffdf8;
+    --danger:#ad5c4c;
+    --danger-bg:#f5e2da;
+    --ok:#5f8a63;
+    --weekend-bg:#f0ead9;
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
   body{
     background:
-      repeating-linear-gradient(#F6F2E7 0px, #F6F2E7 27px, #ece4cd 28px),
+      repeating-linear-gradient(#F8F4EC 0px, #F8F4EC 27px, #f0e8d2 28px),
       var(--paper);
     color:var(--ink);
     font-family:'Inter',sans-serif;
@@ -192,17 +193,17 @@
     #printArea{ display:block; position:absolute; top:0; left:0; width:100%; background:#fff; }
     .copia{ page-break-after:always; padding:30px 40px; }
     .copia:last-child{ page-break-after:auto; }
-    .slip-header{ display:flex; justify-content:space-between; border-bottom:2px solid #1D4E4E; padding-bottom:10px; margin-bottom:14px; }
-    .slip-tag{ display:inline-block; background:#B98A2E; color:#fff; padding:3px 12px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
-    .slip-title{ font-family:'Lora',serif; font-size:20px; color:#1D4E4E; margin:0; }
+    .slip-header{ display:flex; justify-content:space-between; border-bottom:2px solid #5f7c68; padding-bottom:10px; margin-bottom:14px; }
+    .slip-tag{ display:inline-block; background:#c9a35e; color:#fff; padding:3px 12px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .slip-title{ font-family:'Lora',serif; font-size:20px; color:#48604f; margin:0; }
     .slip-sub{ font-size:12px; color:#555; }
     .slip-block{ margin-bottom:14px; font-size:13px; }
-    .slip-block b{ color:#1D4E4E; }
+    .slip-block b{ color:#48604f; }
     table.slip-table{ width:100%; border-collapse:collapse; margin-bottom:10px; font-size:12.5px; }
-    table.slip-table th{ background:#f0ead6; border:1px solid #ccc; padding:5px 8px; text-align:left; color:#1D4E4E; }
+    table.slip-table th{ background:#f0ead6; border:1px solid #ccc; padding:5px 8px; text-align:left; color:#48604f; }
     table.slip-table td{ border:1px solid #ccc; padding:5px 8px; }
     table.slip-table td.num{ text-align:right; font-family:'JetBrains Mono',monospace; }
-    .slip-total{ display:flex; justify-content:space-between; font-weight:700; font-size:15px; border-top:2px solid #1D4E4E; padding-top:8px; margin-top:6px; }
+    .slip-total{ display:flex; justify-content:space-between; font-weight:700; font-size:15px; border-top:2px solid #5f7c68; padding-top:8px; margin-top:6px; }
     .slip-firmas{ display:flex; justify-content:space-between; margin-top:60px; }
     .firma-box{ width:40%; text-align:center; font-size:12px; }
     .firma-line{ border-top:1px solid #333; margin-bottom:6px; padding-top:4px; }
@@ -237,7 +238,7 @@
   <!-- TAB 1: TRABAJADORES -->
   <section id="tab-trabajadores" class="tab-panel active">
     <div class="card">
-      <h2>Agregar trabajador</h2>
+      <h2 id="form-trabajador-titulo">Agregar trabajador</h2>
       <form id="form-trabajador">
         <div class="grid-form">
           <div>
@@ -253,8 +254,17 @@
             <input id="trab-cargo" style="font-family:'Inter',sans-serif;">
           </div>
           <div>
-            <label for="trab-sueldo">Sueldo base (CLP)</label>
-            <input id="trab-sueldo" type="number" min="0" step="1000" required>
+            <label for="trab-tipo">Tipo de personal</label>
+            <select id="trab-tipo">
+              <option value="soporte">Soporte (aseo, cocina, TENS) — 40 hrs/semana</option>
+              <option value="esencial">Esencial (cuidadores) — turno 4&times;4 (LLNN/OOOO)</option>
+            </select>
+            <p class="field-hint">Soporte trabaja de lunes a s&aacute;bado, jornada diurna, repartida en 5 o 6 d&iacute;as. Esencial rota en bloques de 4 d&iacute;as trabajados (2 turnos d&iacute;a + 2 turnos noche) y 4 d&iacute;as de descanso.</p>
+          </div>
+          <div id="trab-ciclo-wrap" style="display:none;">
+            <label for="trab-ciclo-inicio">Inicio del ciclo (1&deg; turno d&iacute;a)</label>
+            <input id="trab-ciclo-inicio" type="date">
+            <p class="field-hint">Fecha del primer d&iacute;a "L" (turno d&iacute;a) del ciclo 4&times;4 de este trabajador.</p>
           </div>
           <div>
             <label for="trab-afp">% AFP</label>
@@ -279,24 +289,58 @@
             </select>
           </div>
           <div>
-            <label for="trab-horas">Horas jornada diaria</label>
+            <label for="trab-liquido">Sueldo l&iacute;quido referencial (CLP)</label>
+            <input id="trab-liquido" type="number" min="0" step="1000" placeholder="Ej. 650000">
+            <p class="field-hint">Si lo llenas, calcula el sueldo base solo (AFP + salud + cesant&iacute;a arriba). El base sigue siendo editable a mano.</p>
+          </div>
+          <div>
+            <label for="trab-sueldo">Sueldo base (CLP)</label>
+            <input id="trab-sueldo" type="number" min="0" step="1000" required>
+          </div>
+          <div>
+            <label for="trab-horas" id="trab-horas-label">Horas jornada diaria</label>
             <input id="trab-horas" type="number" min="1" max="24" step="0.5" value="8">
           </div>
-          <div class="full">
-            <button type="submit">Agregar trabajador</button>
+        </div>
+
+        <h3 style="margin-top:18px;">Contacto de emergencia</h3>
+        <p class="field-hint">Opcional — a qui&eacute;n avisar en caso de un accidente o emergencia con este trabajador.</p>
+        <div class="grid-form" style="margin-top:8px;">
+          <div>
+            <label for="trab-contacto-nombre">Nombre</label>
+            <input id="trab-contacto-nombre" style="font-family:'Inter',sans-serif;" placeholder="Nombre completo">
           </div>
+          <div>
+            <label for="trab-contacto-parentesco">Parentesco / relaci&oacute;n</label>
+            <input id="trab-contacto-parentesco" style="font-family:'Inter',sans-serif;" placeholder="Ej. Cónyuge, hermano/a">
+          </div>
+          <div>
+            <label for="trab-contacto-telefono">Tel&eacute;fono</label>
+            <input id="trab-contacto-telefono" placeholder="+56 9 ...">
+          </div>
+        </div>
+
+        <div class="full" style="display:flex; gap:10px; margin-top:18px;">
+          <button type="submit" id="btn-guardar-trabajador">Agregar trabajador</button>
+          <button type="button" id="btn-cancelar-trabajador" class="secondary" style="display:none;">Cancelar edici&oacute;n</button>
         </div>
       </form>
     </div>
 
     <div class="card">
-      <h2>N&oacute;mina</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h2 style="border:none; padding:0; margin:0;">N&oacute;mina</h2>
+        <div>
+          <button id="btn-pdf-nomina" class="gold" type="button">Generar reporte PDF de n&oacute;mina</button>
+          <span id="nomina-save-flash" class="save-flash"></span>
+        </div>
+      </div>
       <table>
         <thead>
           <tr>
-            <th>Nombre</th><th>RUT</th><th>Cargo</th>
+            <th>Nombre</th><th>RUT</th><th>Cargo</th><th>Tipo</th>
             <th class="num">Sueldo base</th><th class="num">AFP %</th>
-            <th>Salud</th><th class="num">Cesant&iacute;a %</th><th class="num">Horas/d&iacute;a</th>
+            <th>Salud</th><th class="num">Cesant&iacute;a %</th><th class="num">Horas/turno</th>
             <th></th>
           </tr>
         </thead>
@@ -324,8 +368,10 @@
         </div>
         <div>
           <button id="btn-autofill" class="gold" type="button">Rellenar mes como "Trabajado"</button>
+          <button id="btn-autofill-4x4" class="gold" type="button" style="display:none;">Generar turno 4&times;4 (LLNN/OOOO)</button>
         </div>
       </div>
+      <p class="field-hint" id="asis-tipo-hint"></p>
       <div id="cal-head-row" class="cal-grid" style="margin-bottom:4px;"></div>
       <div id="calendar-grid" class="cal-grid"></div>
       <div id="asis-resumen" class="summary-cards"></div>
@@ -359,9 +405,11 @@
               <div><label for="liq-sueldo-base">Sueldo base</label><input id="liq-sueldo-base" type="number" min="0" step="1000"></div>
               <div><label for="liq-gratificacion">Gratificaci&oacute;n legal</label><input id="liq-gratificacion" type="number" min="0" step="1000"></div>
               <div><label for="liq-bonos">Bonos</label><input id="liq-bonos" type="number" min="0" step="1000"></div>
-              <div></div>
+              <div><label for="liq-bono-asistencia">Bono cumplimiento asistencia (&ge;95%)</label><input id="liq-bono-asistencia" type="number" min="0" step="1000"></div>
+              <div><label for="liq-bono-puntualidad">Bono puntualidad (&ge;95%)</label><input id="liq-bono-puntualidad" type="number" min="0" step="1000"></div>
               <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5"></div>
               <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100"></div>
+              <div style="grid-column:1/-1;"><p class="field-hint" id="liq-asistencia-hint"></p></div>
             </div>
             <div class="liq-total-row"><span>Total haberes</span><span class="amt mono" id="liq-total-haberes">$ 0</span></div>
           </div>
@@ -387,7 +435,8 @@
 
         <div class="actions-row">
           <button id="btn-guardar-liq" class="secondary" type="button">Guardar liquidaci&oacute;n</button>
-          <button id="btn-imprimir-liq" class="gold" type="button">Imprimir / Guardar PDF</button>
+          <button id="btn-imprimir-liq" type="button">Imprimir (2 copias)</button>
+          <button id="btn-pdf-liq" class="gold" type="button">Generar PDF y guardar en Reportes</button>
           <span id="liq-save-flash" class="save-flash"></span>
         </div>
       </div>
@@ -400,6 +449,9 @@
 
 <div id="printArea"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="assets/pdf-export.js"></script>
+<script src="assets/nav.js"></script>
 <script>
 (function(){
   'use strict';
@@ -422,12 +474,17 @@
   var DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
   var ESTADOS = [
     ['trabajado','Trabajado'],
+    ['turno_dia','Turno día (L)'],
+    ['turno_noche','Turno noche (N)'],
+    ['descanso_turno','Descanso de turno (O)'],
     ['falta_injustificada','Falta injustificada'],
     ['falta_justificada','Falta justificada'],
     ['licencia','Licencia médica'],
     ['vacaciones','Vacaciones'],
     ['no_aplica','No aplica']
   ];
+  var CICLO_4X4 = ['turno_dia','turno_dia','turno_noche','turno_noche','descanso_turno','descanso_turno','descanso_turno','descanso_turno'];
+  var ESTADOS_TRABAJADOS = { trabajado:1, turno_dia:1, turno_noche:1 };
 
   var empresa = window.storage.get('empresa', {nombre:'', rut:''});
   var trabajadores = window.storage.get('trabajadores', []);
@@ -477,57 +534,152 @@
     saludMontoWrap.style.display = saludTipoSel.value === 'isapre' ? 'block' : 'none';
   });
 
+  var tipoSel = document.getElementById('trab-tipo');
+  var cicloWrap = document.getElementById('trab-ciclo-wrap');
+  var horasInput = document.getElementById('trab-horas');
+  var horasLabel = document.getElementById('trab-horas-label');
+  function applyTipoUI(){
+    var esencial = tipoSel.value === 'esencial';
+    cicloWrap.style.display = esencial ? 'block' : 'none';
+    horasLabel.textContent = esencial ? 'Horas por turno (día/noche)' : 'Horas jornada diaria';
+    horasInput.value = esencial ? 12 : 8;
+  }
+  tipoSel.addEventListener('change', applyTipoUI);
+  applyTipoUI();
+
+  // ---------- Sueldo líquido → sueldo base (cálculo referencial) ----------
+  var liquidoInput = document.getElementById('trab-liquido');
+  var sueldoBaseInput = document.getElementById('trab-sueldo');
+  function calcularBaseDesdeLiquido(){
+    var liquido = num(liquidoInput.value);
+    if(!liquido) return;
+    var afpPct = num(document.getElementById('trab-afp').value);
+    var contrato = document.getElementById('trab-contrato').value;
+    var cesantiaPct = contrato === 'indefinido' ? 0.6 : 0;
+    var saludMonto = num(document.getElementById('trab-salud-monto').value);
+    var base;
+    if(saludTipoSel.value === 'fonasa'){
+      var factor = 1 - (afpPct + 7 + cesantiaPct) / 100;
+      base = factor > 0 ? liquido / factor : liquido;
+    } else {
+      var factor2 = 1 - (afpPct + cesantiaPct) / 100;
+      base = factor2 > 0 ? (liquido + saludMonto) / factor2 : liquido + saludMonto;
+    }
+    sueldoBaseInput.value = Math.round(base / 1000) * 1000;
+  }
+  liquidoInput.addEventListener('input', calcularBaseDesdeLiquido);
+  document.getElementById('trab-afp').addEventListener('input', calcularBaseDesdeLiquido);
+  saludTipoSel.addEventListener('change', calcularBaseDesdeLiquido);
+  document.getElementById('trab-salud-monto').addEventListener('input', calcularBaseDesdeLiquido);
+  document.getElementById('trab-contrato').addEventListener('change', calcularBaseDesdeLiquido);
+
+  var editandoTrabajadorId = null;
+
+  function cancelarEdicionTrabajador(){
+    editandoTrabajadorId = null;
+    document.getElementById('form-trabajador').reset();
+    document.getElementById('trab-afp').value = 11.44;
+    tipoSel.value = 'soporte';
+    applyTipoUI();
+    saludMontoWrap.style.display = 'none';
+    document.getElementById('form-trabajador-titulo').textContent = 'Agregar trabajador';
+    document.getElementById('btn-guardar-trabajador').textContent = 'Agregar trabajador';
+    document.getElementById('btn-cancelar-trabajador').style.display = 'none';
+  }
+  document.getElementById('btn-cancelar-trabajador').addEventListener('click', cancelarEdicionTrabajador);
+
   document.getElementById('form-trabajador').addEventListener('submit', function(e){
     e.preventDefault();
     var nombre = document.getElementById('trab-nombre').value.trim();
     var rut = document.getElementById('trab-rut').value.trim();
     if(!nombre || !rut) return;
     var contrato = document.getElementById('trab-contrato').value;
-    var t = {
-      id: uid(),
+    var datos = {
       nombre: nombre,
       rut: rut,
       cargo: document.getElementById('trab-cargo').value.trim(),
+      tipo: tipoSel.value,
+      cicloInicio: tipoSel.value === 'esencial' ? document.getElementById('trab-ciclo-inicio').value : '',
       sueldoBase: num(document.getElementById('trab-sueldo').value),
       afpPct: num(document.getElementById('trab-afp').value),
       saludTipo: saludTipoSel.value,
       saludMonto: num(document.getElementById('trab-salud-monto').value),
       contratoTipo: contrato,
       cesantiaPct: contrato === 'indefinido' ? 0.6 : 0,
-      horasJornada: num(document.getElementById('trab-horas').value) || 8
+      horasJornada: num(horasInput.value) || (tipoSel.value === 'esencial' ? 12 : 8),
+      contactoEmergencia: {
+        nombre: document.getElementById('trab-contacto-nombre').value.trim(),
+        parentesco: document.getElementById('trab-contacto-parentesco').value.trim(),
+        telefono: document.getElementById('trab-contacto-telefono').value.trim()
+      }
     };
-    trabajadores.push(t);
+    if(editandoTrabajadorId){
+      var existente = trabajadores.find(function(x){ return x.id === editandoTrabajadorId; });
+      if(existente) Object.assign(existente, datos);
+    } else {
+      datos.id = uid();
+      trabajadores.push(datos);
+    }
     saveTrabajadores();
-    this.reset();
-    document.getElementById('trab-afp').value = 11.44;
-    document.getElementById('trab-horas').value = 8;
-    saludMontoWrap.style.display = 'none';
+    cancelarEdicionTrabajador();
     renderTrabajadores();
     refreshSelectors();
   });
 
+  function editarTrabajador(id){
+    var t = trabajadores.find(function(x){ return x.id === id; });
+    if(!t) return;
+    editandoTrabajadorId = id;
+    document.getElementById('trab-nombre').value = t.nombre;
+    document.getElementById('trab-rut').value = t.rut;
+    document.getElementById('trab-cargo').value = t.cargo || '';
+    tipoSel.value = t.tipo || 'soporte';
+    applyTipoUI();
+    document.getElementById('trab-ciclo-inicio').value = t.cicloInicio || '';
+    document.getElementById('trab-afp').value = t.afpPct;
+    saludTipoSel.value = t.saludTipo || 'fonasa';
+    saludMontoWrap.style.display = t.saludTipo === 'isapre' ? 'block' : 'none';
+    document.getElementById('trab-salud-monto').value = t.saludMonto || 0;
+    document.getElementById('trab-contrato').value = t.contratoTipo || 'indefinido';
+    document.getElementById('trab-sueldo').value = t.sueldoBase;
+    document.getElementById('trab-liquido').value = '';
+    document.getElementById('trab-horas').value = t.horasJornada;
+    var contacto = t.contactoEmergencia || {};
+    document.getElementById('trab-contacto-nombre').value = contacto.nombre || '';
+    document.getElementById('trab-contacto-parentesco').value = contacto.parentesco || '';
+    document.getElementById('trab-contacto-telefono').value = contacto.telefono || '';
+    document.getElementById('form-trabajador-titulo').textContent = 'Editar trabajador — ' + t.nombre;
+    document.getElementById('btn-guardar-trabajador').textContent = 'Guardar cambios';
+    document.getElementById('btn-cancelar-trabajador').style.display = 'inline-block';
+    document.getElementById('form-trabajador').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
   function renderTrabajadores(){
     var tbody = document.getElementById('tabla-trabajadores');
     if(trabajadores.length === 0){
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="9">A&uacute;n no hay trabajadores registrados.</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="10">A&uacute;n no hay trabajadores registrados.</td></tr>';
       return;
     }
     tbody.innerHTML = trabajadores.map(function(t){
       var salud = t.saludTipo === 'fonasa' ? 'Fonasa (7%)' : 'Isapre (' + fmtCLP(t.saludMonto) + ')';
+      var tipoLabel = t.tipo === 'esencial' ? '<span class="badge">Esencial · 4&times;4</span>' : '<span class="badge" style="background:var(--paper-dark); color:var(--ink-soft);">Soporte</span>';
       return '<tr>'+
         '<td>'+esc(t.nombre)+'</td>'+
         '<td class="mono">'+esc(t.rut)+'</td>'+
         '<td>'+esc(t.cargo)+'</td>'+
+        '<td>'+tipoLabel+'</td>'+
         '<td class="num">'+fmtCLP(t.sueldoBase)+'</td>'+
         '<td class="num">'+t.afpPct+'%</td>'+
         '<td>'+salud+'</td>'+
         '<td class="num">'+t.cesantiaPct+'%</td>'+
         '<td class="num">'+t.horasJornada+'</td>'+
-        '<td><button class="danger" data-del="'+t.id+'">Eliminar</button></td>'+
+        '<td style="white-space:nowrap;"><button class="secondary small" data-edit="'+t.id+'">Editar</button> <button class="danger" data-del="'+t.id+'">Eliminar</button></td>'+
       '</tr>';
     }).join('');
   }
   document.getElementById('tabla-trabajadores').addEventListener('click', function(e){
+    var editBtn = e.target.closest('[data-edit]');
+    if(editBtn){ editarTrabajador(editBtn.dataset.edit); return; }
     var btn = e.target.closest('[data-del]');
     if(!btn) return;
     var id = btn.dataset.del;
@@ -536,6 +688,7 @@
     if(!confirm('¿Eliminar a '+t.nombre+' de la nómina?')) return;
     trabajadores = trabajadores.filter(function(x){ return x.id!==id; });
     saveTrabajadores();
+    if(editandoTrabajadorId === id) cancelarEdicionTrabajador();
     renderTrabajadores();
     refreshSelectors();
   });
@@ -595,16 +748,49 @@
     return trabajadores.find(function(t){ return t.id===id; });
   }
 
+  function diasEntre(a, b){
+    var ms = Date.UTC(b.getFullYear(),b.getMonth(),b.getDate()) - Date.UTC(a.getFullYear(),a.getMonth(),a.getDate());
+    return Math.round(ms / 86400000);
+  }
+  function estadoCiclo4x4(trab, year, month, d){
+    if(!trab.cicloInicio) return null;
+    var parts = trab.cicloInicio.split('-');
+    var inicio = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+    var fecha = new Date(year, month-1, d);
+    var diff = diasEntre(inicio, fecha);
+    var idx = ((diff % 8) + 8) % 8;
+    return CICLO_4X4[idx];
+  }
+  function defaultDayInfo(trab, year, month, d, isWeekend){
+    if(trab.tipo === 'esencial'){
+      var estado = estadoCiclo4x4(trab, year, month, d) || 'descanso_turno';
+      return { estado: estado, horas: ESTADOS_TRABAJADOS[estado] ? trab.horasJornada : 0 };
+    }
+    return isWeekend ? {estado:'no_aplica', horas:0} : {estado:'trabajado', horas: trab.horasJornada};
+  }
+
   function renderCalendar(){
     var grid = document.getElementById('calendar-grid');
     var trab = currentTrabajador(asisTrabSel);
     var year = parseInt(asisAnioInput.value,10) || today.getFullYear();
     var month = parseInt(asisMesSel.value,10) || (today.getMonth()+1);
+    var hintEl = document.getElementById('asis-tipo-hint');
+    var btnAuto = document.getElementById('btn-autofill');
+    var btnAuto4x4 = document.getElementById('btn-autofill-4x4');
     if(!trab){
       grid.innerHTML = '<div class="field-hint" style="grid-column:1/-1;">Selecciona un trabajador para ver su calendario.</div>';
       document.getElementById('asis-resumen').innerHTML = '';
+      hintEl.textContent = '';
+      btnAuto.style.display = 'none';
+      btnAuto4x4.style.display = 'none';
       return;
     }
+    var esencial = trab.tipo === 'esencial';
+    btnAuto.style.display = esencial ? 'none' : 'inline-block';
+    btnAuto4x4.style.display = esencial ? 'inline-block' : 'none';
+    hintEl.textContent = esencial
+      ? (trab.cicloInicio ? 'Personal esencial — ciclo 4×4 desde el ' + trab.cicloInicio + '. Puedes ajustar cualquier día manualmente.' : 'Este trabajador es personal esencial pero no tiene fecha de inicio de ciclo — edítalo en la pestaña Trabajadores para generar el turno 4×4 automáticamente.')
+      : 'Personal de soporte — jornada diurna, editable día a día.';
     var monthData = getMonthData(trab.id, year, month);
     var daysInMonth = new Date(year, month, 0).getDate();
     var firstWeekday = (new Date(year, month-1, 1).getDay()+6)%7;
@@ -614,13 +800,13 @@
       var wd = (new Date(year, month-1, d).getDay()+6)%7;
       var isWeekend = wd===5 || wd===6;
       if(!monthData[d]){
-        monthData[d] = isWeekend ? {estado:'no_aplica', horas:0} : {estado:'trabajado', horas: trab.horasJornada};
+        monthData[d] = defaultDayInfo(trab, year, month, d, isWeekend);
       }
       var info = monthData[d];
-      html += '<div class="cal-cell'+(isWeekend?' weekend':'')+'" data-day="'+d+'">'+
+      html += '<div class="cal-cell'+(isWeekend && !esencial?' weekend':'')+'" data-day="'+d+'">'+
         '<div class="cal-daynum">'+d+'<span class="cal-dayname">'+DIAS[wd]+'</span></div>'+
         '<select class="cal-estado" data-day="'+d+'">'+estadoOptionsHtml(info.estado)+'</select>'+
-        '<input type="number" class="cal-horas" data-day="'+d+'" min="0" step="0.5" value="'+info.horas+'"'+(info.estado!=='trabajado'?' disabled':'')+'>'+
+        '<input type="number" class="cal-horas" data-day="'+d+'" min="0" step="0.5" value="'+info.horas+'"'+(!ESTADOS_TRABAJADOS[info.estado]?' disabled':'')+'>'+
       '</div>';
     }
     grid.innerHTML = html;
@@ -640,7 +826,7 @@
       var estado = e.target.value;
       var horasInput = e.target.closest('.cal-cell').querySelector('.cal-horas');
       monthData[day].estado = estado;
-      if(estado === 'trabajado'){
+      if(ESTADOS_TRABAJADOS[estado]){
         horasInput.disabled = false;
         if(!monthData[day].horas) monthData[day].horas = trab.horasJornada;
         horasInput.value = monthData[day].horas;
@@ -676,16 +862,35 @@
     renderCalendar();
   });
 
+  document.getElementById('btn-autofill-4x4').addEventListener('click', function(){
+    var trab = currentTrabajador(asisTrabSel);
+    if(!trab || trab.tipo !== 'esencial') return;
+    if(!trab.cicloInicio){
+      alert('Este trabajador no tiene fecha de inicio de ciclo. Edítala en la pestaña Trabajadores.');
+      return;
+    }
+    var year = parseInt(asisAnioInput.value,10);
+    var month = parseInt(asisMesSel.value,10);
+    var monthData = getMonthData(trab.id, year, month);
+    var daysInMonth = new Date(year, month, 0).getDate();
+    for(var d=1; d<=daysInMonth; d++){
+      monthData[d] = defaultDayInfo(trab, year, month, d, false);
+    }
+    saveAsistencia();
+    renderCalendar();
+  });
+
   function computeResumen(trab, year, month){
     var monthData = getMonthData(trab.id, year, month);
-    var r = {diasTrabajados:0, horasTotales:0, horasExtra:0, faltaInjust:0, faltaJust:0, licencias:0, vacaciones:0};
+    var r = {diasTrabajados:0, horasTotales:0, horasExtra:0, faltaInjust:0, faltaJust:0, licencias:0, vacaciones:0, descansoTurno:0};
     Object.keys(monthData).forEach(function(day){
       var info = monthData[day];
-      if(info.estado === 'trabajado'){
+      if(ESTADOS_TRABAJADOS[info.estado]){
         r.diasTrabajados++;
         r.horasTotales += info.horas;
         r.horasExtra += Math.max(0, info.horas - trab.horasJornada);
-      } else if(info.estado === 'falta_injustificada'){ r.faltaInjust++; }
+      } else if(info.estado === 'descanso_turno'){ r.descansoTurno++; }
+      else if(info.estado === 'falta_injustificada'){ r.faltaInjust++; }
       else if(info.estado === 'falta_justificada'){ r.faltaJust++; }
       else if(info.estado === 'licencia'){ r.licencias++; }
       else if(info.estado === 'vacaciones'){ r.vacaciones++; }
@@ -700,6 +905,7 @@
       stat('Días trabajados', r.diasTrabajados, '') +
       stat('Horas totales', r.horasTotales, '') +
       stat('Horas extra', r.horasExtra, 'gold') +
+      (trab.tipo === 'esencial' ? stat('Días de descanso (turno)', r.descansoTurno, '') : '') +
       stat('Faltas injustificadas', r.faltaInjust, r.faltaInjust>0?'warn':'') +
       stat('Faltas justificadas', r.faltaJust, '') +
       stat('Licencias médicas', r.licencias, '') +
@@ -714,6 +920,12 @@
 
   var liqFields = ['sueldo-base','gratificacion','bonos','he-cantidad','he-valor','dias-falta','impuesto','otros'];
   function liqEl(name){ return document.getElementById('liq-'+name); }
+
+  function attendancePct(resumen){
+    var esperados = resumen.diasTrabajados + resumen.faltaInjust + resumen.faltaJust;
+    if(esperados <= 0) return null;
+    return (resumen.diasTrabajados / esperados) * 100;
+  }
 
   function loadLiquidacion(){
     var trab = currentTrabajador(liqTrabSel);
@@ -732,11 +944,17 @@
     var key = keyLiq(trab.id, year, month);
     var resumen = computeResumen(trab, year, month);
     var saved = liquidaciones[key];
+    var pctAsistencia = attendancePct(resumen);
+    var cumpleAsistencia = pctAsistencia !== null && pctAsistencia >= 95;
+    var bonoAsistenciaDefault = cumpleAsistencia ? 100000 : 0;
+    var bonoPuntualidadDefault = cumpleAsistencia ? 20000 : 0;
 
-    var data = saved || {
+    var data = saved ? Object.assign({ bonoAsistencia: bonoAsistenciaDefault, bonoPuntualidad: bonoPuntualidadDefault }, saved) : {
       sueldoBase: trab.sueldoBase,
       gratificacion: 0,
       bonos: 0,
+      bonoAsistencia: bonoAsistenciaDefault,
+      bonoPuntualidad: bonoPuntualidadDefault,
       heCantidad: Math.round(resumen.horasExtra*10)/10,
       heValor: Math.round((trab.sueldoBase/30/trab.horasJornada)*1.5),
       diasFalta: resumen.faltaInjust,
@@ -747,11 +965,18 @@
     liqEl('sueldo-base').value = data.sueldoBase;
     liqEl('gratificacion').value = data.gratificacion;
     liqEl('bonos').value = data.bonos;
+    liqEl('bono-asistencia').value = data.bonoAsistencia || 0;
+    liqEl('bono-puntualidad').value = data.bonoPuntualidad || 0;
     liqEl('he-cantidad').value = data.heCantidad;
     liqEl('he-valor').value = data.heValor;
     liqEl('dias-falta').value = data.diasFalta;
     liqEl('impuesto').value = data.impuesto;
     liqEl('otros').value = data.otros;
+
+    document.getElementById('liq-asistencia-hint').textContent = pctAsistencia === null
+      ? 'Sin datos de asistencia registrados este mes — no se sugieren bonos automáticos.'
+      : 'Cumplimiento de asistencia este mes: ' + pctAsistencia.toFixed(1) + '%' +
+        (cumpleAsistencia ? ' — cumple el mínimo de 95%: bono asistencia $100.000 + bono puntualidad $20.000 sugeridos (editables).' : ' — bajo el mínimo de 95%, sin bonos sugeridos.');
 
     document.getElementById('liq-save-flash').textContent = '';
     recomputeLiquidacion();
@@ -762,6 +987,8 @@
       sueldoBase: num(liqEl('sueldo-base').value),
       gratificacion: num(liqEl('gratificacion').value),
       bonos: num(liqEl('bonos').value),
+      bonoAsistencia: num(liqEl('bono-asistencia').value),
+      bonoPuntualidad: num(liqEl('bono-puntualidad').value),
       heCantidad: num(liqEl('he-cantidad').value),
       heValor: num(liqEl('he-valor').value),
       diasFalta: num(liqEl('dias-falta').value),
@@ -772,7 +999,7 @@
 
   function calcularLiquidacion(trab, form){
     var montoHorasExtra = form.heCantidad * form.heValor;
-    var totalHaberes = form.sueldoBase + form.gratificacion + form.bonos + montoHorasExtra;
+    var totalHaberes = form.sueldoBase + form.gratificacion + form.bonos + (form.bonoAsistencia||0) + (form.bonoPuntualidad||0) + montoHorasExtra;
     var baseImponible = form.sueldoBase + form.gratificacion + montoHorasExtra;
     var sueldoDiario = form.sueldoBase / 30;
     var descInasistencia = sueldoDiario * form.diasFalta;
@@ -848,6 +1075,8 @@
           '<tr><td>Sueldo base</td><td class="num">'+fmtCLP(form.sueldoBase)+'</td></tr>'+
           '<tr><td>Gratificación legal</td><td class="num">'+fmtCLP(form.gratificacion)+'</td></tr>'+
           '<tr><td>Bonos</td><td class="num">'+fmtCLP(form.bonos)+'</td></tr>'+
+          '<tr><td>Bono cumplimiento asistencia (&ge;95%)</td><td class="num">'+fmtCLP(form.bonoAsistencia||0)+'</td></tr>'+
+          '<tr><td>Bono puntualidad (&ge;95%)</td><td class="num">'+fmtCLP(form.bonoPuntualidad||0)+'</td></tr>'+
           '<tr><td>Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')</td><td class="num">'+fmtCLP(c.montoHorasExtra)+'</td></tr>'+
         '</tbody></table>'+
         '<div class="slip-total"><span>Total haberes</span><span>'+fmtCLP(c.totalHaberes)+'</span></div>'+
@@ -860,7 +1089,7 @@
           '<tr><td>Otros descuentos</td><td class="num">'+fmtCLP(form.otros)+'</td></tr>'+
         '</tbody></table>'+
         '<div class="slip-total"><span>Total descuentos</span><span>'+fmtCLP(c.totalDescuentos)+'</span></div>'+
-        '<div class="slip-total" style="color:#1D4E4E; font-size:17px;"><span>LÍQUIDO A PAGAR</span><span>'+fmtCLP(c.liquido)+'</span></div>'+
+        '<div class="slip-total" style="color:#48604f; font-size:17px;"><span>LÍQUIDO A PAGAR</span><span>'+fmtCLP(c.liquido)+'</span></div>'+
         '<div class="slip-firmas">'+
           '<div class="firma-box"><div class="firma-line">&nbsp;</div>Firma Trabajador</div>'+
           '<div class="firma-box"><div class="firma-line">&nbsp;</div>Firma Empleador</div>'+
@@ -870,6 +1099,106 @@
 
     document.getElementById('printArea').innerHTML = copia('Copia empleador') + copia('Copia trabajador');
     window.print();
+  });
+
+  // ---------- REPORTES PDF ----------
+  function flash(elId, msg, ms){
+    var el = document.getElementById(elId);
+    el.textContent = msg;
+    setTimeout(function(){ if(el.textContent===msg) el.textContent=''; }, ms||4000);
+  }
+
+  document.getElementById('btn-pdf-nomina').addEventListener('click', async function(){
+    if(trabajadores.length===0){ flash('nomina-save-flash','No hay trabajadores para incluir en el reporte.'); return; }
+    try{
+      var filas = trabajadores.map(function(t){
+        var salud = t.saludTipo==='fonasa' ? 'Fonasa (7%)' : ('Isapre ('+fmtCLP(t.saludMonto)+')');
+        var tipoTxt = t.tipo === 'esencial' ? 'Esencial · turno 4×4' : 'Soporte · 40 hrs/semana';
+        return { label: t.nombre+' — '+t.rut+(t.cargo?' · '+t.cargo:''), valor: fmtCLP(t.sueldoBase)+' base', nota: tipoTxt+' · AFP '+t.afpPct+'% · '+salud+' · Cesantía '+t.cesantiaPct+'% · '+t.horasJornada+' hrs/turno' };
+      });
+      var totalBase = trabajadores.reduce(function(a,t){ return a+(t.sueldoBase||0); },0);
+      var conContacto = trabajadores.filter(function(t){ return t.contactoEmergencia && t.contactoEmergencia.nombre; });
+      var secciones = [{ titulo:'Dotación actual', filas: filas }];
+      secciones.push({
+        titulo: 'Contactos de emergencia',
+        sub: conContacto.length === 0 ? 'Ningún trabajador tiene contacto de emergencia registrado.' : '',
+        filas: conContacto.map(function(t){
+          var c = t.contactoEmergencia;
+          return { label: t.nombre+(c.parentesco?' — '+c.parentesco:''), valor: c.telefono || '—' };
+        })
+      });
+      var doc = ReportPDF.buildDoc({
+        titulo: 'Nómina de trabajadores',
+        subtitulo: trabajadores.length+' trabajador(es) registrados',
+        empresa: empresa,
+        secciones: secciones,
+        resumenFinal: { label:'Total sueldos base (mensual)', valor: fmtCLP(totalBase) },
+        notaPie: 'Reporte generado desde el módulo de Trabajadores, Asistencia y Liquidaciones — Residencia de ancianos.'
+      });
+      var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('nomina-'+(empresa.nombre||'residencia'))+'.pdf');
+      flash('nomina-save-flash', res.mensaje, 6000);
+    }catch(e){
+      flash('nomina-save-flash', '✗ '+e.message, 6000);
+    }
+  });
+
+  document.getElementById('btn-pdf-liq').addEventListener('click', async function(){
+    var trab = currentTrabajador(liqTrabSel);
+    if(!trab) return;
+    var year = parseInt(liqAnioInput.value,10);
+    var month = parseInt(liqMesSel.value,10);
+    var form = readLiqForm();
+    var c = calcularLiquidacion(trab, form);
+    var periodo = MESES[month-1] + ' ' + year;
+    var saludLabel = trab.saludTipo==='fonasa' ? 'Salud (Fonasa 7%)' : 'Salud (Isapre)';
+    try{
+      var doc = ReportPDF.buildDoc({
+        titulo: 'Liquidación de sueldo',
+        subtitulo: periodo,
+        empresa: empresa,
+        secciones: [
+          {
+            titulo: 'Trabajador',
+            filas: [
+              { label:'Nombre', valor: trab.nombre },
+              { label:'RUT', valor: trab.rut },
+              { label:'Cargo', valor: trab.cargo || '—' }
+            ]
+          },
+          {
+            titulo: 'Haberes',
+            filas: [
+              { label:'Sueldo base', valor: fmtCLP(form.sueldoBase) },
+              { label:'Gratificación legal', valor: fmtCLP(form.gratificacion) },
+              { label:'Bonos', valor: fmtCLP(form.bonos) },
+              { label:'Bono cumplimiento asistencia (≥95%)', valor: fmtCLP(form.bonoAsistencia||0) },
+              { label:'Bono puntualidad (≥95%)', valor: fmtCLP(form.bonoPuntualidad||0) },
+              { label:'Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')', valor: fmtCLP(c.montoHorasExtra) }
+            ],
+            total: { label:'Total haberes', valor: fmtCLP(c.totalHaberes) }
+          },
+          {
+            titulo: 'Descuentos',
+            filas: [
+              { label:'AFP ('+trab.afpPct+'%)', valor: fmtCLP(c.afpMonto) },
+              { label: saludLabel, valor: fmtCLP(c.saludMonto) },
+              { label:'Seguro cesantía ('+trab.cesantiaPct+'%)', valor: fmtCLP(c.cesantiaMonto) },
+              { label:'Descuento por inasistencia ('+form.diasFalta+' día(s))', valor: fmtCLP(c.descInasistencia) },
+              { label:'Impuesto único', valor: fmtCLP(form.impuesto) },
+              { label:'Otros descuentos', valor: fmtCLP(form.otros) }
+            ],
+            total: { label:'Total descuentos', valor: fmtCLP(c.totalDescuentos) }
+          }
+        ],
+        resumenFinal: { label:'Líquido a pagar', valor: fmtCLP(c.liquido) },
+        firmas: [{ label:'Firma Trabajador' }, { label:'Firma Empleador' }],
+        notaPie: 'Documento generado desde el módulo de Trabajadores, Asistencia y Liquidaciones — Residencia de ancianos.'
+      });
+      var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('liquidacion-'+trab.nombre+'-'+periodo)+'.pdf');
+      flash('liq-save-flash', res.mensaje, 6000);
+    }catch(e){
+      flash('liq-save-flash', '✗ '+e.message, 6000);
+    }
   });
 
   // ---------- INIT ----------

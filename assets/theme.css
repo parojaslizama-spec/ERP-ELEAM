@@ -1,0 +1,88 @@
+/* Tema compartido — Residencia de ancianos (ELEAM)
+   Paleta clara, tonos pastel cálidos, aires de respeto. */
+
+.app-nav {
+  background: linear-gradient(180deg, #eef2ea 0%, #e6ebe1 100%);
+  border-bottom: 1px solid #d8d0ba;
+  padding: 10px 22px;
+}
+.app-nav .app-nav-inner {
+  max-width: 1220px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.app-nav .app-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Lora", "Iowan Old Style", Georgia, serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: #4a6353;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+}
+.app-nav .app-nav-brand:hover { color: #2f4335; }
+.app-nav .app-nav-brand .mark { font-size: 18px; }
+.app-nav .app-nav-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.app-nav .app-nav-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-family: "Inter", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6f6858;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.app-nav .app-nav-step .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #d9d0b5;
+  color: #5a5240;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.app-nav .app-nav-step:hover {
+  background: #ffffffaa;
+  color: #4a6353;
+}
+.app-nav .app-nav-step.active {
+  background: #5f7c68;
+  color: #fdfaf2;
+  border-color: #5f7c68;
+}
+.app-nav .app-nav-step.active .num {
+  background: #c9a35e;
+  color: #3a2e12;
+}
+.app-nav .app-nav-arrow {
+  color: #b7ac8d;
+  font-size: 13px;
+}
+@media (max-width: 760px) {
+  .app-nav .app-nav-inner { justify-content: center; }
+  .app-nav .app-nav-brand { width: 100%; justify-content: center; }
+}
+@media print {
+  .app-nav { display: none !important; }
+}

@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingreso de residentes — Datos personales y cuota</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+  :root{
+    --paper:#F8F4EC;
+    --paper-dark:#f0e9d7;
+    --ink:#3d3a33;
+    --ink-soft:#6f6858;
+    --petroleo:#5f7c68;
+    --petroleo-dark:#48604f;
+    --dorado:#c9a35e;
+    --dorado-soft:#eeddb3;
+    --line:#e0d7bf;
+    --card:#fffdf8;
+    --danger:#ad5c4c;
+    --danger-bg:#f5e2da;
+    --ok:#5f8a63;
+    --weekend-bg:#f0ead9;
+    --rose:#b97d76;
+    --rose-soft:#f2ddd8;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      repeating-linear-gradient(#F8F4EC 0px, #F8F4EC 27px, #f0e8d2 28px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    line-height:1.45;
+    padding-bottom:60px;
+  }
+  h1,h2,h3{ font-family:'Lora',serif; font-weight:600; color:var(--petroleo-dark); margin:0 0 6px; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  label{ font-weight:600; font-size:12.5px; color:var(--ink-soft); display:block; margin-bottom:4px; }
+  input, select, textarea{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13.5px;
+    padding:7px 9px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:#fffef9;
+    color:var(--ink);
+    width:100%;
+  }
+  textarea{ font-family:'Inter',sans-serif; resize:vertical; min-height:56px; }
+  select{ font-family:'Inter',sans-serif; }
+  input:focus, select:focus, textarea:focus{ outline:2px solid var(--dorado-soft); border-color:var(--dorado); }
+  button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    border:1px solid var(--petroleo);
+    background:var(--petroleo);
+    color:#fff;
+    padding:9px 16px;
+    border-radius:5px;
+    transition:background .15s, transform .05s;
+  }
+  button:hover{ background:var(--petroleo-dark); }
+  button:active{ transform:translateY(1px); }
+  button.secondary{ background:transparent; color:var(--petroleo); }
+  button.secondary:hover{ background:var(--paper-dark); }
+  button.gold{ background:var(--dorado); border-color:var(--dorado); }
+  button.gold:hover{ background:#9c7325; }
+  button.danger{ background:transparent; border-color:var(--danger); color:var(--danger); padding:5px 10px; font-size:12px; }
+  button.danger:hover{ background:var(--danger-bg); }
+  button.small{ padding:5px 10px; font-size:12px; }
+
+  .top-header{
+    background:linear-gradient(180deg, var(--petroleo) 0%, var(--petroleo-dark) 100%);
+    color:#f3ead3;
+    padding:18px 28px;
+    border-bottom:4px solid var(--dorado);
+  }
+  .top-header .header-inner{ max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{ font-family:'Lora',serif; font-size:26px; color:var(--dorado-soft); }
+  .empresa-fields{ display:flex; gap:10px; flex-wrap:wrap; }
+  .empresa-fields input{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.25);
+    color:#f6f2e7;
+    font-family:'Lora',serif;
+    font-size:14px;
+    min-width:220px;
+  }
+  .empresa-fields input::placeholder{ color:#cdd8d3; }
+  .empresa-fields input:focus{ outline:2px solid var(--dorado); }
+  .subtitle{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--dorado-soft); margin-top:2px; }
+  .confidential-note{
+    background:var(--rose-soft); color:#6d332c; border:1px solid #e0b8b0; border-radius:6px;
+    padding:8px 14px; font-size:12px; margin:14px 24px 0; max-width:1132px; margin-left:auto; margin-right:auto;
+  }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  .tabbar{ display:flex; gap:4px; margin:22px 0 18px; border-bottom:2px solid var(--line); flex-wrap:wrap; }
+  .tab-btn{
+    background:transparent; border:1px solid transparent; border-bottom:none;
+    color:var(--ink-soft); font-family:'Lora',serif; font-size:15px; font-weight:600;
+    padding:10px 20px; border-radius:6px 6px 0 0;
+  }
+  .tab-btn:hover{ background:var(--paper-dark); color:var(--petroleo-dark); }
+  .tab-btn.active{
+    background:var(--card); color:var(--petroleo-dark);
+    border-color:var(--line);
+    box-shadow:0 -2px 0 var(--dorado) inset;
+    margin-bottom:-2px;
+    border-bottom:2px solid var(--card);
+  }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; animation:fade .15s ease; }
+  @keyframes fade{ from{opacity:0} to{opacity:1} }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px 22px;
+    margin-bottom:20px;
+    box-shadow:0 1px 3px rgba(30,25,10,.06);
+  }
+  .card h2{ font-size:18px; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:16px; }
+  .card h3{ font-size:15px; margin-top:0; }
+
+  .grid-form{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px,1fr)); gap:14px; align-items:end; }
+  .grid-form .full{ grid-column:1/-1; }
+  .field-hint{ font-size:11px; color:var(--ink-soft); margin-top:3px; }
+
+  table{ width:100%; border-collapse:collapse; margin-top:6px; }
+  th{
+    text-align:left; font-family:'Inter',sans-serif; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--dorado); border-bottom:2px solid var(--petroleo); padding:8px 10px; background:var(--paper-dark);
+  }
+  td{ padding:8px 10px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:middle; }
+  tbody tr:hover{ background:#fbf7ea; }
+  td.num, th.num{ font-family:'JetBrains Mono',monospace; text-align:right; }
+  .empty-row td{ text-align:center; color:var(--ink-soft); padding:24px; font-style:italic; }
+
+  .selector-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:end; margin-bottom:18px; }
+  .selector-row .field{ min-width:180px; }
+
+  .badge{ display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; background:var(--dorado-soft); color:#5c4315; }
+  .badge.rose{ background:var(--rose-soft); color:#6d332c; }
+  .badge.ok{ background:#e2eedf; color:#2f4a33; }
+  .badge.off{ background:var(--paper-dark); color:var(--ink-soft); }
+
+  .subtable{ background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:12px 14px; margin-top:10px; }
+  .subtable-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:8px; align-items:end; }
+  .subtable-add{ margin-top:10px; }
+  .mini-label{ font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin-bottom:2px; }
+
+  .liq-actions{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; align-items:center; }
+  .save-flash{ font-size:12.5px; color:var(--ok); font-weight:600; margin-left:6px; }
+
+  footer.note{ max-width:1180px; margin:30px auto 0; padding:0 24px; font-size:11.5px; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<header class="top-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">&#9825;</div>
+      <div>
+        <div class="empresa-fields">
+          <input id="empresa-nombre" placeholder="Nombre de la empresa">
+          <input id="empresa-rut" placeholder="RUT empresa (ej. 76.123.456-7)">
+        </div>
+        <div class="subtitle">Ingreso de residentes &middot; datos personales, contacto y cuota</div>
+      </div>
+    </div>
+  </div>
+</header>
+<p class="confidential-note">&#128274; Informaci&oacute;n confidencial: datos personales, de contacto y la cuota de incorporaci&oacute;n. Solo debe conocerla quien registra el ingreso. La ficha m&eacute;dica y el control de medicamentos y cuidados viven en un m&oacute;dulo aparte y no muestran esta informaci&oacute;n. Este es el &uacute;nico m&oacute;dulo donde se puede eliminar a un residente.</p>
+
+<div class="wrap">
+  <nav class="tabbar">
+    <button class="tab-btn active" data-tab="residentes">Residentes</button>
+    <button class="tab-btn" data-tab="contactos">Datos de contacto</button>
+  </nav>
+
+  <!-- TAB 1: RESIDENTES -->
+  <section id="tab-residentes" class="tab-panel active">
+    <div class="card">
+      <h2 id="form-residente-titulo">Agregar residente</h2>
+      <form id="form-residente">
+        <div class="grid-form">
+          <div>
+            <label for="res-nombre">Nombre completo</label>
+            <input id="res-nombre" required style="font-family:'Inter',sans-serif;">
+          </div>
+          <div>
+            <label for="res-rut">RUT (opcional)</label>
+            <input id="res-rut" placeholder="12.345.678-9">
+          </div>
+          <div>
+            <label for="res-ingreso">Fecha de ingreso</label>
+            <input id="res-ingreso" type="date" required>
+          </div>
+          <div>
+            <label for="res-egreso">Fecha de egreso (si aplica)</label>
+            <input id="res-egreso" type="date">
+          </div>
+          <div>
+            <label for="res-cuota">Cuota de incorporaci&oacute;n (mensual, CLP)</label>
+            <input id="res-cuota" type="number" min="0" step="1000" required>
+          </div>
+          <div class="full" style="display:flex; gap:10px;">
+            <button type="submit" id="btn-guardar-residente">Agregar residente</button>
+            <button type="button" id="btn-cancelar-residente" class="secondary" style="display:none;">Cancelar edici&oacute;n</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h2 style="border:none; padding:0; margin:0;">N&oacute;mina de residentes</h2>
+        <div>
+          <button id="btn-pdf-residentes" class="gold" type="button">Generar reporte PDF de residentes</button>
+          <span id="residentes-save-flash" class="save-flash"></span>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th><th>RUT</th><th>Ingreso</th><th>Egreso</th><th>Estado</th>
+            <th class="num">Cuota mensual</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tabla-residentes"></tbody>
+      </table>
+      <p class="field-hint">La cuota de incorporaci&oacute;n de cada residente activo se suma sola en el m&oacute;dulo de Gastos, secci&oacute;n Ingresos. Eliminar un residente aqu&iacute; tambi&eacute;n elimina su ficha m&eacute;dica y su historial de cuidados en el otro m&oacute;dulo.</p>
+    </div>
+  </section>
+
+  <!-- TAB 2: DATOS DE CONTACTO -->
+  <section id="tab-contactos" class="tab-panel">
+    <div class="card">
+      <h2>Datos de contacto</h2>
+      <div class="selector-row">
+        <div class="field">
+          <label for="contacto-residente">Residente</label>
+          <select id="contacto-residente"></select>
+        </div>
+      </div>
+
+      <div id="contacto-content" style="display:none;">
+        <h3>Contactos de emergencia / apoderado</h3>
+        <p class="field-hint">Opcional — puedes agregar uno o m&aacute;s contactos.</p>
+        <div id="contactos-list"></div>
+        <div class="subtable subtable-add">
+          <div class="subtable-grid">
+            <div><div class="mini-label">Nombre</div><input id="contacto-nombre" placeholder="Nombre completo"></div>
+            <div><div class="mini-label">Parentesco</div><input id="contacto-parentesco" placeholder="Ej. Hijo/a"></div>
+            <div><div class="mini-label">Tel&eacute;fono</div><input id="contacto-telefono" placeholder="+56 9 ..."></div>
+            <div><div class="mini-label">Email (opcional)</div><input id="contacto-email" placeholder="correo@ejemplo.cl"></div>
+            <div>
+              <label class="field-hint" style="display:flex; align-items:center; gap:6px; font-weight:600;">
+                <input type="checkbox" id="contacto-apoderado" style="width:16px; height:16px;"> Es apoderado
+              </label>
+              <button type="button" id="btn-add-contacto" class="secondary small">+ Agregar contacto</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="liq-actions">
+          <button id="btn-pdf-ficha" class="gold" type="button">Generar ficha de ingreso PDF</button>
+          <span id="ficha-save-flash" class="save-flash"></span>
+        </div>
+      </div>
+      <div id="contacto-empty" class="field-hint">Selecciona un residente para ver y editar sus contactos.</div>
+    </div>
+  </section>
+</div>
+
+<footer class="note">Los datos se guardan solo en este navegador &mdash; no se env&iacute;an a ning&uacute;n servidor. Respalda peri&oacute;dicamente si es informaci&oacute;n cr&iacute;tica.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="assets/pdf-export.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  if(!window.storage){
+    window.storage = {
+      get:function(key, def){
+        try{
+          var raw = localStorage.getItem('rha_'+key);
+          return raw===null ? def : JSON.parse(raw);
+        }catch(e){ return def; }
+      },
+      set:function(key, value){
+        try{ localStorage.setItem('rha_'+key, JSON.stringify(value)); }catch(e){}
+      }
+    };
+  }
+
+  var empresa = window.storage.get('empresa', {nombre:'', rut:''});
+  var residentes = window.storage.get('residentes', []);
+
+  // Asegura que la nómina entregada esté presente — agrega solo los nombres que todavía no existan (no duplica ni pisa datos ya cargados).
+  // También retira la lista anterior (reemplazada), pero solo las filas que nadie alcanzó a completar con fecha o contactos.
+  (function ensureResidentesBase(){
+    var LISTA_BASE = [
+      ['Monica Becerra', 1200000], ['Sra. Mila Elizas Olguín', 1038000], ['Silvia Oñate', 1198000],
+      ['Patricia Achondo', 1200000], ['Magaly Saldoval', 1227000], ['Irma Mendoza', 1400000],
+      ['Guana Figueroa', 780000], ['Marta Villegas', 1242000], ['Ana Rosa Iribarra', 1061100],
+      ['Lucía Garrido', 1100000], ['Evaristo H. Guerrero', 1035000]
+    ];
+    var LISTA_ANTERIOR = [
+      'Paulina A.', 'Cristina W.', 'Stephanie W.', 'Elizabeth S.', 'Paulina Soto', 'Margarita Arcos',
+      'Rosa Cares', 'Geraldine R.', 'Victoria Schwuma', 'María Sepúlveda', 'Defur Candles',
+      'Francesca Jarpa', 'Ariel Córdova', 'Paola Cerda'
+    ];
+    var changed = false;
+    residentes = residentes.filter(function(r){
+      var esAntiguoSinTocar = LISTA_ANTERIOR.indexOf(r.nombre) !== -1 &&
+        !r.fechaIngreso && !r.fechaEgreso && (!r.contactos || r.contactos.length === 0);
+      if(esAntiguoSinTocar) changed = true;
+      return !esAntiguoSinTocar;
+    });
+    var nombresExistentes = residentes.map(function(r){ return r.nombre; });
+    LISTA_BASE.forEach(function(row){
+      if(nombresExistentes.indexOf(row[0]) === -1){
+        residentes.push({ id: uid(), nombre: row[0], rut:'', fechaIngreso:'', fechaEgreso:'', cuotaPermanencia: row[1], contactos: [] });
+        changed = true;
+      }
+    });
+    if(changed) window.storage.set('residentes', residentes);
+  })();
+
+  function saveEmpresa(){ window.storage.set('empresa', empresa); }
+  function saveResidentes(){ window.storage.set('residentes', residentes); }
+
+  function uid(){ return 'r_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+  function fmtCLP(n){ n = Math.round(Number(n)||0); return '$ '+n.toLocaleString('es-CL'); }
+  function num(v){ var n = parseFloat(v); return isNaN(n)?0:n; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function fmtDate(d){ if(!d) return '—'; var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+  // ---------- MIGRACIÓN: mueve datos médicos antiguos guardados en el residente al módulo de Ficha médica ----------
+  (function migrateLegacyMedicalData(){
+    var changedResidentes = false;
+    var fichas = window.storage.get('fichas', {});
+    var changedFichas = false;
+    residentes.forEach(function(r){
+      if(r.diagnostico || r.indicaciones || (r.medicamentos && r.medicamentos.length)){
+        if(!fichas[r.id]) fichas[r.id] = { diagnosticos: [], cuidadosGenerales: [], indicacionesCuidado: '' };
+        if(r.indicaciones && !fichas[r.id].indicacionesCuidado) fichas[r.id].indicacionesCuidado = r.indicaciones;
+        if(r.medicamentos && r.medicamentos.length){
+          fichas[r.id].diagnosticos.push({ id: uid(), nombre: r.diagnostico || 'Diagnóstico general', medicamentos: r.medicamentos });
+        } else if(r.diagnostico){
+          fichas[r.id].diagnosticos.push({ id: uid(), nombre: r.diagnostico, medicamentos: [] });
+        }
+        delete r.diagnostico; delete r.indicaciones; delete r.medicamentos;
+        changedResidentes = true; changedFichas = true;
+      }
+    });
+    if(changedResidentes) saveResidentes();
+    if(changedFichas) window.storage.set('fichas', fichas);
+  })();
+
+  // ---------- HEADER EMPRESA ----------
+  var elEmpresaNombre = document.getElementById('empresa-nombre');
+  var elEmpresaRut = document.getElementById('empresa-rut');
+  elEmpresaNombre.value = empresa.nombre || '';
+  elEmpresaRut.value = empresa.rut || '';
+  elEmpresaNombre.addEventListener('input', function(){ empresa.nombre = elEmpresaNombre.value; saveEmpresa(); });
+  elEmpresaRut.addEventListener('input', function(){ empresa.rut = elEmpresaRut.value; saveEmpresa(); });
+
+  // ---------- TABS ----------
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var tabPanels = {
+    residentes: document.getElementById('tab-residentes'),
+    contactos: document.getElementById('tab-contactos')
+  };
+  tabBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.keys(tabPanels).forEach(function(k){ tabPanels[k].classList.remove('active'); });
+      tabPanels[btn.dataset.tab].classList.add('active');
+      if(btn.dataset.tab === 'contactos') loadContactos();
+    });
+  });
+
+  // ---------- RESIDENTES: alta, edición y nómina ----------
+  var editandoResidenteId = null;
+
+  function cancelarEdicionResidente(){
+    editandoResidenteId = null;
+    document.getElementById('form-residente').reset();
+    document.getElementById('form-residente-titulo').textContent = 'Agregar residente';
+    document.getElementById('btn-guardar-residente').textContent = 'Agregar residente';
+    document.getElementById('btn-cancelar-residente').style.display = 'none';
+  }
+
+  document.getElementById('btn-cancelar-residente').addEventListener('click', cancelarEdicionResidente);
+
+  document.getElementById('form-residente').addEventListener('submit', function(e){
+    e.preventDefault();
+    var nombre = document.getElementById('res-nombre').value.trim();
+    var ingreso = document.getElementById('res-ingreso').value;
+    if(!nombre || !ingreso) return;
+    var datos = {
+      nombre: nombre,
+      rut: document.getElementById('res-rut').value.trim(),
+      fechaIngreso: ingreso,
+      fechaEgreso: document.getElementById('res-egreso').value,
+      cuotaPermanencia: num(document.getElementById('res-cuota').value)
+    };
+    if(editandoResidenteId){
+      var existente = residentes.find(function(x){ return x.id === editandoResidenteId; });
+      if(existente) Object.assign(existente, datos);
+    } else {
+      datos.id = uid();
+      datos.contactos = [];
+      residentes.push(datos);
+    }
+    saveResidentes();
+    cancelarEdicionResidente();
+    renderResidentes();
+    refreshSelectors();
+  });
+
+  function editarResidente(id){
+    var r = residentes.find(function(x){ return x.id === id; });
+    if(!r) return;
+    editandoResidenteId = id;
+    document.getElementById('res-nombre').value = r.nombre;
+    document.getElementById('res-rut').value = r.rut || '';
+    document.getElementById('res-ingreso').value = r.fechaIngreso || '';
+    document.getElementById('res-egreso').value = r.fechaEgreso || '';
+    document.getElementById('res-cuota').value = r.cuotaPermanencia;
+    document.getElementById('form-residente-titulo').textContent = 'Editar residente — ' + r.nombre;
+    document.getElementById('btn-guardar-residente').textContent = 'Guardar cambios';
+    document.getElementById('btn-cancelar-residente').style.display = 'inline-block';
+    document.getElementById('form-residente').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function estadoResidente(r){
+    if(r.fechaEgreso && r.fechaEgreso <= todayStr()) return 'egresado';
+    return 'activo';
+  }
+
+  function renderResidentes(){
+    var tbody = document.getElementById('tabla-residentes');
+    if(residentes.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">A&uacute;n no hay residentes registrados.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = residentes.map(function(r){
+      var estado = estadoResidente(r);
+      var badge = estado === 'activo' ? '<span class="badge ok">Activo</span>' : '<span class="badge off">Egresado</span>';
+      return '<tr>'+
+        '<td>'+esc(r.nombre)+'</td>'+
+        '<td class="mono">'+esc(r.rut||'—')+'</td>'+
+        '<td class="mono">'+fmtDate(r.fechaIngreso)+'</td>'+
+        '<td class="mono">'+fmtDate(r.fechaEgreso)+'</td>'+
+        '<td>'+badge+'</td>'+
+        '<td class="num">'+fmtCLP(r.cuotaPermanencia)+'</td>'+
+        '<td style="white-space:nowrap;"><button class="secondary small" data-edit="'+r.id+'">Editar</button> <button class="danger" data-del="'+r.id+'">Eliminar</button></td>'+
+      '</tr>';
+    }).join('');
+  }
+  document.getElementById('tabla-residentes').addEventListener('click', function(e){
+    var editBtn = e.target.closest('[data-edit]');
+    if(editBtn){ editarResidente(editBtn.dataset.edit); return; }
+    var btn = e.target.closest('[data-del]');
+    if(!btn) return;
+    var id = btn.dataset.del;
+    var r = residentes.find(function(x){ return x.id===id; });
+    if(!r) return;
+    if(!confirm('¿Eliminar a '+r.nombre+'? Esto también elimina su ficha médica, medicamentos, cuidados y checklist en el módulo de Ficha médica.')) return;
+    residentes = residentes.filter(function(x){ return x.id!==id; });
+    saveResidentes();
+    // Limpieza en cascada de datos del módulo de Ficha médica.
+    var fichas = window.storage.get('fichas', {});
+    if(fichas[id]){ delete fichas[id]; window.storage.set('fichas', fichas); }
+    var checklistCuidados = window.storage.get('cuidados_checklist', {});
+    var changed = false;
+    Object.keys(checklistCuidados).forEach(function(k){ if(k.indexOf(id+'_')===0){ delete checklistCuidados[k]; changed = true; } });
+    if(changed) window.storage.set('cuidados_checklist', checklistCuidados);
+    if(editandoResidenteId === id) cancelarEdicionResidente();
+    renderResidentes();
+    refreshSelectors();
+  });
+
+  // ---------- SELECTOR DE CONTACTOS ----------
+  function fillResidenteSelect(sel){
+    var prev = sel.value;
+    if(residentes.length===0){
+      sel.innerHTML = '<option value="">(sin residentes)</option>';
+      return;
+    }
+    sel.innerHTML = residentes.map(function(r){
+      var estado = estadoResidente(r) === 'activo' ? '' : ' (egresado)';
+      return '<option value="'+r.id+'">'+esc(r.nombre)+estado+'</option>';
+    }).join('');
+    if(residentes.some(function(r){ return r.id===prev; })) sel.value = prev;
+  }
+
+  var contactoSel = document.getElementById('contacto-residente');
+  function refreshSelectors(){ fillResidenteSelect(contactoSel); }
+  refreshSelectors();
+  contactoSel.addEventListener('change', loadContactos);
+
+  function currentResidente(sel){
+    var id = sel.value;
+    return residentes.find(function(r){ return r.id===id; });
+  }
+
+  function loadContactos(){
+    var r = currentResidente(contactoSel);
+    var contentEl = document.getElementById('contacto-content');
+    var emptyEl = document.getElementById('contacto-empty');
+    if(!r){
+      contentEl.style.display = 'none';
+      emptyEl.style.display = 'block';
+      return;
+    }
+    contentEl.style.display = 'block';
+    emptyEl.style.display = 'none';
+    renderContactos(r);
+    document.getElementById('ficha-save-flash').textContent = '';
+  }
+
+  function renderContactos(r){
+    var el = document.getElementById('contactos-list');
+    if(r.contactos.length === 0){
+      el.innerHTML = '<p class="field-hint">Sin contactos registrados todavía.</p>';
+      return;
+    }
+    el.innerHTML = r.contactos.map(function(c){
+      return '<div class="subtable">'+
+        '<div class="subtable-grid">'+
+          '<div><div class="mini-label">Nombre</div>'+esc(c.nombre)+'</div>'+
+          '<div><div class="mini-label">Parentesco</div>'+esc(c.parentesco||'—')+'</div>'+
+          '<div><div class="mini-label">Teléfono</div>'+esc(c.telefono||'—')+'</div>'+
+          '<div><div class="mini-label">Email</div>'+esc(c.email||'—')+'</div>'+
+          '<div>'+(c.apoderado ? '<span class="badge rose">Apoderado</span>' : '')+
+            ' <button type="button" class="danger small" data-del-contacto="'+c.id+'" style="margin-left:6px;">Eliminar</button></div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  document.getElementById('btn-add-contacto').addEventListener('click', function(){
+    var r = currentResidente(contactoSel);
+    if(!r) return;
+    var nombre = document.getElementById('contacto-nombre').value.trim();
+    if(!nombre) return;
+    r.contactos.push({
+      id: uid(),
+      nombre: nombre,
+      parentesco: document.getElementById('contacto-parentesco').value.trim(),
+      telefono: document.getElementById('contacto-telefono').value.trim(),
+      email: document.getElementById('contacto-email').value.trim(),
+      apoderado: document.getElementById('contacto-apoderado').checked
+    });
+    saveResidentes();
+    document.getElementById('contacto-nombre').value = '';
+    document.getElementById('contacto-parentesco').value = '';
+    document.getElementById('contacto-telefono').value = '';
+    document.getElementById('contacto-email').value = '';
+    document.getElementById('contacto-apoderado').checked = false;
+    renderContactos(r);
+  });
+
+  document.getElementById('contactos-list').addEventListener('click', function(e){
+    var btn = e.target.closest('[data-del-contacto]');
+    if(!btn) return;
+    var r = currentResidente(contactoSel);
+    if(!r) return;
+    r.contactos = r.contactos.filter(function(c){ return c.id !== btn.dataset.delContacto; });
+    saveResidentes();
+    renderContactos(r);
+  });
+
+  // ---------- REPORTES PDF ----------
+  function flash(elId, msg, ms){
+    var el = document.getElementById(elId);
+    el.textContent = msg;
+    setTimeout(function(){ if(el.textContent===msg) el.textContent=''; }, ms||4000);
+  }
+
+  document.getElementById('btn-pdf-residentes').addEventListener('click', async function(){
+    if(residentes.length===0){ flash('residentes-save-flash','No hay residentes para incluir en el reporte.'); return; }
+    try{
+      var filas = residentes.map(function(r){
+        var estado = estadoResidente(r) === 'activo' ? 'Activo' : 'Egresado el ' + fmtDate(r.fechaEgreso);
+        return { label: r.nombre+(r.rut?' — '+r.rut:''), valor: fmtCLP(r.cuotaPermanencia)+'/mes', nota: 'Ingreso '+fmtDate(r.fechaIngreso)+' · '+estado };
+      });
+      var totalActivos = residentes.filter(function(r){ return estadoResidente(r)==='activo'; });
+      var totalCuota = totalActivos.reduce(function(a,r){ return a+(r.cuotaPermanencia||0); },0);
+      var doc = ReportPDF.buildDoc({
+        titulo: 'Nómina de residentes',
+        subtitulo: residentes.length+' residente(s) registrados · '+totalActivos.length+' activos',
+        empresa: empresa,
+        secciones: [{ titulo:'Residentes', filas: filas }],
+        resumenFinal: { label:'Ingreso mensual por cuotas (residentes activos)', valor: fmtCLP(totalCuota) },
+        notaPie: 'Reporte confidencial generado desde el módulo de Ingreso — Residencia de ancianos.'
+      });
+      var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('residentes-'+(empresa.nombre||'residencia'))+'.pdf');
+      flash('residentes-save-flash', res.mensaje, 6000);
+    }catch(e){
+      flash('residentes-save-flash', '✗ '+e.message, 6000);
+    }
+  });
+
+  document.getElementById('btn-pdf-ficha').addEventListener('click', async function(){
+    var r = currentResidente(contactoSel);
+    if(!r) return;
+    try{
+      var estado = estadoResidente(r) === 'activo' ? 'Activo' : 'Egresado el ' + fmtDate(r.fechaEgreso);
+      var secciones = [
+        {
+          titulo: 'Datos generales',
+          filas: [
+            { label:'Nombre', valor: r.nombre },
+            { label:'RUT', valor: r.rut || '—' },
+            { label:'Fecha de ingreso', valor: fmtDate(r.fechaIngreso) },
+            { label:'Estado', valor: estado },
+            { label:'Cuota de incorporación mensual', valor: fmtCLP(r.cuotaPermanencia) }
+          ]
+        },
+        {
+          titulo: 'Contactos de emergencia / apoderado',
+          sub: r.contactos.length === 0 ? 'Sin contactos registrados.' : '',
+          filas: r.contactos.map(function(c){
+            return { label: c.nombre+(c.apoderado?' (Apoderado)':'')+(c.parentesco?' — '+c.parentesco:''), valor: c.telefono || '—', nota: c.email || '' };
+          })
+        }
+      ];
+      var doc = ReportPDF.buildDoc({
+        titulo: 'Ficha de ingreso',
+        subtitulo: r.nombre,
+        empresa: empresa,
+        secciones: secciones,
+        notaPie: 'Ficha confidencial generada desde el módulo de Ingreso — Residencia de ancianos. Contiene datos personales, de contacto y financieros — uso interno restringido.'
+      });
+      var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('ingreso-'+r.nombre)+'.pdf');
+      flash('ficha-save-flash', res.mensaje, 6000);
+    }catch(e){
+      flash('ficha-save-flash', '✗ '+e.message, 6000);
+    }
+  });
+
+  // ---------- INIT ----------
+  renderResidentes();
+})();
+</script>
+</body>
+</html>
