@@ -492,7 +492,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var f = form || { sueldoBase: trab.sueldoBase, gratificacion: 0, bonos: 0, bonoAsistencia: 0, bonoPuntualidad: 0, heCantidad: 0, heValor: 0, diasFalta: 0, impuesto: 0, otros: 0 };
     var montoHorasExtra = (f.heCantidad || 0) * (f.heValor || 0);
     var totalHaberes = (f.sueldoBase || 0) + (f.gratificacion || 0) + (f.bonos || 0) + (f.bonoAsistencia || 0) + (f.bonoPuntualidad || 0) + montoHorasExtra;
-    var baseImponible = (f.sueldoBase || 0) + (f.gratificacion || 0) + montoHorasExtra;
+    var baseImponible = (f.sueldoBase || 0) + (f.gratificacion || 0) + montoHorasExtra + (f.bonoAsistencia || 0) + (f.bonoPuntualidad || 0);
     var descInasistencia = ((f.sueldoBase || 0) / 30) * (f.diasFalta || 0);
     var afpMonto = baseImponible * ((trab.afpPct || 0) / 100);
     var saludMonto = trab.saludTipo === "fonasa" ? baseImponible * 0.07 : (trab.saludMonto || 0);
