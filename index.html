@@ -1,5 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
+<script src="assets/auth.js"></script>
 <title>Residencia de ancianos · ELEAM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -110,11 +111,52 @@ footer.note { text-align: center; font-size: 12px; color: var(--ink-faint); marg
     <div class="stat-grid" id="statGrid"></div>
   </div>
 
+  <div class="summary-card" id="backupCard">
+    <h2>Respaldo de datos</h2>
+    <p class="sub">Los datos viven solo en este navegador (localStorage). Si se borra el caché o se cambia de equipo, se pierden para siempre — descarga un respaldo con frecuencia.</p>
+    <div class="actions-row" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <button id="btn-backup-export" type="button" class="mod-card" style="width:auto; cursor:pointer; padding:10px 16px; flex-direction:row; align-items:center; gap:8px;">⬇ Descargar respaldo completo (.json)</button>
+      <button id="btn-backup-import" type="button" class="mod-card" style="width:auto; cursor:pointer; padding:10px 16px; flex-direction:row; align-items:center; gap:8px;">⬆ Restaurar desde un respaldo</button>
+      <input id="backup-file-input" type="file" accept="application/json" style="display:none;">
+    </div>
+    <p class="stat-note" id="backup-flash" style="margin-top:10px;"></p>
+  </div>
+
   <footer class="note">
     Los datos se guardan solo en este navegador (localStorage) — no se envían a ningún servidor. Respalda periódicamente si es información crítica.
   </footer>
 </div>
 
+<script src="assets/backup.js"></script>
+<script>
+(function () {
+  "use strict";
+  var flash = document.getElementById("backup-flash");
+  function setFlash(msg, isErr) {
+    flash.textContent = msg;
+    flash.style.color = isErr ? "#ad5c4c" : "#5f8a63";
+  }
+  document.getElementById("btn-backup-export").addEventListener("click", function () {
+    window.RhaBackup.exportBackup();
+    setFlash("Respaldo descargado ✓", false);
+  });
+  var fileInput = document.getElementById("backup-file-input");
+  document.getElementById("btn-backup-import").addEventListener("click", function () {
+    fileInput.value = "";
+    fileInput.click();
+  });
+  fileInput.addEventListener("change", function () {
+    var file = fileInput.files[0];
+    if (!file) return;
+    if (!confirm("Esto reemplazará los datos actuales de este navegador con los del respaldo. ¿Continuar?")) return;
+    window.RhaBackup.importBackup(file, function (err) {
+      if (err) { setFlash("✗ " + err.message, true); return; }
+      setFlash("Respaldo restaurado ✓ Recargando…", false);
+      setTimeout(function () { location.reload(); }, 1200);
+    });
+  });
+})();
+</script>
 <script src="assets/nav.js"></script>
 <script>
 (function () {

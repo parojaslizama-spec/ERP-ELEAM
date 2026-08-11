@@ -2,6 +2,7 @@
 <html lang="es-CL">
 <head>
 <meta charset="UTF-8">
+<script src="assets/auth.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Control de Horas, Asistencia y Liquidaciones</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -418,14 +419,16 @@
         <div class="liq-columns">
           <div>
             <h3>Haberes</h3>
+            <p class="field-hint">Estos montos se calculan solos según el contrato del trabajador y su registro de asistencia. Solo el anticipo (columna Descuentos) es editable a mano.</p>
             <div class="grid-form" style="grid-template-columns:1fr 1fr;">
-              <div><label for="liq-sueldo-base">Sueldo base</label><input id="liq-sueldo-base" type="number" min="0" step="1000"></div>
-              <div><label for="liq-gratificacion">Gratificaci&oacute;n legal mensual (25%, tope 4,75 IMM/12, pagada en 2 cuotas quincenales)</label><input id="liq-gratificacion" type="number" min="0" step="1000"></div>
-              <div><label for="liq-bonos">Bonos</label><input id="liq-bonos" type="number" min="0" step="1000"></div>
-              <div><label for="liq-bono-asistencia">Bono asistencia (100%=$100.000 &middot; 95-99,9%=$50.000 &middot; solo esencial)</label><input id="liq-bono-asistencia" type="number" min="0" step="1000"></div>
-              <div><label for="liq-bono-puntualidad">Bono puntualidad (100%=$20.000 &middot; 95-99,9%=$10.000)</label><input id="liq-bono-puntualidad" type="number" min="0" step="1000"></div>
-              <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5"></div>
-              <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100"></div>
+              <div><label for="liq-sueldo-base">Sueldo base</label><input id="liq-sueldo-base" type="number" min="0" step="1000" disabled class="mono"></div>
+              <div><label for="liq-gratificacion">Gratificaci&oacute;n legal mensual (25%, tope 4,75 IMM/12, pagada en 2 cuotas quincenales)</label><input id="liq-gratificacion" type="number" min="0" step="1000" disabled class="mono"></div>
+              <div><label for="liq-bonos">Bonos</label><input id="liq-bonos" type="number" min="0" step="1000" disabled class="mono"></div>
+              <div><label for="liq-bono-asistencia">Bono asistencia (100%=$100.000 &middot; 95-99,9%=$50.000 &middot; solo esencial)</label><input id="liq-bono-asistencia" type="number" min="0" step="1000" disabled class="mono"></div>
+              <div><label for="liq-bono-puntualidad">Bono puntualidad (100%=$20.000 &middot; 95-99,9%=$10.000)</label><input id="liq-bono-puntualidad" type="number" min="0" step="1000" disabled class="mono"></div>
+              <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5" disabled class="mono"></div>
+              <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100" disabled class="mono"></div>
+              <div><label>Total valor hora extra</label><input id="liq-he-total" type="text" disabled class="mono"></div>
               <div style="grid-column:1/-1;"><p class="field-hint" id="liq-gratificacion-hint"></p></div>
               <div style="grid-column:1/-1;"><p class="field-hint" id="liq-asistencia-hint"></p></div>
             </div>
@@ -434,13 +437,15 @@
           <div>
             <h3>Descuentos</h3>
             <div class="grid-form" style="grid-template-columns:1fr 1fr;">
-              <div><label for="liq-dias-falta">D&iacute;as de falta (injustificada)</label><input id="liq-dias-falta" type="number" min="0" step="1"></div>
+              <div><label for="liq-dias-falta">D&iacute;as de falta (injustificada)</label><input id="liq-dias-falta" type="number" min="0" step="1" disabled class="mono"></div>
               <div><label>Descuento por inasistencia</label><input id="liq-desc-inasistencia" type="text" disabled class="mono"></div>
               <div><label>AFP (%)</label><input id="liq-afp-monto" type="text" disabled class="mono"></div>
               <div><label>Salud</label><input id="liq-salud-monto" type="text" disabled class="mono"></div>
               <div><label>Seguro cesant&iacute;a</label><input id="liq-cesantia-monto" type="text" disabled class="mono"></div>
-              <div><label for="liq-impuesto">Impuesto &uacute;nico</label><input id="liq-impuesto" type="number" min="0" step="100"></div>
-              <div><label for="liq-otros">Otros descuentos</label><input id="liq-otros" type="number" min="0" step="100"></div>
+              <div><label for="liq-impuesto">Impuesto &uacute;nico</label><input id="liq-impuesto" type="number" min="0" step="100" disabled class="mono"></div>
+              <div><label for="liq-otros">Otros descuentos</label><input id="liq-otros" type="number" min="0" step="100" disabled class="mono"></div>
+              <div><label for="liq-adelanto">Anticipo de sueldo (quincena, ya pagado) — editable</label><input id="liq-adelanto" type="number" min="0" step="1000"></div>
+              <div style="grid-column:1/-1;"><p class="field-hint" id="liq-adelanto-hint"></p></div>
             </div>
             <div class="liq-total-row"><span>Total descuentos</span><span class="amt mono" id="liq-total-descuentos">$ 0</span></div>
           </div>
@@ -990,13 +995,16 @@
 
   function computeResumen(trab, year, month){
     var monthData = getMonthData(trab.id, year, month);
+    var esencial = trab.tipo === 'esencial';
     var r = {diasTrabajados:0, horasTotales:0, horasExtra:0, faltaInjust:0, faltaJust:0, licencias:0, vacaciones:0, descansoTurno:0, diasPuntuales:0, diasConRegistro:0};
     Object.keys(monthData).forEach(function(day){
       var info = monthData[day];
       if(ESTADOS_TRABAJADOS[info.estado]){
         r.diasTrabajados++;
         r.horasTotales += info.horas;
-        r.horasExtra += Math.max(0, info.horas - trab.horasJornada);
+        // Turno trabajado fuera del ciclo 4x4 (debía ser día de descanso según LLNN OOOO): todas esas horas son extra.
+        var fueraDeCiclo = esencial && estadoCiclo4x4(trab, year, month, parseInt(day,10)) === 'descanso_turno';
+        r.horasExtra += fueraDeCiclo ? info.horas : Math.max(0, info.horas - trab.horasJornada);
         var puntual = esPuntual(info.horaIngreso, horaEntradaEsperada(trab, info.estado));
         if(puntual !== null){
           r.diasConRegistro++;
@@ -1054,6 +1062,17 @@
     return 0;
   }
   // Bono puntualidad: todos los tipos. 100% puntualidad -> $20.000; 95%-99,9% -> $10.000; menos, $0.
+  // Adelanto de sueldo (quincena): anticipo sugerido según los días efectivamente trabajados hasta el día 15 del mes.
+  function computeAdelantoDefault(trab, year, month){
+    var monthData = getMonthData(trab.id, year, month);
+    var sueldoDiario = trab.sueldoBase / 30;
+    var total = 0;
+    for(var d=1; d<=15; d++){
+      var info = monthData[d];
+      if(info && ESTADOS_TRABAJADOS[info.estado]) total += sueldoDiario;
+    }
+    return Math.round(total / 100) * 100;
+  }
   function nivelBonoPuntualidad(pctPuntualidad){
     if(pctPuntualidad === null) return 0;
     if(pctPuntualidad >= 100) return 20000;
@@ -1082,21 +1101,28 @@
     var pctPuntualidad = punctualityPct(resumen);
     var bonoAsistenciaDefault = nivelBonoAsistencia(pctAsistencia, trab.tipo);
     var bonoPuntualidadDefault = nivelBonoPuntualidad(pctPuntualidad);
-    // Gratificación legal Art. 50: 25% de lo devengado, con tope de 4,75 IMM al año (mensualizado).
+    var heCantidadDefault = Math.round(resumen.horasExtra*10)/10;
+    var heValorDefault = Math.round((trab.sueldoBase/30/trab.horasJornada)*1.5);
+    var montoHorasExtraDefault = heCantidadDefault * heValorDefault;
+    // Gratificación legal Art. 50: 25% del sueldo imponible del mes (sueldo base + horas extra + bonos
+    // imponibles, sin incluir la propia gratificación), con tope de 4,75 IMM al año (mensualizado).
+    var imponibleParaGratificacion = trab.sueldoBase + montoHorasExtraDefault + bonoAsistenciaDefault + bonoPuntualidadDefault;
     var topeGratificacionMensual = (4.75 * immVigente) / 12;
-    var gratificacionDefault = Math.round(Math.min(trab.sueldoBase * 0.25, topeGratificacionMensual) / 100) * 100;
+    var gratificacionDefault = Math.round(Math.min(imponibleParaGratificacion * 0.25, topeGratificacionMensual) / 100) * 100;
+    var adelantoDefault = computeAdelantoDefault(trab, year, month);
 
-    var data = saved ? Object.assign({ bonoAsistencia: bonoAsistenciaDefault, bonoPuntualidad: bonoPuntualidadDefault, gratificacion: gratificacionDefault }, saved) : {
+    var data = saved ? Object.assign({ bonoAsistencia: bonoAsistenciaDefault, bonoPuntualidad: bonoPuntualidadDefault, gratificacion: gratificacionDefault, adelanto: adelantoDefault }, saved) : {
       sueldoBase: trab.sueldoBase,
       gratificacion: gratificacionDefault,
       bonos: 0,
       bonoAsistencia: bonoAsistenciaDefault,
       bonoPuntualidad: bonoPuntualidadDefault,
-      heCantidad: Math.round(resumen.horasExtra*10)/10,
-      heValor: Math.round((trab.sueldoBase/30/trab.horasJornada)*1.5),
+      heCantidad: heCantidadDefault,
+      heValor: heValorDefault,
       diasFalta: resumen.faltaInjust,
       impuesto: 0,
-      otros: 0
+      otros: 0,
+      adelanto: adelantoDefault
     };
 
     liqEl('sueldo-base').value = data.sueldoBase;
@@ -1109,10 +1135,13 @@
     liqEl('dias-falta').value = data.diasFalta;
     liqEl('impuesto').value = data.impuesto;
     liqEl('otros').value = data.otros;
+    liqEl('adelanto').value = data.adelanto || 0;
 
     document.getElementById('liq-gratificacion-hint').textContent =
-      'Gratificación sugerida: 25% del sueldo base (' + fmtCLP(trab.sueldoBase * 0.25) + '), tope mensual 4,75 × IMM ÷ 12 = ' + fmtCLP(topeGratificacionMensual) +
+      'Gratificación sugerida: 25% del sueldo imponible del mes (sueldo base + horas extra + bonos imponibles = ' + fmtCLP(imponibleParaGratificacion) + '), tope mensual 4,75 × IMM ÷ 12 = ' + fmtCLP(topeGratificacionMensual) +
       '. Se paga en 2 cuotas quincenales de ' + fmtCLP(data.gratificacion / 2) + ' c/u (no como pago único anual). Editable si corresponde otro monto.';
+    document.getElementById('liq-adelanto-hint').textContent =
+      'Sugerido según los días trabajados hasta el 15 del mes (' + fmtCLP(adelantoDefault) + '). Es un anticipo ya entregado al trabajador: se descuenta del líquido de esta liquidación, no es un costo adicional. Editable si corresponde otro monto.';
 
     var asistenciaTxt = pctAsistencia === null ? 'Asistencia: sin datos registrados este mes.' : 'Asistencia: ' + pctAsistencia.toFixed(1) + '%';
     if(trab.tipo !== 'esencial') asistenciaTxt += ' (personal de soporte no accede al bono de asistencia, solo al de puntualidad).';
@@ -1136,7 +1165,8 @@
       heValor: num(liqEl('he-valor').value),
       diasFalta: num(liqEl('dias-falta').value),
       impuesto: num(liqEl('impuesto').value),
-      otros: num(liqEl('otros').value)
+      otros: num(liqEl('otros').value),
+      adelanto: num(liqEl('adelanto').value)
     };
   }
 
@@ -1149,12 +1179,13 @@
     var afpMonto = baseImponible * (trab.afpPct/100);
     var saludMonto = trab.saludTipo === 'fonasa' ? baseImponible * 0.07 : trab.saludMonto;
     var cesantiaMonto = baseImponible * (trab.cesantiaPct/100);
-    var totalDescuentos = afpMonto + saludMonto + cesantiaMonto + descInasistencia + form.impuesto + form.otros;
+    var adelanto = form.adelanto || 0;
+    var totalDescuentos = afpMonto + saludMonto + cesantiaMonto + descInasistencia + form.impuesto + form.otros + adelanto;
     var liquido = totalHaberes - totalDescuentos;
     return {
       montoHorasExtra: montoHorasExtra, totalHaberes: totalHaberes, baseImponible: baseImponible,
       sueldoDiario: sueldoDiario, descInasistencia: descInasistencia, afpMonto: afpMonto,
-      saludMonto: saludMonto, cesantiaMonto: cesantiaMonto, totalDescuentos: totalDescuentos, liquido: liquido
+      saludMonto: saludMonto, cesantiaMonto: cesantiaMonto, adelanto: adelanto, totalDescuentos: totalDescuentos, liquido: liquido
     };
   }
 
@@ -1163,6 +1194,7 @@
     if(!trab) return;
     var form = readLiqForm();
     var c = calcularLiquidacion(trab, form);
+    liqEl('he-total').value = fmtCLP(c.montoHorasExtra);
     liqEl('desc-inasistencia').value = fmtCLP(c.descInasistencia);
     liqEl('afp-monto').value = fmtCLP(c.afpMonto) + ' ('+trab.afpPct+'%)';
     liqEl('salud-monto').value = trab.saludTipo==='fonasa' ? fmtCLP(c.saludMonto)+' (Fonasa 7%)' : fmtCLP(c.saludMonto)+' (Isapre)';
@@ -1230,6 +1262,7 @@
           '<tr><td>Descuento por inasistencia ('+form.diasFalta+' día(s))</td><td class="num">'+fmtCLP(c.descInasistencia)+'</td></tr>'+
           '<tr><td>Impuesto único</td><td class="num">'+fmtCLP(form.impuesto)+'</td></tr>'+
           '<tr><td>Otros descuentos</td><td class="num">'+fmtCLP(form.otros)+'</td></tr>'+
+          '<tr><td>Anticipo de sueldo (quincena, ya pagado)</td><td class="num">'+fmtCLP(c.adelanto)+'</td></tr>'+
         '</tbody></table>'+
         '<div class="slip-total"><span>Total descuentos</span><span>'+fmtCLP(c.totalDescuentos)+'</span></div>'+
         '<div class="slip-total" style="color:#48604f; font-size:17px;"><span>LÍQUIDO A PAGAR</span><span>'+fmtCLP(c.liquido)+'</span></div>'+
@@ -1447,7 +1480,8 @@
               { label:'Seguro cesantía ('+trab.cesantiaPct+'%)', valor: fmtCLP(c.cesantiaMonto) },
               { label:'Descuento por inasistencia ('+form.diasFalta+' día(s))', valor: fmtCLP(c.descInasistencia) },
               { label:'Impuesto único', valor: fmtCLP(form.impuesto) },
-              { label:'Otros descuentos', valor: fmtCLP(form.otros) }
+              { label:'Otros descuentos', valor: fmtCLP(form.otros) },
+              { label:'Anticipo de sueldo (quincena, ya pagado)', valor: fmtCLP(c.adelanto) }
             ],
             total: { label:'Total descuentos', valor: fmtCLP(c.totalDescuentos) }
           }
