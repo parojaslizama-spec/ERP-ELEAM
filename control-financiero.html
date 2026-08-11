@@ -698,11 +698,24 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   }
 
   // La cuota de permanencia que paga cada residente incluye IVA (así se cobra). Ese IVA no es ingreso
-  // real de la empresa: hay que declararlo y pagarlo al SII, por lo que se descompone la cuota en
-  // neto + IVA y el IVA se suma como un egreso más (costoTotal), igual que el IVA de los gastos.
+  // real de la empresa: hay que declararlo al SII, por lo que se descompone la cuota en neto + IVA.
   function ivaResidentesBreakdown(totIngresosResidentesBruto, params) {
     var iva = totIngresosResidentesBruto * params.ivaPct / (100 + params.ivaPct);
     return { bruto: totIngresosResidentesBruto, iva: iva, neto: totIngresosResidentesBruto - iva };
+  }
+
+  // Tributación (IVA, Formulario 29): el IVA débito fiscal (cobrado en las cuotas de los residentes)
+  // se paga al SII neto del IVA crédito fiscal (pagado en los gastos, que es recuperable) — no se suman
+  // ambos por separado. Si el crédito supera al débito, no se paga IVA ese mes y queda un remanente
+  // a favor para el mes siguiente.
+  function tributacionBreakdown(ivaDebito, ivaCredito) {
+    var diferencia = ivaDebito - ivaCredito;
+    return {
+      ivaDebito: ivaDebito,
+      ivaCredito: ivaCredito,
+      ivaAPagar: Math.max(0, diferencia),
+      ivaRemanente: Math.max(0, -diferencia)
+    };
   }
 
   function monthTotals(month, params, monthKey) {
@@ -716,7 +729,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var totGastosNeto = sum(month.gastos);
     var gastos = gastosBreakdown(totGastosNeto, params);
     var totServicios = sum(month.servicios);
-    var totEgresos = payroll.costoTotal + gastos.conIva + totServicios + ivaResidentes.iva;
+    var tributacion = tributacionBreakdown(ivaResidentes.iva, gastos.iva);
+    var totEgresos = payroll.costoTotal + gastos.conIva + totServicios + tributacion.ivaAPagar;
     return {
       totIngresos: totIngresos,
       ingresosAutoRows: ingresosAutoRows, totIngresosResidentes: totIngresosResidentes,
@@ -724,6 +738,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       autoRows: autoRows,
       totPersonalLiquido: totPersonalLiquido, payroll: payroll,
       gastos: gastos, totServicios: totServicios,
+      tributacion: tributacion,
       totEgresos: totEgresos, margen: totIngresos - totEgresos
     };
   }
@@ -923,11 +938,6 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     });
     lines.push(["Total ingresos", totals.totIngresos].map(csvEscape).join(","));
     lines.push([]);
-    lines.push(["IVA DÉBITO FISCAL — CUOTAS DE RESIDENTES (calculado)", "Monto"].map(csvEscape).join(","));
-    lines.push(["Cuotas cobradas a residentes (con IVA)", totals.ivaResidentes.bruto].map(csvEscape).join(","));
-    lines.push(["Neto (sin IVA)", totals.ivaResidentes.neto].map(csvEscape).join(","));
-    lines.push(["IVA a pagar al SII", totals.ivaResidentes.iva].map(csvEscape).join(","));
-    lines.push([]);
     lines.push(["PERSONAL (líquido, sincronizado desde Trabajadores)", "Monto"].map(csvEscape).join(","));
     totals.autoRows.forEach(function (r) { lines.push([r.nombre + " (" + r.origen + ")", r.monto].map(csvEscape).join(",")); });
     lines.push(["Subtotal líquido", totals.totPersonalLiquido].map(csvEscape).join(","));
@@ -958,6 +968,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     lines.push([]);
     lines.push(["Total egresos", totals.totEgresos].map(csvEscape).join(","));
     lines.push(["Margen neto", totals.margen].map(csvEscape).join(","));
+    lines.push([]);
+    lines.push(["TRIBUTACIÓN — IVA (FORMULARIO 29, calculado)", "Monto"].map(csvEscape).join(","));
+    lines.push(["IVA débito fiscal (cuotas de residentes)", totals.tributacion.ivaDebito].map(csvEscape).join(","));
+    lines.push(["IVA crédito fiscal (gastos)", totals.tributacion.ivaCredito].map(csvEscape).join(","));
+    lines.push(["Remanente de crédito a favor (próximo mes)", totals.tributacion.ivaRemanente].map(csvEscape).join(","));
+    lines.push(["IVA a pagar al SII este mes", totals.tributacion.ivaAPagar].map(csvEscape).join(","));
 
     var csv = "﻿" + lines.join("\r\n");
     var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -1022,15 +1038,6 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
             total: { label: "Total ingresos", valor: money(t.totIngresos) }
           },
           {
-            titulo: "IVA débito fiscal — cuotas de residentes",
-            sub: "La cuota de permanencia se cobra con IVA incluido; se declara y paga al SII, por lo que se resta como costo.",
-            filas: [
-              { label: "Cuotas cobradas a residentes (con IVA)", valor: money(t.ivaResidentes.bruto) },
-              { label: "Neto (sin IVA)", valor: money(t.ivaResidentes.neto) }
-            ],
-            total: { label: "IVA a pagar al SII", valor: money(t.ivaResidentes.iva) }
-          },
-          {
             titulo: "Personal — sincronizado desde Trabajadores",
             sub: t.autoRows.length ? "Calculado automáticamente desde el módulo de Trabajadores y Liquidaciones." : "Sin trabajadores registrados en el módulo de Trabajadores.",
             filas: t.autoRows.map(function (r) { return { label: r.nombre, valor: money(r.monto), nota: r.origen }; }),
@@ -1066,6 +1073,15 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
             titulo: "Servicios",
             filas: month.servicios.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; }),
             total: { label: "Total servicios", valor: money(t.totServicios) }
+          },
+          {
+            titulo: "Tributación — IVA (Formulario 29)",
+            sub: "Las cuotas de residentes incluyen IVA (débito fiscal) y los gastos pagados también (crédito fiscal, recuperable). Al SII se paga solo la diferencia.",
+            filas: [
+              { label: "IVA débito fiscal (cuotas de residentes)", valor: money(t.tributacion.ivaDebito) },
+              { label: "IVA crédito fiscal (gastos)", valor: "− " + money(t.tributacion.ivaCredito) }
+            ].concat(t.tributacion.ivaRemanente > 0 ? [{ label: "Remanente de crédito a favor (próximo mes)", valor: money(t.tributacion.ivaRemanente) }] : []),
+            total: { label: "IVA a pagar al SII este mes", valor: money(t.tributacion.ivaAPagar) }
           }
         ];
         var doc = ReportPDF.buildDoc({
@@ -1184,15 +1200,6 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       ),
 
       h("div", { className: "card" },
-        h("h2", null, "IVA débito fiscal — cuotas de residentes"),
-        h("p", { className: "sub" }, "La cuota de permanencia se cobra con IVA (" + numFmt(data.params.ivaPct) + "%) incluido. Ese IVA no es ingreso de la empresa: hay que declararlo y pagarlo al SII cada mes, así que se descuenta como un costo más."),
-        h("div", { className: "total-row" }, h("span", null, "Cuotas cobradas a residentes (con IVA)"), h("span", null, money(totals.ivaResidentes.bruto))),
-        h("div", { className: "total-row" }, h("span", null, "Neto (sin IVA)"), h("span", null, money(totals.ivaResidentes.neto))),
-        h("div", { className: "total-row" }, h("span", null, "IVA a pagar al SII"), h("span", { className: "total-amount" }, money(totals.ivaResidentes.iva))),
-        h("p", { className: "calc-note" }, "Este monto ya está incluido en Total egresos, abajo.")
-      ),
-
-      h("div", { className: "card" },
         h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "8px" } },
           h("h2", null, "Personal — sincronizado desde Trabajadores"),
           h("a", { className: "btn-ghost-sm", href: "control-horas.html" }, "Ir al módulo de Trabajadores →")
@@ -1243,13 +1250,13 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
       h("div", { className: "card" },
         h("h2", null, "Gastos"),
-        h("p", { className: "sub" }, "Ingresa el monto neto de cada gasto — el IVA se calcula solo."),
+        h("p", { className: "sub" }, "Ingresa el monto neto de cada gasto — el IVA se calcula solo (ese IVA es crédito fiscal: se descuenta del IVA a pagar al SII en la sección Tributación, más abajo)."),
         h(EditableTable, {
           rows: month.gastos, labelField: "concepto", labelHeader: "Concepto (neto)", labelPlaceholder: "Ej. Contador",
           emptyText: "Sin gastos registrados.", addText: "Agregar gasto",
           subtotalLabel: "Total gastos con IVA",
           subtotalOverride: totals.gastos.conIva,
-          extraRows: [{ label: "IVA (" + numFmt(data.params.ivaPct) + "%)", amount: totals.gastos.iva }],
+          extraRows: [{ label: "IVA (" + numFmt(data.params.ivaPct) + "%, crédito fiscal)", amount: totals.gastos.iva }],
           onAdd: function () { addRow("gastos", currentKey, "concepto", "Nuevo gasto"); },
           onUpdate: function (id, f, v) { updateRow("gastos", currentKey, id, f, v); },
           onDelete: function (id) { deleteRow("gastos", currentKey, id); }
@@ -1266,6 +1273,18 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           onDelete: function (id) { deleteRow("servicios", currentKey, id); }
         }),
         h("div", { className: "total-row" }, h("span", null, "Total egresos"), h("span", { className: "total-amount" }, money(totals.totEgresos)))
+      ),
+
+      h("div", { className: "card" },
+        h("h2", null, "Tributación — IVA (Formulario 29)"),
+        h("p", { className: "sub" }, "Las cuotas de los residentes se cobran con IVA (" + numFmt(data.params.ivaPct) + "%) incluido — eso es débito fiscal. Los gastos pagados también incluyen IVA — eso es crédito fiscal, recuperable. Al SII se declara y paga solo la diferencia entre ambos."),
+        h("div", { className: "total-row" }, h("span", null, "IVA débito fiscal (cuotas de residentes)"), h("span", null, money(totals.tributacion.ivaDebito))),
+        h("div", { className: "total-row" }, h("span", null, "IVA crédito fiscal (gastos)"), h("span", null, "− " + money(totals.tributacion.ivaCredito))),
+        totals.tributacion.ivaRemanente > 0
+          ? h("div", { className: "total-row" }, h("span", null, "Remanente de crédito a favor (para el próximo mes)"), h("span", null, money(totals.tributacion.ivaRemanente)))
+          : null,
+        h("div", { className: "total-row" }, h("span", null, "IVA a pagar al SII este mes"), h("span", { className: "total-amount" }, money(totals.tributacion.ivaAPagar))),
+        h("p", { className: "calc-note" }, "Este monto ya está incluido en Total egresos, arriba.")
       ),
 
       h("div", { className: "card export-card" },
