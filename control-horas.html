@@ -160,6 +160,13 @@
   .cal-estado{ font-size:11.5px; padding:5px 6px; }
   .cal-horas{ font-size:12.5px; padding:5px 6px; }
   .cal-horas:disabled{ background:#eee7d4; color:#a89e88; }
+  .cal-asistio-label{ display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:var(--ink-soft); margin:0; cursor:pointer; }
+  .cal-asistio-label input{ width:15px; height:15px; accent-color:var(--ok); }
+  .cal-turno, .cal-motivo{ font-size:11px; padding:4px 5px; }
+  .cal-hora-ingreso, .cal-hora-salida{ font-size:12px; padding:4px 5px; }
+  .cal-tiempos{ display:flex; gap:4px; }
+  .cal-tiempos input{ min-width:0; }
+  .cal-cell.tarde .cal-hora-ingreso{ border-color:var(--danger); color:var(--danger); }
 
   .summary-cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-top:18px; }
   .stat{
@@ -301,6 +308,11 @@
             <label for="trab-horas" id="trab-horas-label">Horas jornada diaria</label>
             <input id="trab-horas" type="number" min="1" max="24" step="0.5" value="8">
           </div>
+          <div>
+            <label for="trab-hora-entrada" id="trab-hora-entrada-label">Hora de entrada esperada</label>
+            <input id="trab-hora-entrada" type="time" value="08:00">
+            <p class="field-hint">Se usa para calcular puntualidad. En esencial, el turno noche se asume 12 h despu&eacute;s de esta hora.</p>
+          </div>
         </div>
 
         <h3 style="margin-top:18px;">Contacto de emergencia</h3>
@@ -408,10 +420,10 @@
             <h3>Haberes</h3>
             <div class="grid-form" style="grid-template-columns:1fr 1fr;">
               <div><label for="liq-sueldo-base">Sueldo base</label><input id="liq-sueldo-base" type="number" min="0" step="1000"></div>
-              <div><label for="liq-gratificacion">Gratificaci&oacute;n legal mensual (25%, tope 4,75 IMM/12)</label><input id="liq-gratificacion" type="number" min="0" step="1000"></div>
+              <div><label for="liq-gratificacion">Gratificaci&oacute;n legal mensual (25%, tope 4,75 IMM/12, pagada en 2 cuotas quincenales)</label><input id="liq-gratificacion" type="number" min="0" step="1000"></div>
               <div><label for="liq-bonos">Bonos</label><input id="liq-bonos" type="number" min="0" step="1000"></div>
-              <div><label for="liq-bono-asistencia">Bono cumplimiento asistencia (&ge;95%, imponible)</label><input id="liq-bono-asistencia" type="number" min="0" step="1000"></div>
-              <div><label for="liq-bono-puntualidad">Bono puntualidad (&ge;95%, imponible)</label><input id="liq-bono-puntualidad" type="number" min="0" step="1000"></div>
+              <div><label for="liq-bono-asistencia">Bono asistencia (100%=$100.000 &middot; 95-99,9%=$50.000 &middot; solo esencial)</label><input id="liq-bono-asistencia" type="number" min="0" step="1000"></div>
+              <div><label for="liq-bono-puntualidad">Bono puntualidad (100%=$20.000 &middot; 95-99,9%=$10.000)</label><input id="liq-bono-puntualidad" type="number" min="0" step="1000"></div>
               <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5"></div>
               <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100"></div>
               <div style="grid-column:1/-1;"><p class="field-hint" id="liq-gratificacion-hint"></p></div>
@@ -478,17 +490,6 @@
 
   var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   var DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-  var ESTADOS = [
-    ['trabajado','Trabajado'],
-    ['turno_dia','Turno día (L)'],
-    ['turno_noche','Turno noche (N)'],
-    ['descanso_turno','Descanso de turno (O)'],
-    ['falta_injustificada','Falta injustificada'],
-    ['falta_justificada','Falta justificada'],
-    ['licencia','Licencia médica'],
-    ['vacaciones','Vacaciones'],
-    ['no_aplica','No aplica']
-  ];
   var CICLO_4X4 = ['turno_dia','turno_dia','turno_noche','turno_noche','descanso_turno','descanso_turno','descanso_turno','descanso_turno'];
   var ESTADOS_TRABAJADOS = { trabajado:1, turno_dia:1, turno_noche:1 };
 
@@ -615,6 +616,7 @@
       contratoTipo: contrato,
       cesantiaPct: contrato === 'indefinido' ? 0.6 : 0,
       horasJornada: num(horasInput.value) || (tipoSel.value === 'esencial' ? 12 : 8),
+      horaEntrada: document.getElementById('trab-hora-entrada').value || '08:00',
       contactoEmergencia: {
         nombre: document.getElementById('trab-contacto-nombre').value.trim(),
         parentesco: document.getElementById('trab-contacto-parentesco').value.trim(),
@@ -652,6 +654,7 @@
     document.getElementById('trab-sueldo').value = t.sueldoBase;
     document.getElementById('trab-liquido').value = '';
     document.getElementById('trab-horas').value = t.horasJornada;
+    document.getElementById('trab-hora-entrada').value = t.horaEntrada || '08:00';
     var contacto = t.contactoEmergencia || {};
     document.getElementById('trab-contacto-nombre').value = contacto.nombre || '';
     document.getElementById('trab-contacto-parentesco').value = contacto.parentesco || '';
@@ -681,11 +684,13 @@
         '<td>'+salud+'</td>'+
         '<td class="num">'+t.cesantiaPct+'%</td>'+
         '<td class="num">'+t.horasJornada+'</td>'+
-        '<td style="white-space:nowrap;"><button class="secondary small" data-edit="'+t.id+'">Editar</button> <button class="danger" data-del="'+t.id+'">Eliminar</button></td>'+
+        '<td style="white-space:nowrap;"><button class="gold small" data-contrato="'+t.id+'">Generar contrato</button> <button class="secondary small" data-edit="'+t.id+'">Editar</button> <button class="danger" data-del="'+t.id+'">Eliminar</button></td>'+
       '</tr>';
     }).join('');
   }
   document.getElementById('tabla-trabajadores').addEventListener('click', function(e){
+    var contratoBtn = e.target.closest('[data-contrato]');
+    if(contratoBtn){ generarContratoTrabajador(contratoBtn.dataset.contrato); return; }
     var editBtn = e.target.closest('[data-edit]');
     if(editBtn){ editarTrabajador(editBtn.dataset.edit); return; }
     var btn = e.target.closest('[data-del]');
@@ -751,10 +756,6 @@
     if(!asistencia[key]) asistencia[key] = {};
     return asistencia[key];
   }
-  function estadoOptionsHtml(selected){
-    return ESTADOS.map(function(e){ return '<option value="'+e[0]+'"'+(e[0]===selected?' selected':'')+'>'+e[1]+'</option>'; }).join('');
-  }
-
   var headRow = document.getElementById('cal-head-row');
   headRow.innerHTML = DIAS.map(function(d){ return '<div class="cal-head">'+d+'</div>'; }).join('');
 
@@ -776,12 +777,52 @@
     var idx = ((diff % 8) + 8) % 8;
     return CICLO_4X4[idx];
   }
+
+  // ---------- Ayudas de horario (para puntualidad y horas trabajadas) ----------
+  function horaAMinutos(hhmm){
+    if(!hhmm) return null;
+    var p = String(hhmm).split(':');
+    var h = parseInt(p[0],10), m = parseInt(p[1],10);
+    if(isNaN(h) || isNaN(m)) return null;
+    return h*60 + m;
+  }
+  function minutosAHora(min){
+    min = ((min % 1440) + 1440) % 1440;
+    var h = Math.floor(min/60), m = Math.round(min%60);
+    return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  }
+  function sumarHoras(hhmm, horas){
+    var base = horaAMinutos(hhmm);
+    if(base===null) return '';
+    return minutosAHora(base + Math.round(horas*60));
+  }
+  function horaEntradaEsperada(trab, estado){
+    var base = trab.horaEntrada || '08:00';
+    return estado === 'turno_noche' ? sumarHoras(base, 12) : base;
+  }
+  function horasEntreHoras(ingreso, salida){
+    var i = horaAMinutos(ingreso), s = horaAMinutos(salida);
+    if(i===null || s===null) return null;
+    var diff = s - i;
+    if(diff <= 0) diff += 1440; // turno cruza medianoche
+    return diff/60;
+  }
+  function esPuntual(horaIngreso, horaEsperada){
+    if(!horaIngreso || !horaEsperada) return null;
+    return horaAMinutos(horaIngreso) <= horaAMinutos(horaEsperada);
+  }
+
   function defaultDayInfo(trab, year, month, d, isWeekend){
     if(trab.tipo === 'esencial'){
       var estado = estadoCiclo4x4(trab, year, month, d) || 'descanso_turno';
-      return { estado: estado, horas: ESTADOS_TRABAJADOS[estado] ? trab.horasJornada : 0 };
+      var trabajado = !!ESTADOS_TRABAJADOS[estado];
+      var horaIngreso = trabajado ? horaEntradaEsperada(trab, estado) : '';
+      var horaSalida = trabajado ? sumarHoras(horaIngreso, trab.horasJornada) : '';
+      return { estado: estado, horas: trabajado ? trab.horasJornada : 0, horaIngreso: horaIngreso, horaSalida: horaSalida };
     }
-    return isWeekend ? {estado:'no_aplica', horas:0} : {estado:'trabajado', horas: trab.horasJornada};
+    if(isWeekend) return {estado:'no_aplica', horas:0, horaIngreso:'', horaSalida:''};
+    var hi = trab.horaEntrada || '08:00';
+    return {estado:'trabajado', horas: trab.horasJornada, horaIngreso: hi, horaSalida: sumarHoras(hi, trab.horasJornada)};
   }
 
   function renderCalendar(){
@@ -809,6 +850,9 @@
     var monthData = getMonthData(trab.id, year, month);
     var daysInMonth = new Date(year, month, 0).getDate();
     var firstWeekday = (new Date(year, month-1, 1).getDay()+6)%7;
+    var motivos = esencial
+      ? [['descanso_turno','Descanso (turno)'],['falta_injustificada','Falta injustificada'],['falta_justificada','Falta justificada'],['licencia','Licencia médica'],['vacaciones','Vacaciones']]
+      : [['no_aplica','No aplica (fin de semana)'],['falta_injustificada','Falta injustificada'],['falta_justificada','Falta justificada'],['licencia','Licencia médica'],['vacaciones','Vacaciones']];
     var html = '';
     for(var i=0;i<firstWeekday;i++) html += '<div class="cal-cell empty"></div>';
     for(var d=1; d<=daysInMonth; d++){
@@ -818,15 +862,36 @@
         monthData[d] = defaultDayInfo(trab, year, month, d, isWeekend);
       }
       var info = monthData[d];
-      html += '<div class="cal-cell'+(isWeekend && !esencial?' weekend':'')+'" data-day="'+d+'">'+
-        '<div class="cal-daynum">'+d+'<span class="cal-dayname">'+DIAS[wd]+'</span></div>'+
-        '<select class="cal-estado" data-day="'+d+'">'+estadoOptionsHtml(info.estado)+'</select>'+
-        '<input type="number" class="cal-horas" data-day="'+d+'" min="0" step="0.5" value="'+info.horas+'"'+(!ESTADOS_TRABAJADOS[info.estado]?' disabled':'')+'>'+
-      '</div>';
+      var trabajado = !!ESTADOS_TRABAJADOS[info.estado];
+      var tarde = trabajado && esPuntual(info.horaIngreso, horaEntradaEsperada(trab, info.estado)) === false;
+      var inner = '<div class="cal-daynum">'+d+'<span class="cal-dayname">'+DIAS[wd]+'</span></div>'+
+        '<label class="cal-asistio-label"><input type="checkbox" class="cal-asistio" data-day="'+d+'"'+(trabajado?' checked':'')+'> Asistió</label>';
+      if(trabajado){
+        if(esencial){
+          inner += '<select class="cal-turno" data-day="'+d+'">'+
+            '<option value="turno_dia"'+(info.estado==='turno_dia'?' selected':'')+'>Turno día</option>'+
+            '<option value="turno_noche"'+(info.estado==='turno_noche'?' selected':'')+'>Turno noche</option>'+
+          '</select>';
+        }
+        inner += '<div class="cal-tiempos">'+
+          '<input type="time" class="cal-hora-ingreso" data-day="'+d+'" value="'+(info.horaIngreso||'')+'" title="Hora de ingreso">'+
+          '<input type="time" class="cal-hora-salida" data-day="'+d+'" value="'+(info.horaSalida||'')+'" title="Hora de salida">'+
+        '</div>';
+      } else {
+        inner += '<select class="cal-motivo" data-day="'+d+'">'+
+          motivos.map(function(m){ return '<option value="'+m[0]+'"'+(info.estado===m[0]?' selected':'')+'>'+m[1]+'</option>'; }).join('') +
+        '</select>';
+      }
+      html += '<div class="cal-cell'+(isWeekend && !esencial?' weekend':'')+(tarde?' tarde':'')+'" data-day="'+d+'">'+inner+'</div>';
     }
     grid.innerHTML = html;
     saveAsistencia();
     renderResumen(trab, year, month);
+  }
+
+  function recalcularHorasDia(trab, info){
+    var horasReales = horasEntreHoras(info.horaIngreso, info.horaSalida);
+    info.horas = horasReales !== null ? horasReales : trab.horasJornada;
   }
 
   document.getElementById('calendar-grid').addEventListener('change', function(e){
@@ -835,29 +900,57 @@
     var year = parseInt(asisAnioInput.value,10);
     var month = parseInt(asisMesSel.value,10);
     var monthData = getMonthData(trab.id, year, month);
+    var esencial = trab.tipo === 'esencial';
 
-    if(e.target.classList.contains('cal-estado')){
+    if(e.target.classList.contains('cal-asistio')){
       var day = e.target.dataset.day;
-      var estado = e.target.value;
-      var horasInput = e.target.closest('.cal-cell').querySelector('.cal-horas');
-      monthData[day].estado = estado;
-      if(ESTADOS_TRABAJADOS[estado]){
-        horasInput.disabled = false;
-        if(!monthData[day].horas) monthData[day].horas = trab.horasJornada;
-        horasInput.value = monthData[day].horas;
-      }else{
-        horasInput.disabled = true;
-        horasInput.value = 0;
+      if(e.target.checked){
+        var estadoNuevo = esencial ? 'turno_dia' : 'trabajado';
+        monthData[day].estado = estadoNuevo;
+        monthData[day].horaIngreso = horaEntradaEsperada(trab, estadoNuevo);
+        monthData[day].horaSalida = sumarHoras(monthData[day].horaIngreso, trab.horasJornada);
+        recalcularHorasDia(trab, monthData[day]);
+      } else {
+        monthData[day].estado = 'falta_injustificada';
         monthData[day].horas = 0;
+        monthData[day].horaIngreso = '';
+        monthData[day].horaSalida = '';
       }
       saveAsistencia();
-      renderResumen(trab, year, month);
+      renderCalendar();
+      return;
     }
-    if(e.target.classList.contains('cal-horas')){
+    if(e.target.classList.contains('cal-turno')){
       var day2 = e.target.dataset.day;
-      monthData[day2].horas = num(e.target.value);
+      monthData[day2].estado = e.target.value;
+      monthData[day2].horaIngreso = horaEntradaEsperada(trab, e.target.value);
+      monthData[day2].horaSalida = sumarHoras(monthData[day2].horaIngreso, trab.horasJornada);
+      recalcularHorasDia(trab, monthData[day2]);
+      saveAsistencia();
+      renderCalendar();
+      return;
+    }
+    if(e.target.classList.contains('cal-motivo')){
+      var day3 = e.target.dataset.day;
+      monthData[day3].estado = e.target.value;
+      monthData[day3].horas = 0;
+      monthData[day3].horaIngreso = '';
+      monthData[day3].horaSalida = '';
       saveAsistencia();
       renderResumen(trab, year, month);
+      return;
+    }
+    if(e.target.classList.contains('cal-hora-ingreso') || e.target.classList.contains('cal-hora-salida')){
+      var day4 = e.target.dataset.day;
+      var info4 = monthData[day4];
+      if(e.target.classList.contains('cal-hora-ingreso')) info4.horaIngreso = e.target.value;
+      else info4.horaSalida = e.target.value;
+      recalcularHorasDia(trab, info4);
+      saveAsistencia();
+      var tarde4 = esPuntual(info4.horaIngreso, horaEntradaEsperada(trab, info4.estado)) === false;
+      e.target.closest('.cal-cell').classList.toggle('tarde', tarde4);
+      renderResumen(trab, year, month);
+      return;
     }
   });
 
@@ -871,7 +964,7 @@
     for(var d=1; d<=daysInMonth; d++){
       var wd = (new Date(year, month-1, d).getDay()+6)%7;
       var isWeekend = wd===5 || wd===6;
-      monthData[d] = isWeekend ? {estado:'no_aplica', horas:0} : {estado:'trabajado', horas: trab.horasJornada};
+      monthData[d] = defaultDayInfo(trab, year, month, d, isWeekend);
     }
     saveAsistencia();
     renderCalendar();
@@ -897,13 +990,18 @@
 
   function computeResumen(trab, year, month){
     var monthData = getMonthData(trab.id, year, month);
-    var r = {diasTrabajados:0, horasTotales:0, horasExtra:0, faltaInjust:0, faltaJust:0, licencias:0, vacaciones:0, descansoTurno:0};
+    var r = {diasTrabajados:0, horasTotales:0, horasExtra:0, faltaInjust:0, faltaJust:0, licencias:0, vacaciones:0, descansoTurno:0, diasPuntuales:0, diasConRegistro:0};
     Object.keys(monthData).forEach(function(day){
       var info = monthData[day];
       if(ESTADOS_TRABAJADOS[info.estado]){
         r.diasTrabajados++;
         r.horasTotales += info.horas;
         r.horasExtra += Math.max(0, info.horas - trab.horasJornada);
+        var puntual = esPuntual(info.horaIngreso, horaEntradaEsperada(trab, info.estado));
+        if(puntual !== null){
+          r.diasConRegistro++;
+          if(puntual) r.diasPuntuales++;
+        }
       } else if(info.estado === 'descanso_turno'){ r.descansoTurno++; }
       else if(info.estado === 'falta_injustificada'){ r.faltaInjust++; }
       else if(info.estado === 'falta_justificada'){ r.faltaJust++; }
@@ -912,14 +1010,20 @@
     });
     return r;
   }
+  function punctualityPct(resumen){
+    if(resumen.diasConRegistro <= 0) return null;
+    return (resumen.diasPuntuales / resumen.diasConRegistro) * 100;
+  }
 
   function renderResumen(trab, year, month){
     var r = computeResumen(trab, year, month);
     var el = document.getElementById('asis-resumen');
+    var pctPuntualidad = punctualityPct(r);
     el.innerHTML =
       stat('Días trabajados', r.diasTrabajados, '') +
       stat('Horas totales', r.horasTotales, '') +
       stat('Horas extra', r.horasExtra, 'gold') +
+      stat('Puntualidad', pctPuntualidad===null?'—':pctPuntualidad.toFixed(1)+'%', pctPuntualidad!==null && pctPuntualidad<95?'warn':'') +
       (trab.tipo === 'esencial' ? stat('Días de descanso (turno)', r.descansoTurno, '') : '') +
       stat('Faltas injustificadas', r.faltaInjust, r.faltaInjust>0?'warn':'') +
       stat('Faltas justificadas', r.faltaJust, '') +
@@ -941,6 +1045,21 @@
     if(esperados <= 0) return null;
     return (resumen.diasTrabajados / esperados) * 100;
   }
+  // Bono asistencia: solo personal esencial. 100% asistencia -> $100.000; 95%-99,9% -> $50.000; menos, $0.
+  function nivelBonoAsistencia(pctAsistencia, tipo){
+    if(tipo !== 'esencial') return 0;
+    if(pctAsistencia === null) return 0;
+    if(pctAsistencia >= 100) return 100000;
+    if(pctAsistencia >= 95) return 50000;
+    return 0;
+  }
+  // Bono puntualidad: todos los tipos. 100% puntualidad -> $20.000; 95%-99,9% -> $10.000; menos, $0.
+  function nivelBonoPuntualidad(pctPuntualidad){
+    if(pctPuntualidad === null) return 0;
+    if(pctPuntualidad >= 100) return 20000;
+    if(pctPuntualidad >= 95) return 10000;
+    return 0;
+  }
 
   function loadLiquidacion(){
     var trab = currentTrabajador(liqTrabSel);
@@ -960,9 +1079,9 @@
     var resumen = computeResumen(trab, year, month);
     var saved = liquidaciones[key];
     var pctAsistencia = attendancePct(resumen);
-    var cumpleAsistencia = pctAsistencia !== null && pctAsistencia >= 95;
-    var bonoAsistenciaDefault = cumpleAsistencia ? 100000 : 0;
-    var bonoPuntualidadDefault = cumpleAsistencia ? 20000 : 0;
+    var pctPuntualidad = punctualityPct(resumen);
+    var bonoAsistenciaDefault = nivelBonoAsistencia(pctAsistencia, trab.tipo);
+    var bonoPuntualidadDefault = nivelBonoPuntualidad(pctPuntualidad);
     // Gratificación legal Art. 50: 25% de lo devengado, con tope de 4,75 IMM al año (mensualizado).
     var topeGratificacionMensual = (4.75 * immVigente) / 12;
     var gratificacionDefault = Math.round(Math.min(trab.sueldoBase * 0.25, topeGratificacionMensual) / 100) * 100;
@@ -993,12 +1112,14 @@
 
     document.getElementById('liq-gratificacion-hint').textContent =
       'Gratificación sugerida: 25% del sueldo base (' + fmtCLP(trab.sueldoBase * 0.25) + '), tope mensual 4,75 × IMM ÷ 12 = ' + fmtCLP(topeGratificacionMensual) +
-      '. Se paga cada mes junto con el sueldo (no como pago único anual). Editable si corresponde otro monto.';
+      '. Se paga en 2 cuotas quincenales de ' + fmtCLP(data.gratificacion / 2) + ' c/u (no como pago único anual). Editable si corresponde otro monto.';
 
-    document.getElementById('liq-asistencia-hint').textContent = pctAsistencia === null
-      ? 'Sin datos de asistencia registrados este mes — no se sugieren bonos automáticos.'
-      : 'Cumplimiento de asistencia este mes: ' + pctAsistencia.toFixed(1) + '%' +
-        (cumpleAsistencia ? ' — cumple el mínimo de 95%: bono asistencia $100.000 + bono puntualidad $20.000 sugeridos (editables). Ambos son imponibles: descuentan AFP/salud/cesantía al trabajador y generan cargas legales para la empresa.' : ' — bajo el mínimo de 95%, sin bonos sugeridos.');
+    var asistenciaTxt = pctAsistencia === null ? 'Asistencia: sin datos registrados este mes.' : 'Asistencia: ' + pctAsistencia.toFixed(1) + '%';
+    if(trab.tipo !== 'esencial') asistenciaTxt += ' (personal de soporte no accede al bono de asistencia, solo al de puntualidad).';
+    else if(pctAsistencia !== null) asistenciaTxt += pctAsistencia >= 100 ? ' — 100%: bono $100.000.' : pctAsistencia >= 95 ? ' — entre 95% y 99,9%: bono $50.000.' : ' — bajo 95%: sin bono.';
+    var puntualidadTxt = pctPuntualidad === null ? 'Puntualidad: sin datos registrados este mes.' : 'Puntualidad: ' + pctPuntualidad.toFixed(1) + '%' +
+      (pctPuntualidad >= 100 ? ' — 100%: bono $20.000.' : pctPuntualidad >= 95 ? ' — entre 95% y 99,9%: bono $10.000.' : ' — bajo 95%: sin bono.');
+    document.getElementById('liq-asistencia-hint').textContent = asistenciaTxt + ' ' + puntualidadTxt + ' Ambos bonos son imponibles: descuentan AFP/salud/cesantía al trabajador y generan cargas legales para la empresa.';
 
     document.getElementById('liq-save-flash').textContent = '';
     recomputeLiquidacion();
@@ -1095,10 +1216,10 @@
         '</div>'+
         '<table class="slip-table"><thead><tr><th>Haberes</th><th class="num" style="text-align:right;">Monto</th></tr></thead><tbody>'+
           '<tr><td>Sueldo base</td><td class="num">'+fmtCLP(form.sueldoBase)+'</td></tr>'+
-          '<tr><td>Gratificación legal</td><td class="num">'+fmtCLP(form.gratificacion)+'</td></tr>'+
+          '<tr><td>Gratificación legal (2 cuotas quincenales de '+fmtCLP(form.gratificacion/2)+')</td><td class="num">'+fmtCLP(form.gratificacion)+'</td></tr>'+
           '<tr><td>Bonos</td><td class="num">'+fmtCLP(form.bonos)+'</td></tr>'+
-          '<tr><td>Bono cumplimiento asistencia (&ge;95%)</td><td class="num">'+fmtCLP(form.bonoAsistencia||0)+'</td></tr>'+
-          '<tr><td>Bono puntualidad (&ge;95%)</td><td class="num">'+fmtCLP(form.bonoPuntualidad||0)+'</td></tr>'+
+          '<tr><td>Bono asistencia</td><td class="num">'+fmtCLP(form.bonoAsistencia||0)+'</td></tr>'+
+          '<tr><td>Bono puntualidad</td><td class="num">'+fmtCLP(form.bonoPuntualidad||0)+'</td></tr>'+
           '<tr><td>Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')</td><td class="num">'+fmtCLP(c.montoHorasExtra)+'</td></tr>'+
         '</tbody></table>'+
         '<div class="slip-total"><span>Total haberes</span><span>'+fmtCLP(c.totalHaberes)+'</span></div>'+
@@ -1128,6 +1249,125 @@
     var el = document.getElementById(elId);
     el.textContent = msg;
     setTimeout(function(){ if(el.textContent===msg) el.textContent=''; }, ms||4000);
+  }
+
+  // ---------- CONTRATO DE TRABAJO (generado con los datos reales del trabajador) ----------
+  var CONTRATO_DISCLAIMER = 'ADVERTENCIA: este documento es un modelo o borrador de trabajo generado automáticamente a partir de los datos cargados en el sistema, y NO constituye asesoría legal. Antes de firmar, debe ser revisado y validado por un abogado habilitado en Chile. Los datos entre corchetes [ ] no están disponibles en el sistema y deben completarse a mano.';
+
+  function contratoConfigPara(t){
+    var cargo = (t.cargo||'').toLowerCase();
+    if(t.tipo === 'esencial' || cargo.indexOf('cuidad') !== -1){
+      return {
+        subtitulo: 'CUIDADOR(A) DE PERSONAS MAYORES',
+        primero: 'El trabajador se compromete a prestar servicios como Cuidador(a) de personas mayores para el empleador, cuya función principal consiste en: la atención integral de los residentes, incluyendo apoyo en las actividades de la vida diaria (aseo e higiene personal, alimentación, movilización y vestuario), acompañamiento y vigilancia permanente, formando parte de la dotación mínima de cuidadores que debe mantener el establecimiento simultáneamente presente en la residencia en todo momento, incluido el turno nocturno.',
+        jornada: 'La jornada de trabajo se distribuirá bajo un sistema de turnos rotativos de 4×4: bloques de cuatro días de trabajo (dos turnos diurnos seguidos de dos turnos nocturnos, de 12 horas cada uno, con inicio de turno diurno a las ' + (t.horaEntrada||'08:00') + ' horas) seguidos de cuatro días de descanso, conforme al rol de turnos que el empleador comunicará oportunamente al trabajador (Anexo N°1), debiendo asegurarse en todo momento la presencia simultánea de al menos dos cuidadores en la residencia, incluido el turno nocturno, en cumplimiento de la dotación mínima exigida a los Establecimientos de Larga Estadía para Adultos Mayores (ELEAM).',
+        jornadaNota: 'NOTA: el sistema de turnos 4×4 con jornadas de 12 horas excede los límites de la jornada ordinaria diaria general y debe formalizarse mediante un sistema excepcional de distribución de jornada y descansos autorizado por la Dirección del Trabajo (artículo 38 del Código del Trabajo) antes de operar de forma permanente.',
+        obligacionesExtra: [
+          'No abandonar su puesto de turno sin ser previamente relevado por otro cuidador, de manera de no comprometer la dotación mínima simultánea exigida en la residencia.',
+          'Informar de inmediato al TENS o a quien corresponda cualquier situación de salud, caída o urgencia que observe en un residente durante su turno.'
+        ]
+      };
+    }
+    if(cargo.indexOf('tens') !== -1){
+      return {
+        subtitulo: 'TÉCNICO EN ENFERMERÍA DE NIVEL SUPERIOR (TENS)',
+        primero: 'El trabajador se compromete a prestar servicios como Técnico en Enfermería de Nivel Superior (TENS) para el empleador, cuya función principal consiste en: la administración y control de medicamentos a los residentes conforme a la indicación médica vigente para cada uno de ellos, el registro de signos vitales y curaciones básicas, y el apoyo en los cuidados de salud de los residentes.',
+        jornada: 'La jornada ordinaria del trabajador será de hasta 40 horas semanales, distribuidas de lunes a sábado, en horario diurno con inicio a las ' + (t.horaEntrada||'08:00') + ' horas, conforme al rol que el empleador comunicará oportunamente (Anexo N°1), con los descansos legales correspondientes dentro de la jornada.',
+        jornadaNota: null,
+        obligacionesExtra: [
+          'Administrar medicamentos únicamente conforme a indicación médica vigente, dejando registro escrito de cada administración.',
+          'Informar de inmediato a la dirección técnica del establecimiento cualquier reacción adversa, urgencia médica o novedad relevante de salud de un residente.'
+        ]
+      };
+    }
+    if(cargo.indexOf('cocin') !== -1){
+      return {
+        subtitulo: 'COCINERA(O)',
+        primero: 'El trabajador se compromete a prestar servicios como Cocinera(o) para el empleador, cuya función principal consiste en: la preparación de alimentos y colaciones para los residentes y el personal del establecimiento, conforme a las pautas nutricionales e higiénico-sanitarias vigentes.',
+        jornada: 'La jornada ordinaria de trabajo será de hasta 40 horas semanales, distribuidas de lunes a sábado, en horario diurno con inicio a las ' + (t.horaEntrada||'08:00') + ' horas, conforme al rol que el empleador comunicará oportunamente (Anexo N°1), con los descansos legales correspondientes dentro de la jornada.',
+        jornadaNota: null,
+        obligacionesExtra: [
+          'Cumplir las normas de manipulación higiénica de alimentos y las pautas nutricionales indicadas para los residentes.',
+          'Informar oportunamente al empleador sobre el estado de los insumos y necesidades de reposición de la cocina.'
+        ]
+      };
+    }
+    if(cargo.indexOf('aseo') !== -1 || cargo.indexOf('limpi') !== -1){
+      return {
+        subtitulo: 'AUXILIAR DE ASEO',
+        primero: 'El trabajador se compromete a prestar servicios como Auxiliar de aseo para el empleador, cuya función principal consiste en: la limpieza, higienización y mantención de las dependencias, mobiliario y espacios comunes del establecimiento, conforme a los protocolos de higiene y sanitización vigentes.',
+        jornada: 'La jornada ordinaria de trabajo será de hasta 40 horas semanales, distribuidas de lunes a sábado, en horario diurno con inicio a las ' + (t.horaEntrada||'08:00') + ' horas, conforme al rol que el empleador comunicará oportunamente (Anexo N°1), con los descansos legales correspondientes dentro de la jornada.',
+        jornadaNota: null,
+        obligacionesExtra: [
+          'Utilizar correctamente los elementos de protección personal e insumos de aseo proporcionados por el empleador.',
+          'Dar aviso oportuno de cualquier desperfecto o necesidad de mantención detectada en las dependencias.'
+        ]
+      };
+    }
+    return {
+      subtitulo: (t.cargo || 'TRABAJADOR(A)').toUpperCase(),
+      primero: 'El trabajador se compromete a prestar servicios como ' + (t.cargo || 'trabajador') + ' para el empleador, cumpliendo las funciones propias de su cargo dentro del establecimiento.',
+      jornada: 'La jornada ordinaria de trabajo será de hasta 40 horas semanales, distribuidas de lunes a sábado, en horario diurno con inicio a las ' + (t.horaEntrada||'08:00') + ' horas, conforme al rol que el empleador comunicará oportunamente (Anexo N°1), con los descansos legales correspondientes dentro de la jornada.',
+      jornadaNota: null,
+      obligacionesExtra: []
+    };
+  }
+
+  function generarContratoTrabajador(id){
+    var t = trabajadores.find(function(x){ return x.id === id; });
+    if(!t) return;
+    try{
+      var cfg = contratoConfigPara(t);
+      var topeGratMensual = (4.75 * immVigente) / 12;
+      var gratMensual = Math.round(Math.min(t.sueldoBase * 0.25, topeGratMensual) / 100) * 100;
+      var descuentoAprox = t.afpPct + (t.saludTipo === 'fonasa' ? 7 : 0) + t.cesantiaPct;
+      var liquidoRef = t.saludTipo === 'fonasa'
+        ? Math.round(t.sueldoBase * (1 - descuentoAprox/100) / 100) * 100
+        : Math.round((t.sueldoBase - t.saludMonto - t.sueldoBase*(t.afpPct+t.cesantiaPct)/100) / 100) * 100;
+      var saludTxt = t.saludTipo === 'fonasa' ? 'Fonasa (7%)' : ('Isapre, plan de ' + fmtCLP(t.saludMonto) + ' mensuales');
+      var contratoTxt = t.contratoTipo === 'indefinido' ? 'indefinido' : 'a plazo fijo';
+
+      var remuneracion = 'El empleador pagará al trabajador un sueldo base mensual bruto de ' + fmtCLP(t.sueldoBase) +
+        ', que conforme a los descuentos legales vigentes (AFP ' + t.afpPct + '%, salud ' + saludTxt + ', seguro de cesantía ' + t.cesantiaPct + '%) equivale referencialmente a un líquido aproximado de ' + fmtCLP(liquidoRef) +
+        '. El trabajador tendrá además derecho a: (i) gratificación legal mensual equivalente al 25% de lo devengado en el mes, con tope de 4,75 ingresos mínimos mensuales al año (artículo 50 del Código del Trabajo) — actualmente ' + fmtCLP(gratMensual) + ' mensuales, pagada en 2 cuotas quincenales de ' + fmtCLP(gratMensual/2) + ' cada una; (ii) un bono de cumplimiento de asistencia' +
+        (t.tipo === 'esencial' ? ' de $100.000 mensuales si asiste al 100% de los turnos programados, o $50.000 si asiste entre el 95% y el 99,9% de ellos (bajo 95% no corresponde bono)' : ' — no aplicable a este cargo, reservado a personal esencial (cuidadores)') +
+        '; y (iii) un bono de puntualidad de $20.000 mensuales si llega puntual al 100% de sus turnos, o $10.000 si es puntual entre el 95% y el 99,9% de ellos (bajo 95% no corresponde bono), aplicable a todos los cargos. La gratificación y ambos bonos son imponibles y tributables. La remuneración se pagará por período mensual, dentro de los primeros cinco días hábiles del mes siguiente al trabajado, mediante depósito en la cuenta bancaria que indique el trabajador, previo descuento de las cotizaciones legales y demás descuentos procedentes.';
+
+      var clauses = [
+        { title: 'PRIMERO: Naturaleza de los servicios', body: cfg.primero + ' El trabajador se obliga además a cumplir las demás labores anexas y complementarias a las señaladas, propias de su cargo, que le sean encomendadas por el empleador o quien lo represente, en tanto sean compatibles con sus aptitudes e idoneidad y no importen menoscabo para el trabajador.' },
+        { title: 'SEGUNDO: Lugar de los servicios', body: 'Los servicios se prestarán en las dependencias del establecimiento de larga estadía para adultos mayores ubicado en [DOMICILIO DE LA RESIDENCIA], sin perjuicio de la facultad del empleador de alterar el sitio o recinto dentro del mismo lugar o ciudad, conforme al artículo 12 del Código del Trabajo.' },
+        { title: 'TERCERO: Jornada de trabajo', body: cfg.jornada, note: cfg.jornadaNota },
+        { title: 'CUARTO: Remuneración', body: remuneracion, note: 'NOTA: el líquido referencial es una estimación; verifica estas cifras con tu contador antes de firmar. El IMM usado para el tope de gratificación (' + fmtCLP(immVigente) + ') debe actualizarse cuando cambie por ley.' },
+        { title: 'QUINTO: Duración del contrato', body: 'El presente contrato se celebra ' + contratoTxt + ', por el período comprendido entre el [FECHA DE INICIO]' + (t.contratoTipo!=='indefinido' ? ' y el [FECHA DE TÉRMINO], pudiendo renovarse por igual período de común acuerdo entre las partes. En conformidad al artículo 159 N°4 del Código del Trabajo, el hecho de continuar el trabajador prestando servicios con conocimiento del empleador después de expirado el plazo, o su segunda renovación, o de haber prestado servicios continuadamente por doce meses o más, transforma este contrato en uno de duración indefinida.' : ' en adelante.') },
+        { title: 'SEXTO: Obligaciones del trabajador', body: [
+          'Cumplir el Reglamento Interno de Orden, Higiene y Seguridad del empleador, cuyo texto declara conocer y aceptar.',
+          'Guardar reserva y confidencialidad absoluta respecto de la información de salud, datos personales y situación de los residentes, conforme a la Ley N°19.628 sobre Protección de la Vida Privada, obligación que subsiste con posterioridad al término de la relación laboral.',
+          'Tratar con respeto y dignidad a los residentes del establecimiento, dando cumplimiento a la normativa vigente sobre derechos de las personas mayores.',
+          'Registrar su asistencia y cumplir el horario y rol de turnos que le sea comunicado por el empleador.'
+        ].concat(cfg.obligacionesExtra).join(' ') },
+        { title: 'SÉPTIMO: Previsión y seguridad social', body: 'El trabajador estará afiliado al sistema previsional y de salud que corresponda, efectuándose las cotizaciones legales pertinentes sobre su remuneración imponible. El empleador lo mantendrá afiliado al organismo administrador de la Ley N°16.744 sobre accidentes del trabajo y enfermedades profesionales.' },
+        { title: 'OCTAVO: Terminación del contrato', body: 'El contrato terminará por las causales establecidas en los artículos 159, 160 y 161 del Código del Trabajo.' },
+        { title: 'NOVENO: Domicilio y jurisdicción', body: 'Para todos los efectos derivados del presente contrato, las partes fijan domicilio en la ciudad de [CIUDAD] y se someten a la jurisdicción de sus tribunales.' }
+      ];
+
+      var doc = ReportPDF.buildContractDoc({
+        titulo: 'CONTRATO DE TRABAJO ' + (t.contratoTipo==='indefinido' ? 'INDEFINIDO' : 'A PLAZO FIJO'),
+        subtitulo: cfg.subtitulo,
+        disclaimer: CONTRATO_DISCLAIMER,
+        clauses: clauses,
+        closing: 'En [CIUDAD], a [DÍA] de [MES] de [AÑO], entre [RAZÓN SOCIAL DEL EMPLEADOR], RUT [RUT EMPLEADOR], en adelante «el empleador»; y ' + t.nombre + ', RUT ' + t.rut + ', en adelante «el trabajador», se ha convenido el contrato de trabajo cuyas cláusulas anteceden. Se firma en dos ejemplares del mismo tenor y fecha, quedando uno en poder de cada parte.',
+        firmas: [
+          { label: 'EMPLEADOR', sub: '[RAZÓN SOCIAL] · RUT [RUT EMPLEADOR]' },
+          { label: 'TRABAJADOR(A)', sub: t.nombre + ' · RUT ' + t.rut }
+        ]
+      });
+      (async function(){
+        var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('contrato-'+t.nombre)+'.pdf');
+        flash('nomina-save-flash', res.mensaje, 6000);
+      })();
+    }catch(e){
+      flash('nomina-save-flash', '✗ '+e.message, 6000);
+    }
   }
 
   document.getElementById('btn-pdf-nomina').addEventListener('click', async function(){
@@ -1191,10 +1431,10 @@
             titulo: 'Haberes',
             filas: [
               { label:'Sueldo base', valor: fmtCLP(form.sueldoBase) },
-              { label:'Gratificación legal', valor: fmtCLP(form.gratificacion) },
+              { label:'Gratificación legal', valor: fmtCLP(form.gratificacion), nota: '2 cuotas quincenales de '+fmtCLP(form.gratificacion/2)+' c/u' },
               { label:'Bonos', valor: fmtCLP(form.bonos) },
-              { label:'Bono cumplimiento asistencia (≥95%)', valor: fmtCLP(form.bonoAsistencia||0) },
-              { label:'Bono puntualidad (≥95%)', valor: fmtCLP(form.bonoPuntualidad||0) },
+              { label:'Bono asistencia', valor: fmtCLP(form.bonoAsistencia||0) },
+              { label:'Bono puntualidad', valor: fmtCLP(form.bonoPuntualidad||0) },
               { label:'Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')', valor: fmtCLP(c.montoHorasExtra) }
             ],
             total: { label:'Total haberes', valor: fmtCLP(c.totalHaberes) }

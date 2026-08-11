@@ -222,5 +222,96 @@ window.ReportPDF = (function () {
     return { ok: true, metodo: "descarga", mensaje: "Descargado ✓ — muévelo a Documentos › Residencia ancianos › Reportes (tu navegador no soporta guardado directo; Chrome o Edge sí lo permiten)." };
   }
 
-  return { money: money, buildDoc: buildDoc, guardarPDF: guardarPDF, slugify: slugify };
+  // Documento de texto corrido (contratos) — títulos de cláusula + párrafos justificados con salto de
+  // línea automático, distinto de buildDoc (que es para reportes tabulares de secciones/filas).
+  function buildContractDoc(opts) {
+    ensureLib();
+    var doc = new window.jspdf.jsPDF({ unit: "pt", format: "letter" });
+    var pageW = doc.internal.pageSize.getWidth();
+    var pageH = doc.internal.pageSize.getHeight();
+    var margin = 56;
+    var y = margin;
+
+    function checkBreak(minSpace) {
+      if (y > pageH - minSpace) { doc.addPage(); y = margin; }
+    }
+
+    doc.setTextColor(COL_INK[0], COL_INK[1], COL_INK[2]);
+    doc.setFont("times", "bold");
+    doc.setFontSize(15);
+    (doc.splitTextToSize(opts.titulo || "", pageW - margin * 2)).forEach(function (line) {
+      doc.text(line, pageW / 2, y, { align: "center" }); y += 19;
+    });
+    if (opts.subtitulo) {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+      (doc.splitTextToSize(opts.subtitulo, pageW - margin * 2)).forEach(function (line) {
+        doc.text(line, pageW / 2, y, { align: "center" }); y += 15;
+      });
+    }
+    y += 8;
+    if (opts.disclaimer) {
+      doc.setFont("helvetica", "italic"); doc.setFontSize(8.3);
+      doc.setTextColor(COL_SOFT[0], COL_SOFT[1], COL_SOFT[2]);
+      (doc.splitTextToSize(opts.disclaimer, pageW - margin * 2)).forEach(function (line) {
+        checkBreak(50); doc.text(line, margin, y); y += 11;
+      });
+      y += 10;
+      doc.setTextColor(COL_INK[0], COL_INK[1], COL_INK[2]);
+    }
+
+    (opts.clauses || []).forEach(function (c) {
+      checkBreak(90);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10.5);
+      doc.setTextColor(COL_ACCENT_DARK[0], COL_ACCENT_DARK[1], COL_ACCENT_DARK[2]);
+      (doc.splitTextToSize(c.title, pageW - margin * 2)).forEach(function (line) {
+        checkBreak(60); doc.text(line, margin, y); y += 14;
+      });
+      doc.setTextColor(COL_INK[0], COL_INK[1], COL_INK[2]);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+      (doc.splitTextToSize(c.body || "", pageW - margin * 2)).forEach(function (line) {
+        checkBreak(40); doc.text(line, margin, y); y += 12.5;
+      });
+      y += 5;
+      if (c.note) {
+        doc.setFont("helvetica", "italic"); doc.setFontSize(8);
+        doc.setTextColor(COL_SOFT[0], COL_SOFT[1], COL_SOFT[2]);
+        (doc.splitTextToSize(c.note, pageW - margin * 2)).forEach(function (line) {
+          checkBreak(30); doc.text(line, margin, y); y += 10.2;
+        });
+        doc.setTextColor(COL_INK[0], COL_INK[1], COL_INK[2]);
+        y += 8;
+      }
+    });
+
+    if (opts.closing) {
+      checkBreak(60);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9.5);
+      (doc.splitTextToSize(opts.closing, pageW - margin * 2)).forEach(function (line) {
+        checkBreak(40); doc.text(line, margin, y); y += 12.5;
+      });
+      y += 10;
+    }
+
+    if (opts.firmas && opts.firmas.length) {
+      checkBreak(110);
+      y += 34;
+      var colW = (pageW - margin * 2) / opts.firmas.length;
+      opts.firmas.forEach(function (f, i) {
+        checkBreak(70);
+        var cx0 = margin + colW * i + 10, cx1 = margin + colW * (i + 1) - 10;
+        doc.setDrawColor(COL_INK[0], COL_INK[1], COL_INK[2]); doc.setLineWidth(0.7);
+        doc.line(cx0, y, cx1, y);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9);
+        doc.text(f.label, (cx0 + cx1) / 2, y + 13, { align: "center" });
+        if (f.sub) {
+          doc.setFont("helvetica", "normal"); doc.setFontSize(8.3);
+          doc.text(f.sub, (cx0 + cx1) / 2, y + 25, { align: "center" });
+        }
+      });
+    }
+
+    return doc;
+  }
+
+  return { money: money, buildDoc: buildDoc, buildContractDoc: buildContractDoc, guardarPDF: guardarPDF, slugify: slugify };
 })();
