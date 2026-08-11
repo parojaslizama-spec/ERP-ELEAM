@@ -395,7 +395,12 @@
           <label for="liq-anio">A&ntilde;o</label>
           <input id="liq-anio" type="number" min="2015" max="2100">
         </div>
+        <div class="field small">
+          <label for="liq-imm">IMM vigente (CLP)</label>
+          <input id="liq-imm" type="number" min="0" step="1000">
+        </div>
       </div>
+      <p class="field-hint">El Ingreso M&iacute;nimo Mensual (IMM) se usa para calcular el tope legal de la gratificaci&oacute;n (4,75 IMM al a&ntilde;o). Actualiza este valor cuando cambie por ley.</p>
 
       <div id="liq-content" style="display:none;">
         <div class="liq-columns">
@@ -403,12 +408,13 @@
             <h3>Haberes</h3>
             <div class="grid-form" style="grid-template-columns:1fr 1fr;">
               <div><label for="liq-sueldo-base">Sueldo base</label><input id="liq-sueldo-base" type="number" min="0" step="1000"></div>
-              <div><label for="liq-gratificacion">Gratificaci&oacute;n legal</label><input id="liq-gratificacion" type="number" min="0" step="1000"></div>
+              <div><label for="liq-gratificacion">Gratificaci&oacute;n legal mensual (25%, tope 4,75 IMM/12)</label><input id="liq-gratificacion" type="number" min="0" step="1000"></div>
               <div><label for="liq-bonos">Bonos</label><input id="liq-bonos" type="number" min="0" step="1000"></div>
               <div><label for="liq-bono-asistencia">Bono cumplimiento asistencia (&ge;95%, imponible)</label><input id="liq-bono-asistencia" type="number" min="0" step="1000"></div>
               <div><label for="liq-bono-puntualidad">Bono puntualidad (&ge;95%, imponible)</label><input id="liq-bono-puntualidad" type="number" min="0" step="1000"></div>
               <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5"></div>
               <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100"></div>
+              <div style="grid-column:1/-1;"><p class="field-hint" id="liq-gratificacion-hint"></p></div>
               <div style="grid-column:1/-1;"><p class="field-hint" id="liq-asistencia-hint"></p></div>
             </div>
             <div class="liq-total-row"><span>Total haberes</span><span class="amt mono" id="liq-total-haberes">$ 0</span></div>
@@ -490,8 +496,10 @@
   var trabajadores = window.storage.get('trabajadores', []);
   var asistencia = window.storage.get('asistencia', {});
   var liquidaciones = window.storage.get('liquidaciones', {});
+  var immVigente = window.storage.get('imm', 500000);
 
   function saveEmpresa(){ window.storage.set('empresa', empresa); }
+  function saveImm(){ window.storage.set('imm', immVigente); }
   function saveTrabajadores(){ window.storage.set('trabajadores', trabajadores); }
   function saveAsistencia(){ window.storage.set('asistencia', asistencia); }
   function saveLiquidaciones(){ window.storage.set('liquidaciones', liquidaciones); }
@@ -713,12 +721,14 @@
   var liqTrabSel = document.getElementById('liq-trabajador');
   var liqMesSel = document.getElementById('liq-mes');
   var liqAnioInput = document.getElementById('liq-anio');
+  var liqImmInput = document.getElementById('liq-imm');
 
   var today = new Date();
   fillMesSelect(asisMesSel); asisMesSel.value = today.getMonth()+1;
   fillMesSelect(liqMesSel); liqMesSel.value = today.getMonth()+1;
   asisAnioInput.value = today.getFullYear();
   liqAnioInput.value = today.getFullYear();
+  liqImmInput.value = immVigente;
 
   function refreshSelectors(){
     fillTrabajadorSelect(asisTrabSel);
@@ -728,6 +738,11 @@
 
   [asisTrabSel, asisMesSel, asisAnioInput].forEach(function(el){ el.addEventListener('change', renderCalendar); });
   [liqTrabSel, liqMesSel, liqAnioInput].forEach(function(el){ el.addEventListener('change', loadLiquidacion); });
+  liqImmInput.addEventListener('input', function(){
+    immVigente = num(liqImmInput.value) || 500000;
+    saveImm();
+    loadLiquidacion();
+  });
 
   // ---------- ASISTENCIA ----------
   function keyAsis(trabId, year, month){ return trabId+'_'+year+'_'+month; }
@@ -948,10 +963,13 @@
     var cumpleAsistencia = pctAsistencia !== null && pctAsistencia >= 95;
     var bonoAsistenciaDefault = cumpleAsistencia ? 100000 : 0;
     var bonoPuntualidadDefault = cumpleAsistencia ? 20000 : 0;
+    // Gratificación legal Art. 50: 25% de lo devengado, con tope de 4,75 IMM al año (mensualizado).
+    var topeGratificacionMensual = (4.75 * immVigente) / 12;
+    var gratificacionDefault = Math.round(Math.min(trab.sueldoBase * 0.25, topeGratificacionMensual) / 100) * 100;
 
-    var data = saved ? Object.assign({ bonoAsistencia: bonoAsistenciaDefault, bonoPuntualidad: bonoPuntualidadDefault }, saved) : {
+    var data = saved ? Object.assign({ bonoAsistencia: bonoAsistenciaDefault, bonoPuntualidad: bonoPuntualidadDefault, gratificacion: gratificacionDefault }, saved) : {
       sueldoBase: trab.sueldoBase,
-      gratificacion: 0,
+      gratificacion: gratificacionDefault,
       bonos: 0,
       bonoAsistencia: bonoAsistenciaDefault,
       bonoPuntualidad: bonoPuntualidadDefault,
@@ -972,6 +990,10 @@
     liqEl('dias-falta').value = data.diasFalta;
     liqEl('impuesto').value = data.impuesto;
     liqEl('otros').value = data.otros;
+
+    document.getElementById('liq-gratificacion-hint').textContent =
+      'Gratificación sugerida: 25% del sueldo base (' + fmtCLP(trab.sueldoBase * 0.25) + '), tope mensual 4,75 × IMM ÷ 12 = ' + fmtCLP(topeGratificacionMensual) +
+      '. Se paga cada mes junto con el sueldo (no como pago único anual). Editable si corresponde otro monto.';
 
     document.getElementById('liq-asistencia-hint').textContent = pctAsistencia === null
       ? 'Sin datos de asistencia registrados este mes — no se sugieren bonos automáticos.'
