@@ -486,8 +486,19 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   function getEmpresaGlobal() {
     try { return JSON.parse(localStorage.getItem("rha_empresa") || "{}"); } catch (e) { return {}; }
   }
+  // Calendario del Ingreso Mínimo Mensual (IMM) por ley — misma tabla que control-horas.html. Agrega
+  // una fila nueva cada vez que la ley reajuste el sueldo mínimo (en ambos archivos) y se actualiza solo.
+  var IMM_SCHEDULE = [
+    { desde: "2023-05-01", monto: 440000 },
+    { desde: "2023-07-01", monto: 460000 },
+    { desde: "2023-09-01", monto: 500000 }
+  ];
   function getImmGlobal() {
-    try { return JSON.parse(localStorage.getItem("rha_imm") || "500000"); } catch (e) { return 500000; }
+    var actual = IMM_SCHEDULE[0].monto;
+    for (var i = 0; i < IMM_SCHEDULE.length; i++) {
+      if (new Date(IMM_SCHEDULE[i].desde + "T00:00:00") <= new Date()) actual = IMM_SCHEDULE[i].monto;
+    }
+    return actual;
   }
   function getTopeImponibleGlobal() {
     try { return JSON.parse(localStorage.getItem("rha_tope_imponible") || "3300000"); } catch (e) { return 3300000; }

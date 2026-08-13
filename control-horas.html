@@ -471,7 +471,7 @@
           <input id="liq-anio" type="number" min="2015" max="2100">
         </div>
         <div class="field small">
-          <label for="liq-imm">IMM vigente (CLP)</label>
+          <label for="liq-imm">IMM vigente (CLP) — autom&aacute;tico por ley</label>
           <input id="liq-imm" type="number" min="0" step="1000">
         </div>
         <div class="field small">
@@ -483,7 +483,7 @@
           <input id="liq-tope-imponible" type="number" min="0" step="10000">
         </div>
       </div>
-      <p class="field-hint">El Ingreso M&iacute;nimo Mensual (IMM) se usa para el tope legal de la gratificaci&oacute;n (4,75 IMM al a&ntilde;o). La UTM (Unidad Tributaria Mensual) se usa para calcular el Impuesto &Uacute;nico. El tope imponible limita cu&aacute;nto de la base imponible paga AFP, salud y cesant&iacute;a (aprox. 87 UF — simplificado a un monto fijo en pesos por simplicidad). Los tres valores cambian peri&oacute;dicamente: actual&iacute;zalos aqu&iacute; cuando corresponda (ver sii.cl y la Superintendencia de Pensiones).</p>
+      <p class="field-hint">El Ingreso M&iacute;nimo Mensual (IMM) se usa para el tope legal de la gratificaci&oacute;n (4,75 IMM al a&ntilde;o) y como sueldo predeterminado al agregar un trabajador nuevo — se actualiza solo seg&uacute;n el calendario legal (avisa cuando la ley lo reajuste para agregarlo). La UTM (Unidad Tributaria Mensual) se usa para calcular el Impuesto &Uacute;nico y cambia cada mes: actual&iacute;zala aqu&iacute; (ver sii.cl). El tope imponible limita cu&aacute;nto de la base imponible paga AFP, salud y cesant&iacute;a (aprox. 87 UF — simplificado a un monto fijo en pesos): actual&iacute;zalo cuando corresponda (ver la Superintendencia de Pensiones).</p>
 
       <div id="liq-content" style="display:none;">
         <div class="liq-columns">
@@ -569,18 +569,34 @@
   var CICLO_4X4 = ['turno_dia','turno_dia','turno_noche','turno_noche','descanso_turno','descanso_turno','descanso_turno','descanso_turno'];
   var ESTADOS_TRABAJADOS = { trabajado:1, turno_dia:1, turno_noche:1 };
 
+  // Calendario del Ingreso Mínimo Mensual (IMM) por ley — agrega una fila nueva cada vez que la ley
+  // reajuste el sueldo mínimo (avísale a Claude la fecha y el monto) y el valor vigente se actualiza
+  // solo en toda la app, sin depender de que alguien lo edite a mano. Misma tabla en control-financiero.html.
+  var IMM_SCHEDULE = [
+    { desde: '2023-05-01', monto: 440000 },
+    { desde: '2023-07-01', monto: 460000 },
+    { desde: '2023-09-01', monto: 500000 }
+  ];
+  function immLegalVigente(fecha){
+    fecha = fecha || new Date();
+    var actual = IMM_SCHEDULE[0].monto;
+    for(var i=0;i<IMM_SCHEDULE.length;i++){
+      if(new Date(IMM_SCHEDULE[i].desde+'T00:00:00') <= fecha) actual = IMM_SCHEDULE[i].monto;
+    }
+    return actual;
+  }
+
   var empresa = window.storage.get('empresa', {nombre:'', rut:''});
   var trabajadores = window.storage.get('trabajadores', []);
   var asistencia = window.storage.get('asistencia', {});
   var liquidaciones = window.storage.get('liquidaciones', {});
-  var immVigente = window.storage.get('imm', 500000);
+  var immVigente = immLegalVigente(new Date());
   var utmVigente = window.storage.get('utm', 68000);
   var topeImponibleMensual = window.storage.get('tope_imponible', 3300000);
 
   function saveEmpresa(){ window.storage.set('empresa', empresa); }
   function saveUtm(){ window.storage.set('utm', utmVigente); }
   function saveTopeImponible(){ window.storage.set('tope_imponible', topeImponibleMensual); }
-  function saveImm(){ window.storage.set('imm', immVigente); }
   function saveTrabajadores(){ window.storage.set('trabajadores', trabajadores); }
   function saveAsistencia(){ window.storage.set('asistencia', asistencia); }
   function saveLiquidaciones(){ window.storage.set('liquidaciones', liquidaciones); }
@@ -686,6 +702,7 @@
     editandoTrabajadorId = null;
     document.getElementById('form-trabajador').reset();
     document.getElementById('trab-afp').value = 11.44;
+    document.getElementById('trab-sueldo').value = immVigente;
     tipoSel.value = 'soporte';
     applyTipoUI();
     saludMontoWrap.style.display = 'none';
@@ -1056,8 +1073,7 @@
   [asisTrabSel, asisMesSel, asisAnioInput].forEach(function(el){ el.addEventListener('change', renderCalendar); });
   [liqTrabSel, liqMesSel, liqAnioInput].forEach(function(el){ el.addEventListener('change', loadLiquidacion); });
   liqImmInput.addEventListener('input', function(){
-    immVigente = num(liqImmInput.value) || 500000;
-    saveImm();
+    immVigente = num(liqImmInput.value) || immLegalVigente(new Date());
     loadLiquidacion();
     updateDotacionMinimaHint();
   });
@@ -1886,6 +1902,7 @@
   });
 
   // ---------- INIT ----------
+  document.getElementById('trab-sueldo').value = immVigente;
   renderTrabajadores();
   renderCalendar();
   loadLiquidacion();

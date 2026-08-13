@@ -177,7 +177,22 @@
     };
   }
 
-  var IMM = 500000;
+  // Calendario del Ingreso Mínimo Mensual (IMM) por ley — misma tabla que control-horas.html y
+  // control-financiero.html. Agrega una fila nueva en los tres archivos cuando la ley lo reajuste.
+  var IMM_SCHEDULE = [
+    { desde: '2023-05-01', monto: 440000 },
+    { desde: '2023-07-01', monto: 460000 },
+    { desde: '2023-09-01', monto: 500000 }
+  ];
+  function immLegalVigente(fecha){
+    fecha = fecha || new Date();
+    var actual = IMM_SCHEDULE[0].monto;
+    for(var i=0;i<IMM_SCHEDULE.length;i++){
+      if(new Date(IMM_SCHEDULE[i].desde+'T00:00:00') <= fecha) actual = IMM_SCHEDULE[i].monto;
+    }
+    return actual;
+  }
+  var IMM = immLegalVigente(new Date());
   var AFP_PCT = 11.44, SIS_PCT = 1.49, AFC_EMPRESA_PCT = 2.4, MUTUAL_PCT = 0.93, IVA_PCT = 19;
   var TOPE_GRAT_ANUAL = 4.75;
 
