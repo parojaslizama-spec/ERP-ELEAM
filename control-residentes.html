@@ -214,6 +214,21 @@
             <label for="res-egreso">Fecha de egreso (si aplica)</label>
             <input id="res-egreso" type="date">
           </div>
+          <div id="res-motivo-egreso-wrap" style="display:none;">
+            <label for="res-motivo-egreso">Motivo de egreso</label>
+            <select id="res-motivo-egreso">
+              <option value="">Selecciona un motivo</option>
+              <option value="fallecimiento">Fallecimiento</option>
+              <option value="traslado">Traslado a otro establecimiento</option>
+              <option value="decision_familiar">Decisión familiar</option>
+              <option value="alta_medica">Alta médica / mejoría</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div id="res-detalle-egreso-wrap" style="display:none;">
+            <label for="res-detalle-egreso">Detalle (opcional)</label>
+            <input id="res-detalle-egreso" style="font-family:'Inter',sans-serif;" placeholder="Ej. nombre del nuevo establecimiento">
+          </div>
           <div>
             <label for="res-cuota">Cuota de incorporaci&oacute;n (mensual, CLP)</label>
             <input id="res-cuota" type="number" min="0" step="1000" required>
@@ -402,10 +417,25 @@
 
   // ---------- RESIDENTES: alta, edición y nómina ----------
   var editandoResidenteId = null;
+  var MOTIVO_EGRESO_LABEL = {
+    fallecimiento: 'Fallecimiento',
+    traslado: 'Traslado a otro establecimiento',
+    decision_familiar: 'Decisión familiar',
+    alta_medica: 'Alta médica / mejoría',
+    otro: 'Otro'
+  };
+
+  function actualizarVisibilidadEgreso(){
+    var tieneFecha = !!document.getElementById('res-egreso').value;
+    document.getElementById('res-motivo-egreso-wrap').style.display = tieneFecha ? 'block' : 'none';
+    document.getElementById('res-detalle-egreso-wrap').style.display = tieneFecha ? 'block' : 'none';
+  }
+  document.getElementById('res-egreso').addEventListener('input', actualizarVisibilidadEgreso);
 
   function cancelarEdicionResidente(){
     editandoResidenteId = null;
     document.getElementById('form-residente').reset();
+    actualizarVisibilidadEgreso();
     document.getElementById('form-residente-titulo').textContent = 'Agregar residente';
     document.getElementById('btn-guardar-residente').textContent = 'Agregar residente';
     document.getElementById('btn-cancelar-residente').style.display = 'none';
@@ -418,11 +448,19 @@
     var nombre = document.getElementById('res-nombre').value.trim();
     var ingreso = document.getElementById('res-ingreso').value;
     if(!nombre || !ingreso) return;
+    var fechaEgreso = document.getElementById('res-egreso').value;
+    var motivoEgreso = document.getElementById('res-motivo-egreso').value;
+    if(fechaEgreso && !motivoEgreso){
+      alert('Selecciona el motivo de egreso — es obligatorio si se indica una fecha de egreso.');
+      return;
+    }
     var datos = {
       nombre: nombre,
       rut: document.getElementById('res-rut').value.trim(),
       fechaIngreso: ingreso,
-      fechaEgreso: document.getElementById('res-egreso').value,
+      fechaEgreso: fechaEgreso,
+      motivoEgreso: fechaEgreso ? motivoEgreso : '',
+      detalleEgreso: fechaEgreso ? document.getElementById('res-detalle-egreso').value.trim() : '',
       cuotaPermanencia: num(document.getElementById('res-cuota').value)
     };
     if(editandoResidenteId){
@@ -447,6 +485,9 @@
     document.getElementById('res-rut').value = r.rut || '';
     document.getElementById('res-ingreso').value = r.fechaIngreso || '';
     document.getElementById('res-egreso').value = r.fechaEgreso || '';
+    document.getElementById('res-motivo-egreso').value = r.motivoEgreso || '';
+    document.getElementById('res-detalle-egreso').value = r.detalleEgreso || '';
+    actualizarVisibilidadEgreso();
     document.getElementById('res-cuota').value = r.cuotaPermanencia;
     document.getElementById('form-residente-titulo').textContent = 'Editar residente — ' + r.nombre;
     document.getElementById('btn-guardar-residente').textContent = 'Guardar cambios';
@@ -467,7 +508,8 @@
     }
     tbody.innerHTML = residentes.map(function(r){
       var estado = estadoResidente(r);
-      var badge = estado === 'activo' ? '<span class="badge ok">Activo</span>' : '<span class="badge off">Egresado</span>';
+      var motivoTxt = r.motivoEgreso ? (MOTIVO_EGRESO_LABEL[r.motivoEgreso] || r.motivoEgreso) : '';
+      var badge = estado === 'activo' ? '<span class="badge ok">Activo</span>' : '<span class="badge off" title="'+esc(motivoTxt)+'">Egresado' + (motivoTxt ? ' — '+esc(motivoTxt) : '') + '</span>';
       return '<tr>'+
         '<td>'+esc(r.nombre)+'</td>'+
         '<td class="mono">'+esc(r.rut||'—')+'</td>'+
@@ -604,7 +646,7 @@
     if(residentes.length===0){ flash('residentes-save-flash','No hay residentes para incluir en el reporte.'); return; }
     try{
       var filas = residentes.map(function(r){
-        var estado = estadoResidente(r) === 'activo' ? 'Activo' : 'Egresado el ' + fmtDate(r.fechaEgreso);
+        var estado = estadoResidente(r) === 'activo' ? 'Activo' : 'Egresado el ' + fmtDate(r.fechaEgreso) + (r.motivoEgreso ? ' — ' + (MOTIVO_EGRESO_LABEL[r.motivoEgreso] || r.motivoEgreso) : '');
         return { label: r.nombre+(r.rut?' — '+r.rut:''), valor: fmtCLP(r.cuotaPermanencia)+'/mes', nota: 'Ingreso '+fmtDate(r.fechaIngreso)+' · '+estado };
       });
       var totalActivos = residentes.filter(function(r){ return estadoResidente(r)==='activo'; });

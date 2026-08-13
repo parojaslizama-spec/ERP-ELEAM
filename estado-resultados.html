@@ -340,59 +340,18 @@
   function readJSON(key, def){ try{ var raw = localStorage.getItem(key); return raw===null ? def : JSON.parse(raw); }catch(e){ return def; } }
   function sumRows(rows){ return (rows||[]).reduce(function(a,r){ return a + (parseFloat(r.monto)||0); }, 0); }
 
+  // Lee el resumen ya calculado por el módulo de Gastos (control-financiero.html guarda
+  // "resumenMensual" cada vez que algo cambia) en vez de recalcular ingresos/egresos por separado
+  // aquí — así esta pantalla y Gastos nunca pueden mostrar números distintos para el mismo mes real.
   function totalesRealesParaMes(monthKey){
     var finData = readJSON('eleam-control-financiero-v2', null);
-    if(!finData || !finData.months || !finData.months[monthKey]) return null;
-    var month = finData.months[monthKey];
-    var params = finData.params || {};
-    var ivaPct = params.ivaPct != null ? params.ivaPct : 19;
-
-    var year = parseInt(monthKey.split('-')[0],10), mm = parseInt(monthKey.split('-')[1],10);
-    var inicioMes = year+'-'+pad2(mm)+'-01', finMes = year+'-'+pad2(mm)+'-31';
-    var residentes = readJSON('rha_residentes', []);
-    var activos = residentes.filter(function(r){
-      var ingresoOk = !r.fechaIngreso || r.fechaIngreso <= finMes;
-      var egresoOk = !r.fechaEgreso || r.fechaEgreso >= inicioMes;
-      return ingresoOk && egresoOk;
-    });
-    var totIngresosResidentes = activos.reduce(function(a,r){ return a + (r.cuotaPermanencia||0); }, 0);
-    var totIngresos = totIngresosResidentes + sumRows(month.ingresosExtra);
-
-    var imm = readJSON('rha_imm', 500000);
-    var trabajadores = readJSON('rha_trabajadores', []);
-    var liquidaciones = readJSON('rha_liquidaciones', {});
-    var topeGrat = (4.75 * imm) / 12;
-    var totCostoBase = 0, totBaseImponible = 0;
-    trabajadores.forEach(function(t){
-      var key = t.id+'_'+year+'_'+mm;
-      var saved = liquidaciones[key];
-      var gratifDefault = Math.round(Math.min((t.sueldoBase||0)*0.25, topeGrat)/100)*100;
-      var f = saved || { sueldoBase: t.sueldoBase, gratificacion: gratifDefault, bonos:0, bonoAsistencia:0, bonoPuntualidad:0, heCantidad:0, heValor:0, diasFalta:0, impuesto:0, otros:0 };
-      var montoHorasExtra = (f.heCantidad||0)*(f.heValor||0);
-      var totalHaberes = (f.sueldoBase||0)+(f.gratificacion||0)+(f.bonos||0)+(f.bonoAsistencia||0)+(f.bonoPuntualidad||0)+montoHorasExtra;
-      var baseImponible = (f.sueldoBase||0)+(f.gratificacion||0)+montoHorasExtra+(f.bonoAsistencia||0)+(f.bonoPuntualidad||0);
-      var descInasistencia = ((f.sueldoBase||0)/30)*(f.diasFalta||0);
-      totCostoBase += totalHaberes - descInasistencia;
-      totBaseImponible += baseImponible;
-    });
-    var cargasEmpresa = totBaseImponible * (SIS_PCT+AFC_EMPRESA_PCT+MUTUAL_PCT) / 100;
-    var costoPersonalTotal = totCostoBase + cargasEmpresa;
-
-    var totGastosNeto = sumRows(month.gastos);
-    var ivaCredito = totGastosNeto * ivaPct / 100;
-    var gastosConIva = totGastosNeto + ivaCredito;
-    var totServicios = sumRows(month.servicios);
-    var ivaDebito = totIngresosResidentes * ivaPct / (100+ivaPct);
-    var ivaAPagar = Math.max(0, ivaDebito - ivaCredito);
-    var sueldoAdmin = sueldoAdminPara(year, params.sueldoAdminBase||700000, params.sueldoAdminAnioBase||year);
-
-    var totEgresos = costoPersonalTotal + gastosConIva + totServicios + ivaAPagar + sueldoAdmin;
+    if(!finData || !finData.resumenMensual || !finData.resumenMensual[monthKey]) return null;
+    var r = finData.resumenMensual[monthKey];
     return {
-      monthKey: monthKey, origen: 'real', residentes: activos.length,
-      cuotaPromedio: activos.length ? Math.round(totIngresosResidentes/activos.length) : 0,
-      personalEsencial: trabajadores.filter(function(t){ return t.tipo==='esencial'; }).length,
-      personalAseo: trabajadores.filter(function(t){ return t.tipo!=='esencial'; }).length,
-      ingresos: totIngresos, egresos: totEgresos, margen: totIngresos-totEgresos, inversion: 0, eventos: []
+      monthKey: monthKey, origen: 'real', residentes: r.residentes,
+      cuotaPromedio: r.residentes ? Math.round((r.totIngresosResidentes != null ? r.totIngresosResidentes : r.totIngresos)/r.residentes) : 0,
+      personalEsencial: r.personalEsencial, personalAseo: r.personalAseo,
+      ingresos: r.totIngresos, egresos: r.totEgresos, margen: r.margen, inversion: 0, eventos: []
     };
   }
 

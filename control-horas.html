@@ -263,6 +263,11 @@
             <input id="trab-cargo" style="font-family:'Inter',sans-serif;">
           </div>
           <div>
+            <label for="trab-fecha-ingreso">Fecha de ingreso (inicio de contrato)</label>
+            <input id="trab-fecha-ingreso" type="date" required>
+            <p class="field-hint">Se usa para calcular antig&uuml;edad, vacaciones proporcionales e indemnizaci&oacute;n si termina la relaci&oacute;n laboral.</p>
+          </div>
+          <div>
             <label for="trab-tipo">Tipo de personal</label>
             <select id="trab-tipo">
               <option value="soporte">Soporte (aseo, cocina, TENS) — 40 hrs/semana</option>
@@ -362,6 +367,59 @@
           </tr>
         </thead>
         <tbody id="tabla-trabajadores"></tbody>
+      </table>
+    </div>
+
+    <div class="card" id="card-finiquito" style="display:none;">
+      <h2>T&eacute;rmino de relaci&oacute;n laboral — <span id="finiquito-nombre-trab"></span></h2>
+      <div class="grid-form">
+        <div>
+          <label for="fin-fecha-termino">Fecha de t&eacute;rmino</label>
+          <input id="fin-fecha-termino" type="date">
+        </div>
+        <div>
+          <label for="fin-causal">Causal de t&eacute;rmino</label>
+          <select id="fin-causal">
+            <option value="mutuo_acuerdo">Mutuo acuerdo de las partes (Art. 159 N&deg;1)</option>
+            <option value="renuncia">Renuncia voluntaria del trabajador (Art. 159 N&deg;2)</option>
+            <option value="plazo_fijo">Vencimiento del plazo convenido (Art. 159 N&deg;4)</option>
+            <option value="necesidades_empresa">Necesidades de la empresa (Art. 161)</option>
+            <option value="caducidad">Caducidad — falta grave del trabajador (Art. 160)</option>
+          </select>
+        </div>
+        <div id="fin-aviso-wrap" style="display:none;">
+          <label for="fin-aviso-previo">&iquest;Se dio aviso previo de 30 d&iacute;as?</label>
+          <select id="fin-aviso-previo">
+            <option value="si">S&iacute;</option>
+            <option value="no">No (se paga indemnizaci&oacute;n sustitutiva)</option>
+          </select>
+        </div>
+      </div>
+      <p class="field-hint" id="fin-antiguedad-hint"></p>
+
+      <table style="margin-top:14px;">
+        <thead><tr><th>Concepto del finiquito</th><th class="num">Monto</th></tr></thead>
+        <tbody id="tabla-finiquito"></tbody>
+      </table>
+      <div class="liq-total-row"><span>Total a pagar (finiquito)</span><span class="amt mono" id="fin-total">$ 0</span></div>
+
+      <p class="field-hint" style="margin-top:10px;">ADVERTENCIA: este c&aacute;lculo es una estimaci&oacute;n autom&aacute;tica a partir de los datos cargados en el sistema y NO constituye asesor&iacute;a legal. Antes de pagar y firmar, debe ser revisado por un abogado o contador — especialmente la calificaci&oacute;n de la causal y el tope de 90 UF por a&ntilde;o en la indemnizaci&oacute;n, que este c&aacute;lculo no aplica.</p>
+
+      <div class="actions-row">
+        <button id="btn-confirmar-finiquito" class="danger" type="button" style="background:var(--danger); color:#fff;">Confirmar t&eacute;rmino y generar finiquito PDF</button>
+        <button id="btn-cancelar-finiquito" class="secondary" type="button">Cancelar</button>
+        <span id="finiquito-save-flash" class="save-flash"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Personal desvinculado</h2>
+      <p class="field-hint">Historial de trabajadores cuya relaci&oacute;n laboral termin&oacute; — se conservan sus liquidaciones pasadas, pero ya no aparecen en asistencia ni en nuevas liquidaciones.</p>
+      <table>
+        <thead>
+          <tr><th>Nombre</th><th>RUT</th><th>Cargo</th><th>Ingreso</th><th>T&eacute;rmino</th><th>Causal</th><th></th></tr>
+        </thead>
+        <tbody id="tabla-desvinculados"></tbody>
       </table>
     </div>
   </section>
@@ -650,18 +708,18 @@
     var hace4Dias = new Date(); hace4Dias.setDate(hace4Dias.getDate()-4);
     var hace4DiasStr = fechaISO(hace4Dias);
     function cuidador(n, ciclo){
-      return { nombre:'Cuidador(a) '+n, rut:'', cargo:'Cuidador(a)', tipo:'esencial', cicloInicio: ciclo,
+      return { nombre:'Cuidador(a) '+n, rut:'', cargo:'Cuidador(a)', fechaIngreso: hoyStr, tipo:'esencial', cicloInicio: ciclo,
         sueldoBase: immVigente, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
         horasJornada:12, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} };
     }
     var nuevos = [
       cuidador(1, hoyStr), cuidador(2, hoyStr),
       cuidador(3, hace4DiasStr), cuidador(4, hace4DiasStr),
-      { nombre:'Auxiliar de Aseo', rut:'', cargo:'Aseo', tipo:'soporte', cicloInicio:'',
+      { nombre:'Auxiliar de Aseo', rut:'', cargo:'Aseo', fechaIngreso: hoyStr, tipo:'soporte', cicloInicio:'',
         sueldoBase: immVigente, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
         horasJornada:8, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} }
     ];
-    nuevos.forEach(function(n){ n.id = uid(); trabajadores.push(n); });
+    nuevos.forEach(function(n){ n.id = uid(); n.activo = true; trabajadores.push(n); });
     saveTrabajadores();
     renderTrabajadores();
     refreshSelectors();
@@ -674,12 +732,14 @@
     e.preventDefault();
     var nombre = document.getElementById('trab-nombre').value.trim();
     var rut = document.getElementById('trab-rut').value.trim();
-    if(!nombre || !rut) return;
+    var fechaIngreso = document.getElementById('trab-fecha-ingreso').value;
+    if(!nombre || !rut || !fechaIngreso) return;
     var contrato = document.getElementById('trab-contrato').value;
     var datos = {
       nombre: nombre,
       rut: rut,
       cargo: document.getElementById('trab-cargo').value.trim(),
+      fechaIngreso: fechaIngreso,
       tipo: tipoSel.value,
       cicloInicio: tipoSel.value === 'esencial' ? document.getElementById('trab-ciclo-inicio').value : '',
       sueldoBase: num(document.getElementById('trab-sueldo').value),
@@ -701,6 +761,7 @@
       if(existente) Object.assign(existente, datos);
     } else {
       datos.id = uid();
+      datos.activo = true;
       trabajadores.push(datos);
     }
     saveTrabajadores();
@@ -716,6 +777,7 @@
     document.getElementById('trab-nombre').value = t.nombre;
     document.getElementById('trab-rut').value = t.rut;
     document.getElementById('trab-cargo').value = t.cargo || '';
+    document.getElementById('trab-fecha-ingreso').value = t.fechaIngreso || '';
     tipoSel.value = t.tipo || 'soporte';
     applyTipoUI();
     document.getElementById('trab-ciclo-inicio').value = t.cicloInicio || '';
@@ -738,26 +800,57 @@
     document.getElementById('form-trabajador').scrollIntoView({ behavior:'smooth', block:'start' });
   }
 
+  var CAUSAL_TERMINO_LABEL = {
+    mutuo_acuerdo: 'Mutuo acuerdo de las partes (Art. 159 N°1)',
+    renuncia: 'Renuncia voluntaria del trabajador (Art. 159 N°2)',
+    plazo_fijo: 'Vencimiento del plazo convenido (Art. 159 N°4)',
+    necesidades_empresa: 'Necesidades de la empresa (Art. 161)',
+    caducidad: 'Caducidad — falta grave del trabajador (Art. 160)'
+  };
+
+  function trabajadoresActivos(){ return trabajadores.filter(function(t){ return t.activo !== false; }); }
+
   function renderTrabajadores(){
     var tbody = document.getElementById('tabla-trabajadores');
-    if(trabajadores.length === 0){
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="10">A&uacute;n no hay trabajadores registrados.</td></tr>';
+    var activos = trabajadoresActivos();
+    if(activos.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="10">A&uacute;n no hay trabajadores activos registrados.</td></tr>';
+    } else {
+      tbody.innerHTML = activos.map(function(t){
+        var salud = t.saludTipo === 'fonasa' ? 'Fonasa (7%)' : 'Isapre (' + fmtCLP(t.saludMonto) + ')';
+        var tipoLabel = t.tipo === 'esencial' ? '<span class="badge">Esencial · 4&times;4</span>' : '<span class="badge" style="background:var(--paper-dark); color:var(--ink-soft);">Soporte</span>';
+        return '<tr>'+
+          '<td>'+esc(t.nombre)+'</td>'+
+          '<td class="mono">'+esc(t.rut)+'</td>'+
+          '<td>'+esc(t.cargo)+'</td>'+
+          '<td>'+tipoLabel+'</td>'+
+          '<td class="num">'+fmtCLP(t.sueldoBase)+'</td>'+
+          '<td class="num">'+t.afpPct+'%</td>'+
+          '<td>'+salud+'</td>'+
+          '<td class="num">'+t.cesantiaPct+'%</td>'+
+          '<td class="num">'+t.horasJornada+'</td>'+
+          '<td style="white-space:nowrap;"><button class="gold small" data-contrato="'+t.id+'">Generar contrato</button> <button class="secondary small" data-edit="'+t.id+'">Editar</button> <button class="danger small" data-terminar="'+t.id+'" style="background:transparent; border-color:var(--danger); color:var(--danger);">Terminar relación</button> <button class="danger" data-del="'+t.id+'">Eliminar</button></td>'+
+        '</tr>';
+      }).join('');
+    }
+    renderDesvinculados();
+  }
+  function renderDesvinculados(){
+    var tbody = document.getElementById('tabla-desvinculados');
+    var inactivos = trabajadores.filter(function(t){ return t.activo === false; });
+    if(inactivos.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Sin trabajadores desvinculados.</td></tr>';
       return;
     }
-    tbody.innerHTML = trabajadores.map(function(t){
-      var salud = t.saludTipo === 'fonasa' ? 'Fonasa (7%)' : 'Isapre (' + fmtCLP(t.saludMonto) + ')';
-      var tipoLabel = t.tipo === 'esencial' ? '<span class="badge">Esencial · 4&times;4</span>' : '<span class="badge" style="background:var(--paper-dark); color:var(--ink-soft);">Soporte</span>';
+    tbody.innerHTML = inactivos.map(function(t){
       return '<tr>'+
         '<td>'+esc(t.nombre)+'</td>'+
         '<td class="mono">'+esc(t.rut)+'</td>'+
         '<td>'+esc(t.cargo)+'</td>'+
-        '<td>'+tipoLabel+'</td>'+
-        '<td class="num">'+fmtCLP(t.sueldoBase)+'</td>'+
-        '<td class="num">'+t.afpPct+'%</td>'+
-        '<td>'+salud+'</td>'+
-        '<td class="num">'+t.cesantiaPct+'%</td>'+
-        '<td class="num">'+t.horasJornada+'</td>'+
-        '<td style="white-space:nowrap;"><button class="gold small" data-contrato="'+t.id+'">Generar contrato</button> <button class="secondary small" data-edit="'+t.id+'">Editar</button> <button class="danger" data-del="'+t.id+'">Eliminar</button></td>'+
+        '<td class="mono">'+esc(t.fechaIngreso||'—')+'</td>'+
+        '<td class="mono">'+esc(t.fechaTermino||'—')+'</td>'+
+        '<td>'+esc(CAUSAL_TERMINO_LABEL[t.causalTermino] || t.causalTermino || '—')+'</td>'+
+        '<td class="num">'+fmtCLP(t.finiquitoMonto||0)+'</td>'+
       '</tr>';
     }).join('');
   }
@@ -766,15 +859,156 @@
     if(contratoBtn){ generarContratoTrabajador(contratoBtn.dataset.contrato); return; }
     var editBtn = e.target.closest('[data-edit]');
     if(editBtn){ editarTrabajador(editBtn.dataset.edit); return; }
+    var terminarBtn = e.target.closest('[data-terminar]');
+    if(terminarBtn){ abrirFiniquito(terminarBtn.dataset.terminar); return; }
     var btn = e.target.closest('[data-del]');
     if(!btn) return;
     var id = btn.dataset.del;
     var t = trabajadores.find(function(x){ return x.id===id; });
     if(!t) return;
-    if(!confirm('¿Eliminar a '+t.nombre+' de la nómina?')) return;
+    if(!confirm('¿Eliminar a '+t.nombre+' de la nómina? Esto borra el registro por completo — para un término normal de la relación laboral usa "Terminar relación" en vez de esto.')) return;
     trabajadores = trabajadores.filter(function(x){ return x.id!==id; });
     saveTrabajadores();
     if(editandoTrabajadorId === id) cancelarEdicionTrabajador();
+    renderTrabajadores();
+    refreshSelectors();
+  });
+
+  // ---------- TÉRMINO DE RELACIÓN LABORAL Y FINIQUITO ----------
+  // Cálculo simplificado: sueldo proporcional del mes, vacaciones proporcionales (15 días hábiles/año),
+  // e indemnización por años de servicio + sustitutiva de aviso previo solo si la causal es "necesidades
+  // de la empresa" (Art. 161). No aplica el tope de 90 UF/año — se advierte en el PDF generado.
+  function calcularFiniquito(trab, fechaTerminoStr, causal, avisoPrevioDado){
+    var inicio = new Date(trab.fechaIngreso + 'T00:00:00');
+    var termino = new Date(fechaTerminoStr + 'T00:00:00');
+    var mesesServicio = (termino.getFullYear()-inicio.getFullYear())*12 + (termino.getMonth()-inicio.getMonth());
+    if(termino.getDate() < inicio.getDate()) mesesServicio--;
+    mesesServicio = Math.max(0, mesesServicio);
+    var aniosCompletos = Math.floor(mesesServicio/12);
+    var mesesResto = mesesServicio - aniosCompletos*12;
+
+    var sueldoDiario = trab.sueldoBase / 30;
+    var vacacionesProporcionales = Math.round((mesesResto/12) * 15 * sueldoDiario / 100) * 100;
+
+    var aniosIndemnizables = Math.min(aniosCompletos + (mesesResto > 6 ? 1 : 0), 11);
+    var indemnizacionAnios = causal === 'necesidades_empresa' ? aniosIndemnizables * trab.sueldoBase : 0;
+    var indemnizacionAvisoPrevio = (causal === 'necesidades_empresa' && avisoPrevioDado === 'no') ? trab.sueldoBase : 0;
+
+    var diaTermino = termino.getDate();
+    var sueldoProporcional = Math.round(sueldoDiario * diaTermino / 100) * 100;
+
+    var totalHaberes = vacacionesProporcionales + indemnizacionAnios + indemnizacionAvisoPrevio + sueldoProporcional;
+
+    return {
+      mesesServicio: mesesServicio, aniosCompletos: aniosCompletos, mesesResto: mesesResto,
+      vacacionesProporcionales: vacacionesProporcionales,
+      aniosIndemnizables: aniosIndemnizables, indemnizacionAnios: indemnizacionAnios,
+      indemnizacionAvisoPrevio: indemnizacionAvisoPrevio,
+      sueldoProporcional: sueldoProporcional, totalHaberes: totalHaberes
+    };
+  }
+
+  var finiquitoTrabId = null;
+
+  function actualizarVisibilidadAviso(){
+    var causal = document.getElementById('fin-causal').value;
+    document.getElementById('fin-aviso-wrap').style.display = causal === 'necesidades_empresa' ? 'block' : 'none';
+  }
+
+  function recomputeFiniquito(){
+    if(!finiquitoTrabId) return null;
+    var t = trabajadores.find(function(x){ return x.id===finiquitoTrabId; });
+    if(!t) return null;
+    var fecha = document.getElementById('fin-fecha-termino').value;
+    if(!fecha) return null;
+    var causal = document.getElementById('fin-causal').value;
+    var aviso = document.getElementById('fin-aviso-previo').value;
+    var c = calcularFiniquito(t, fecha, causal, aviso);
+    var filas = [
+      { label: 'Sueldo proporcional del mes (' + new Date(fecha+'T00:00:00').getDate() + ' día(s))', monto: c.sueldoProporcional },
+      { label: 'Vacaciones proporcionales', monto: c.vacacionesProporcionales }
+    ];
+    if(c.indemnizacionAnios > 0) filas.push({ label: 'Indemnización por años de servicio (' + c.aniosIndemnizables + ' año(s))', monto: c.indemnizacionAnios });
+    if(c.indemnizacionAvisoPrevio > 0) filas.push({ label: 'Indemnización sustitutiva de aviso previo', monto: c.indemnizacionAvisoPrevio });
+    document.getElementById('tabla-finiquito').innerHTML = filas.map(function(f){
+      return '<tr><td>'+f.label+'</td><td class="num">'+fmtCLP(f.monto)+'</td></tr>';
+    }).join('');
+    document.getElementById('fin-total').textContent = fmtCLP(c.totalHaberes);
+    document.getElementById('fin-antiguedad-hint').textContent = 'Antigüedad: ' + c.aniosCompletos + ' año(s) y ' + c.mesesResto + ' mes(es) desde el ' + (t.fechaIngreso||'—') + '.';
+    return c;
+  }
+
+  function abrirFiniquito(id){
+    var t = trabajadores.find(function(x){ return x.id===id; });
+    if(!t) return;
+    if(!t.fechaIngreso){
+      alert('Este trabajador no tiene fecha de ingreso registrada. Edítalo primero (botón "Editar") para completarla antes de calcular el finiquito.');
+      return;
+    }
+    finiquitoTrabId = id;
+    document.getElementById('finiquito-nombre-trab').textContent = t.nombre;
+    document.getElementById('fin-fecha-termino').value = new Date().toISOString().slice(0,10);
+    document.getElementById('fin-causal').value = 'mutuo_acuerdo';
+    document.getElementById('fin-aviso-previo').value = 'si';
+    actualizarVisibilidadAviso();
+    document.getElementById('card-finiquito').style.display = 'block';
+    document.getElementById('finiquito-save-flash').textContent = '';
+    recomputeFiniquito();
+    document.getElementById('card-finiquito').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  document.getElementById('fin-fecha-termino').addEventListener('input', recomputeFiniquito);
+  document.getElementById('fin-causal').addEventListener('change', function(){ actualizarVisibilidadAviso(); recomputeFiniquito(); });
+  document.getElementById('fin-aviso-previo').addEventListener('change', recomputeFiniquito);
+
+  document.getElementById('btn-cancelar-finiquito').addEventListener('click', function(){
+    finiquitoTrabId = null;
+    document.getElementById('card-finiquito').style.display = 'none';
+  });
+
+  async function generarFiniquitoPDF(t, c, fecha, causal){
+    var clauses = [
+      { title: 'PRIMERO: Individualización', body: 'Entre ' + (empresa.nombre||'[Nombre empresa]') + ', RUT ' + (empresa.rut||'[RUT empresa]') + ', en adelante "el empleador", y don(ña) ' + t.nombre + ', RUT ' + t.rut + ', en adelante "el trabajador", se ha convenido el siguiente finiquito de la relación laboral que los unió desde el ' + (t.fechaIngreso||'[fecha ingreso]') + ' hasta el ' + fecha + '.' },
+      { title: 'SEGUNDO: Causal de término', body: 'La relación laboral termina por la causal: ' + (CAUSAL_TERMINO_LABEL[causal] || causal) + '.' },
+      { title: 'TERCERO: Liquidación de haberes', body: 'Se pagan al trabajador los siguientes conceptos: sueldo proporcional de ' + fmtCLP(c.sueldoProporcional) + '; vacaciones proporcionales de ' + fmtCLP(c.vacacionesProporcionales) +
+        (c.indemnizacionAnios>0 ? '; indemnización por años de servicio (' + c.aniosIndemnizables + ' año(s)) de ' + fmtCLP(c.indemnizacionAnios) : '') +
+        (c.indemnizacionAvisoPrevio>0 ? '; indemnización sustitutiva de aviso previo de ' + fmtCLP(c.indemnizacionAvisoPrevio) : '') +
+        '. Total líquido a pagar: ' + fmtCLP(c.totalHaberes) + '.' },
+      { title: 'CUARTO: Declaración', body: 'El trabajador declara recibir conforme el pago indicado y no tener cargo ni cobro pendiente en contra del empleador por concepto de la relación laboral que los unió, sin perjuicio de las acciones que procedan conforme a la ley.' }
+    ];
+    var doc = ReportPDF.buildContractDoc({
+      titulo: 'FINIQUITO DE CONTRATO DE TRABAJO',
+      subtitulo: t.nombre + ' — RUT ' + t.rut,
+      disclaimer: CONTRATO_DISCLAIMER + ' Este cálculo no aplica el tope de 90 UF por año en la indemnización por años de servicio ni distingue un eventual despido injustificado; verifícalo con un abogado o contador antes de pagar y firmar.',
+      clauses: clauses,
+      closing: 'Para constancia, firman ambas partes en dos ejemplares del mismo tenor.',
+      firmas: [{ label:'Firma Trabajador' }, { label:'Firma Empleador' }]
+    });
+    var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('finiquito-'+t.nombre)+'.pdf');
+    document.getElementById('finiquito-save-flash').textContent = res.mensaje;
+  }
+
+  document.getElementById('btn-confirmar-finiquito').addEventListener('click', function(){
+    if(!finiquitoTrabId) return;
+    var t = trabajadores.find(function(x){ return x.id===finiquitoTrabId; });
+    if(!t) return;
+    var fecha = document.getElementById('fin-fecha-termino').value;
+    var causal = document.getElementById('fin-causal').value;
+    var aviso = document.getElementById('fin-aviso-previo').value;
+    if(!fecha){ alert('Ingresa la fecha de término.'); return; }
+    if(!confirm('¿Confirmar el término de la relación laboral de ' + t.nombre + ' el ' + fecha + '? Pasa a "Personal desvinculado" — el registro no se elimina.')) return;
+    var c = calcularFiniquito(t, fecha, causal, aviso);
+    t.activo = false;
+    t.fechaTermino = fecha;
+    t.causalTermino = causal;
+    t.avisoPrevioDado = aviso;
+    t.finiquitoMonto = c.totalHaberes;
+    saveTrabajadores();
+    generarFiniquitoPDF(t, c, fecha, causal).catch(function(e){
+      document.getElementById('finiquito-save-flash').textContent = '✗ ' + e.message;
+    });
+    finiquitoTrabId = null;
+    document.getElementById('card-finiquito').style.display = 'none';
     renderTrabajadores();
     refreshSelectors();
   });
@@ -785,12 +1019,13 @@
   }
   function fillTrabajadorSelect(sel){
     var prev = sel.value;
-    if(trabajadores.length===0){
+    var activos = trabajadoresActivos();
+    if(activos.length===0){
       sel.innerHTML = '<option value="">(sin trabajadores)</option>';
       return;
     }
-    sel.innerHTML = trabajadores.map(function(t){ return '<option value="'+t.id+'">'+esc(t.nombre)+' — '+esc(t.rut)+'</option>'; }).join('');
-    if(trabajadores.some(function(t){ return t.id===prev; })) sel.value = prev;
+    sel.innerHTML = activos.map(function(t){ return '<option value="'+t.id+'">'+esc(t.nombre)+' — '+esc(t.rut)+'</option>'; }).join('');
+    if(activos.some(function(t){ return t.id===prev; })) sel.value = prev;
   }
 
   var asisTrabSel = document.getElementById('asis-trabajador');

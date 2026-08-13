@@ -664,8 +664,30 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     fresh.refGastosMigrado = true;
     return fresh;
   }
+  // Guarda, junto con los datos, un resumen mensual (ingresos/egresos/margen ya calculados) para que
+  // el módulo de Estado de Resultados lo lea directo — así nunca queda desincronizado con Gastos, en
+  // vez de reimplementar la misma fórmula de sueldos/IVA/impuestos por separado en otro archivo.
+  function computeResumenMensual(data) {
+    var resumen = {};
+    var trabajadores = getTrabajadoresGlobal();
+    var personalEsencial = trabajadores.filter(function (t) { return t.activo !== false && t.tipo === "esencial"; }).length;
+    var personalAseo = trabajadores.filter(function (t) { return t.activo !== false && t.tipo !== "esencial"; }).length;
+    Object.keys(data.months || {}).forEach(function (key) {
+      var t = monthTotals(data.months[key], data.params, key);
+      resumen[key] = {
+        totIngresos: t.totIngresos, totEgresos: t.totEgresos, margen: t.margen,
+        totIngresosResidentes: t.totIngresosResidentes,
+        residentes: t.ingresosAutoRows.length,
+        personalEsencial: personalEsencial, personalAseo: personalAseo
+      };
+    });
+    return resumen;
+  }
   function saveData(data) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+    try {
+      data.resumenMensual = computeResumenMensual(data);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {}
   }
 
   function sum(rows) { return (rows || []).reduce(function (a, r) { return a + (parseFloat(r.monto) || 0); }, 0); }

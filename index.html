@@ -113,8 +113,8 @@ footer.note { text-align: center; font-size: 12px; color: var(--ink-faint); marg
   </div>
 
   <div class="summary-card" id="summaryCard">
-    <h2>Resumen general</h2>
-    <p class="sub">Datos guardados en este navegador — se actualizan solos a medida que usas los módulos. La cuota de cada residente es confidencial y no se muestra aquí.</p>
+    <h2>Funcionamiento del ELEAM hoy</h2>
+    <p class="sub">Indicadores operacionales del día — se actualizan solos a medida que usas los módulos de Residentes y Ficha médica. Para cifras financieras o de personal, ve a esos módulos directamente.</p>
     <div class="stat-grid" id="statGrid"></div>
   </div>
 
@@ -194,13 +194,13 @@ footer.note { text-align: center; font-size: 12px; color: var(--ink-faint); marg
       (d.medicamentos || []).forEach(function (m) {
         var horarios = parseHorarios(m.horarios);
         if (horarios.length === 0) horarios = ["(sin horario)"];
-        horarios.forEach(function (h) { items.push("med_" + m.id + "|" + h); });
+        horarios.forEach(function (h) { items.push({ key: "med_" + m.id + "|" + h, categoria: "medicamento" }); });
       });
     });
     (ficha.cuidadosGenerales || []).forEach(function (c) {
       var horarios = parseHorarios(c.horarios);
       if (horarios.length === 0) horarios = ["(sin horario)"];
-      horarios.forEach(function (h) { items.push("cui_" + c.id + "|" + h); });
+      horarios.forEach(function (h) { items.push({ key: "cui_" + c.id + "|" + h, categoria: c.tipo || "otro" }); });
     });
     return items;
   }
@@ -209,45 +209,38 @@ footer.note { text-align: center; font-size: 12px; color: var(--ink-faint); marg
     var residentes = readJSON("rha_residentes", []);
     var activos = residentes.filter(function (r) { return !r.fechaEgreso || r.fechaEgreso > todayStr(); });
 
-    var boxes = box("Residentes activos", activos.length, activos.length + " de " + residentes.length + " registrados · cuota confidencial en el módulo de Ingreso");
+    var boxes = box("Residentes actuales", activos.length, activos.length + " de " + residentes.length + " registrados en total");
 
     var fichas = readJSON("rha_fichas", {});
     var checklist = readJSON("rha_cuidados_checklist", {});
     var hoy = todayStr();
-    var totalItems = 0, totalHechos = 0, residentesConTareas = 0;
+
+    var categorias = {
+      medicamento: { label: "Medicación administrada hoy", total: 0, hechos: 0 },
+      alimentacion: { label: "Alimentación — horarios cumplidos hoy", total: 0, hechos: 0 },
+      general: { label: "Cuidados generales cumplidos hoy", total: 0, hechos: 0 }
+    };
     activos.forEach(function (r) {
       var ficha = fichas[r.id];
       if (!ficha) return;
       var items = buildCareItems(ficha);
-      if (items.length === 0) return;
-      residentesConTareas++;
       var dayData = checklist[r.id + "_" + hoy] || {};
-      totalItems += items.length;
-      items.forEach(function (key) { if (dayData[key] && dayData[key].hecho) totalHechos++; });
+      items.forEach(function (item) {
+        var cat = item.categoria === "medicamento" ? "medicamento" : item.categoria === "alimentacion" ? "alimentacion" : "general";
+        categorias[cat].total++;
+        if (dayData[item.key] && dayData[item.key].hecho) categorias[cat].hechos++;
+      });
     });
-    if (totalItems > 0) {
-      var pct = Math.round((totalHechos / totalItems) * 100);
-      boxes += box("Cumplimiento de cuidados hoy", pct + "%", totalHechos + " de " + totalItems + " tareas realizadas · " + residentesConTareas + " residente(s) con ficha médica", pct < 80 ? "critical" : "good");
-    } else {
-      boxes += box("Cumplimiento de cuidados hoy", "Sin datos", "Registra diagnósticos, medicamentos y cuidados en el módulo de Ficha médica");
-    }
 
-    var trabajadores = readJSON("rha_trabajadores", []);
-    var soporte = trabajadores.filter(function (t) { return t.tipo !== "esencial"; }).length;
-    var esencial = trabajadores.filter(function (t) { return t.tipo === "esencial"; }).length;
-
-    boxes += box("Trabajadores registrados", trabajadores.length, soporte + " soporte · " + esencial + " esencial (turno 4×4)");
-
-    var fin = readJSON("eleam-control-financiero-v2", null);
-    if (fin && fin.months) {
-      var keys = Object.keys(fin.months).sort();
-      var lastKey = keys[keys.length - 1];
-      if (lastKey) {
-        boxes += box("Último mes con datos de gastos", lastKey, "Revisa el detalle en el módulo de Gastos");
+    ["medicamento", "alimentacion", "general"].forEach(function (catKey) {
+      var c = categorias[catKey];
+      if (c.total > 0) {
+        var pct = Math.round((c.hechos / c.total) * 100);
+        boxes += box(c.label, pct + "%", c.hechos + " de " + c.total + " tareas realizadas", pct < 80 ? "critical" : "good");
+      } else {
+        boxes += box(c.label, "Sin datos", "Registra en el módulo de Ficha médica");
       }
-    } else {
-      boxes += box("Gastos", "Sin datos aún", "Registra el primer mes en el módulo de Gastos");
-    }
+    });
 
     document.getElementById("statGrid").innerHTML = boxes;
   }

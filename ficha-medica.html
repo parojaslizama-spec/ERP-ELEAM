@@ -98,6 +98,7 @@
   .badge.medicamento{ background:var(--dorado-soft); color:#5c4315; }
   .badge.bano{ background:var(--sky-soft); color:#324a5c; }
   .badge.cambio_posicion{ background:var(--rose-soft); color:#6d332c; }
+  .badge.alimentacion{ background:var(--paper-dark); color:var(--petroleo-dark); }
 
   .diag-block{ background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:14px; }
   .diag-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; }
@@ -266,6 +267,7 @@
               <select id="cui-tipo">
                 <option value="bano">Baño</option>
                 <option value="cambio_posicion">Cambio de posición</option>
+                <option value="alimentacion">Alimentación</option>
                 <option value="medicamento">Medicación</option>
                 <option value="otro">Otro</option>
               </select>
@@ -330,7 +332,7 @@
     };
   }
 
-  var TIPO_LABEL = { bano:'Baño', cambio_posicion:'Cambio de posición', medicamento:'Medicación', otro:'Otro cuidado' };
+  var TIPO_LABEL = { bano:'Baño', cambio_posicion:'Cambio de posición', alimentacion:'Alimentación', medicamento:'Medicación', otro:'Otro cuidado' };
 
   var residentes = window.storage.get('residentes', []);
   var fichas = window.storage.get('fichas', {});
