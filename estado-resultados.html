@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<script src="assets/auth.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estado de Resultados — ELEAM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+  :root{
+    --paper:#F8F4EC; --paper-dark:#f0e9d7; --ink:#3d3a33; --ink-soft:#6f6858;
+    --petroleo:#5f7c68; --petroleo-dark:#48604f; --dorado:#c9a35e; --dorado-soft:#eeddb3;
+    --line:#e0d7bf; --card:#fffdf8; --danger:#ad5c4c; --danger-bg:#f5e2da; --ok:#5f8a63;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; font-size:14px; line-height:1.45; padding-bottom:60px; }
+  h1,h2,h3{ font-family:'Lora',serif; font-weight:600; color:var(--petroleo-dark); margin:0 0 6px; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  button{ font-family:'Inter',sans-serif; font-weight:600; font-size:13px; cursor:pointer; border:1px solid var(--petroleo); background:var(--petroleo); color:#fff; padding:9px 16px; border-radius:5px; }
+  button:hover{ background:var(--petroleo-dark); }
+  button.secondary{ background:transparent; color:var(--petroleo); }
+  button.secondary:hover{ background:var(--paper-dark); }
+  input[type="number"]{ font-family:'JetBrains Mono',monospace; font-size:13px; padding:6px 8px; border:1px solid var(--line); border-radius:4px; background:#fffef9; color:var(--ink); width:120px; }
+
+  .top-header{ background:linear-gradient(180deg, var(--petroleo) 0%, var(--petroleo-dark) 100%); color:#f3ead3; padding:18px 28px; border-bottom:4px solid var(--dorado); }
+  .top-header .header-inner{ max-width:1180px; margin:0 auto; }
+  .brand-mark{ font-family:'Lora',serif; font-size:22px; color:var(--dorado-soft); }
+  .subtitle{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--dorado-soft); margin-top:2px; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:8px; padding:20px 22px; margin:20px 0; box-shadow:0 1px 3px rgba(30,25,10,.06); }
+  .card h2{ font-size:18px; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:16px; }
+  .card p.sub{ font-size:12.5px; color:var(--ink-soft); margin:0 0 14px; max-width:80ch; }
+
+  .summary-cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; }
+  .stat{ background:var(--paper-dark); border:1px solid var(--line); border-left:4px solid var(--petroleo); border-radius:6px; padding:12px 14px; }
+  .stat.gold{ border-left-color:var(--dorado); }
+  .stat.warn{ border-left-color:var(--danger); }
+  .stat .stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); font-weight:600; }
+  .stat .stat-value{ font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; color:var(--petroleo-dark); margin-top:4px; }
+  .stat .stat-note{ font-size:10.5px; color:var(--ink-soft); margin-top:3px; }
+
+  table{ width:100%; border-collapse:collapse; margin-top:6px; }
+  th{ text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--dorado); border-bottom:2px solid var(--petroleo); padding:7px 9px; background:var(--paper-dark); position:sticky; top:0; }
+  td{ padding:6px 9px; border-bottom:1px solid var(--line); font-size:12.5px; vertical-align:middle; }
+  tbody tr:hover{ background:#fbf7ea; }
+  td.num, th.num{ font-family:'JetBrains Mono',monospace; text-align:right; }
+  tr.tag-simulado td.tag{ color:var(--ink-soft); }
+  tr.tag-real td.tag{ color:var(--ok); font-weight:700; }
+  tr.margen-neg td.margen{ color:var(--danger); }
+  .table-scroll{ max-height:520px; overflow-y:auto; border:1px solid var(--line); border-radius:6px; }
+  .table-scroll table{ margin-top:0; }
+
+  .chart-scroll{ overflow-x:auto; }
+  .legend{ display:flex; gap:16px; font-size:12px; color:var(--ink-soft); margin-top:8px; flex-wrap:wrap; }
+  .legend i{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:middle; }
+
+  .eventos-list{ list-style:none; margin:0; padding:0; max-height:340px; overflow-y:auto; }
+  .eventos-list li{ padding:8px 0; border-bottom:1px solid var(--line); font-size:12.5px; display:flex; gap:10px; }
+  .eventos-list li .fecha{ font-family:'JetBrains Mono',monospace; color:var(--petroleo-dark); font-weight:700; min-width:64px; flex:none; }
+
+  .params-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:end; margin-bottom:14px; }
+  .params-row .field{ display:flex; flex-direction:column; gap:4px; }
+  .params-row label{ font-size:11px; font-weight:600; color:var(--ink-soft); }
+  .toggle-row{ margin-top:10px; }
+
+  footer.note{ max-width:1180px; margin:30px auto 0; padding:0 24px; font-size:11.5px; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<header class="top-header">
+  <div class="header-inner">
+    <div class="brand-mark">&#128202;</div>
+    <div>
+      <h1 style="color:#f6f2e7; margin:0;">Estado de Resultados</h1>
+      <div class="subtitle">Histórico mensual — proyección simulada de 10 años + datos reales de Gastos</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2>Resumen actual</h2>
+    <div class="summary-cards" id="kpi-grid"></div>
+  </div>
+
+  <div class="card">
+    <h2>Supuestos de la simulación (editables)</h2>
+    <p class="sub">Los 10 años previos al mes actual son una <b>proyección simulada</b>, no contabilidad real — sirve para visualizar cómo crecería el negocio bajo estos supuestos. Ajusta los valores y se recalcula solo. Desde el mes actual en adelante, esta pantalla usa los datos reales que cargues en el módulo Gastos.</p>
+    <div class="params-row">
+      <div class="field"><label for="sim-cuota">Cuota promedio por residente (CLP, con IVA)</label><input id="sim-cuota" type="number" step="10000"></div>
+      <div class="field"><label for="sim-mortalidad">Mortalidad mensual por residente (%)</label><input id="sim-mortalidad" type="number" step="0.1"></div>
+      <div class="field"><label for="sim-umbral">Umbral para doblar personal esencial</label><input id="sim-umbral" type="number" step="1"></div>
+      <div class="field"><label for="sim-inversion">Monto por inversión (CLP)</label><input id="sim-inversion" type="number" step="1000000"></div>
+      <div class="field"><label for="sim-seed">Semilla aleatoria</label><input id="sim-seed" type="number" step="1"></div>
+      <div><button id="btn-recalcular" type="button">Recalcular</button></div>
+    </div>
+    <p class="field-hint" style="font-size:11px; color:var(--ink-soft);">La tasa de mortalidad es un supuesto aproximado para población adulta mayor dependiente en ELEAM (no es una cifra oficial) — ajústala si tienes datos propios. Los ingresos por residente y los turnos siguen el modelo cada 3–4 meses (aleatorio) pedido.</p>
+  </div>
+
+  <div class="card">
+    <h2>Ingresos, egresos y margen por año</h2>
+    <div class="chart-scroll"><svg id="chart-svg" viewBox="0 0 900 300" style="width:100%; min-width:700px; height:auto;"></svg></div>
+    <div class="legend">
+      <span><i style="background:var(--petroleo);"></i>Ingresos</span>
+      <span><i style="background:var(--dorado);"></i>Egresos</span>
+      <span><i style="background:var(--ok);"></i>Margen (línea)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Resumen por año</h2>
+    <div class="table-scroll" style="max-height:360px;">
+      <table>
+        <thead><tr><th>Año</th><th class="num">Ingresos</th><th class="num">Egresos</th><th class="num">Margen</th><th class="num">Residentes (dic.)</th><th class="num">Personal (dic.)</th></tr></thead>
+        <tbody id="tabla-anual"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Hitos y eventos simulados</h2>
+    <p class="sub">Inversiones, duplicación de personal, reajustes de sueldo — los meses más relevantes de la proyección.</p>
+    <ul class="eventos-list" id="lista-eventos"></ul>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <h2 style="border:none; padding:0; margin:0;">Detalle mensual (120 meses)</h2>
+      <button id="btn-toggle-detalle" class="secondary" type="button">Mostrar detalle mensual</button>
+    </div>
+    <div id="detalle-mensual-wrap" style="display:none; margin-top:14px;">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Mes</th><th class="tag">Origen</th><th class="num">Residentes</th><th class="num">Personal esencial</th><th class="num">Aseo</th><th class="num">Ingresos</th><th class="num">Egresos</th><th class="num margen">Margen</th><th>Eventos</th></tr></thead>
+          <tbody id="tabla-mensual"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer class="note">
+    Los meses anteriores al actual son una simulación con parámetros editables (mortalidad, ingreso de residentes, dotación, inversiones, reajustes) — no reemplazan la contabilidad real. Desde el mes actual, esta pantalla usa los datos reales del módulo Gastos, sincronizados automáticamente. No incluye impuesto a la renta de primera categoría ni depreciación de activos — es una vista operacional (ingresos − costos − IVA neto), no un estado de resultados tributario completo.
+  </footer>
+</div>
+
+<script src="assets/nav.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  function fmtCLP(n){ return '$ ' + Math.round(n||0).toLocaleString('es-CL'); }
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function monthKeyOf(year, month){ return year + '-' + pad2(month); }
+  function monthLabel(key){
+    var MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    var p = key.split('-');
+    return MESES[parseInt(p[1],10)-1] + ' ' + p[0];
+  }
+
+  // ---------------- Motor de simulación (10 años, semilla fija para reproducibilidad) ----------------
+  function mulberry32(seed){
+    return function(){
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var IMM = 500000;
+  var AFP_PCT = 11.44, SIS_PCT = 1.49, AFC_EMPRESA_PCT = 2.4, MUTUAL_PCT = 0.93, IVA_PCT = 19;
+  var TOPE_GRAT_ANUAL = 4.75;
+
+  function topeGratMensual(){ return (TOPE_GRAT_ANUAL * IMM) / 12; }
+
+  // Costo mensual para la empresa por trabajador: sueldo base + gratificación (25%, tope legal) + cargas
+  // patronales (SIS + cesantía empresa + mutual). No incluye horas extra/bonos de asistencia — son
+  // demasiado granulares para proyectar una década, se usa el costo "de régimen" de cada trabajador.
+  function costoEmpresaTrabajador(sueldoBase){
+    var gratificacion = Math.min(sueldoBase * 0.25, topeGratMensual());
+    var baseImponible = sueldoBase + gratificacion;
+    var cargasEmpleador = baseImponible * (SIS_PCT + AFC_EMPRESA_PCT + MUTUAL_PCT) / 100;
+    return sueldoBase + gratificacion + cargasEmpleador;
+  }
+
+  function sueldoAdminPara(year, base, anioBase){
+    var anios = Math.max(0, year - anioBase);
+    return Math.round(base * Math.pow(1.05, anios) / 100) * 100;
+  }
+
+  function simular10Anios(opts){
+    opts = opts || {};
+    var rng = mulberry32(opts.seed || 20260812);
+    var hoy = opts.hoy || new Date();
+    var mesesTotal = 120;
+    var fechaInicio = new Date(hoy.getFullYear() - 10, hoy.getMonth(), 1);
+
+    var cuotaPromedioResidente = opts.cuotaPromedioResidente || 950000;
+    var capacidadMaxima = opts.capacidadMaxima || 30;
+    var tasaMortalidadMensual = opts.tasaMortalidadMensual != null ? opts.tasaMortalidadMensual : 0.009;
+    var umbralDoblarPersonal = opts.umbralDoblarPersonal || 16;
+    var montoInversion = opts.montoInversion || 15000000;
+    var numInversiones = opts.numInversiones || 2;
+
+    var residentes = opts.residentesIniciales != null ? opts.residentesIniciales : 3;
+    var mesesHastaProximoIngreso = 3 + Math.floor(rng() * 2);
+
+    var siguienteWorkerId = 1;
+    function nuevoTrabajador(rol, mesIngreso, esFundador){
+      return { id: siguienteWorkerId++, rol: rol, sueldoBase: IMM, mesIngreso: mesIngreso, esFundador: !!esFundador, subio2Anios: false, activo: true };
+    }
+    var trabajadores = [
+      nuevoTrabajador('cuidador', 0, true), nuevoTrabajador('cuidador', 0, true),
+      nuevoTrabajador('cuidador', 0, true), nuevoTrabajador('cuidador', 0, true),
+      nuevoTrabajador('aseo', 0, true)
+    ];
+
+    var sueldoAdminBase = opts.sueldoAdminBase || 700000;
+    var anioAdminBase = fechaInicio.getFullYear();
+
+    var doblajeDisparado = false, doblajeCompletadoEnMes = null;
+    var margenAcumulado = 0, inversionesRealizadas = 0, mesesDesdeUltimaInversion = 999;
+
+    var meses = [];
+
+    for(var m=0; m<mesesTotal; m++){
+      var fecha = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth()+m, 1);
+      var year = fecha.getFullYear(), month = fecha.getMonth()+1;
+      var monthKey = monthKeyOf(year, month);
+      var eventos = [];
+
+      var muertes = 0;
+      for(var i=0; i<residentes; i++){ if(rng() < tasaMortalidadMensual) muertes++; }
+      if(muertes > 0){ residentes = Math.max(0, residentes - muertes); eventos.push(muertes + ' fallecimiento(s)'); }
+
+      mesesHastaProximoIngreso--;
+      if(mesesHastaProximoIngreso <= 0 && residentes < capacidadMaxima){
+        residentes++; eventos.push('Nuevo residente'); mesesHastaProximoIngreso = 3 + Math.floor(rng()*2);
+      }
+
+      if(!doblajeDisparado && residentes > umbralDoblarPersonal){
+        doblajeDisparado = true;
+        doblajeCompletadoEnMes = m + 1 + Math.floor(rng()*3);
+      }
+      if(doblajeDisparado && doblajeCompletadoEnMes === m){
+        var cuidadoresActuales = trabajadores.filter(function(t){ return t.rol==='cuidador' && t.activo; }).length;
+        for(var c=0;c<cuidadoresActuales;c++) trabajadores.push(nuevoTrabajador('cuidador', m, false));
+        trabajadores.push(nuevoTrabajador('aseo', m, false));
+        eventos.push('Personal esencial duplicado (+' + cuidadoresActuales + ' cuidadores) y se suma 1 auxiliar de aseo');
+      }
+
+      trabajadores.forEach(function(t){
+        if(!t.activo) return;
+        var mesesAntiguedad = m - t.mesIngreso;
+        if(mesesAntiguedad >= 24 && !t.subio2Anios){
+          t.sueldoBase = Math.round(t.sueldoBase * 1.10 / 100) * 100;
+          if(t.esFundador) t.sueldoBase = Math.round(t.sueldoBase * 1.05 / 100) * 100;
+          t.subio2Anios = true;
+          eventos.push('Reajuste de sueldo (2 años) — trabajador #' + t.id + (t.esFundador ? ' + bono único de fundador (+5%)' : ''));
+        }
+      });
+
+      var ingresos = residentes * cuotaPromedioResidente;
+      var ivaDebito = ingresos * IVA_PCT / (100 + IVA_PCT);
+
+      var costoPersonal = 0;
+      trabajadores.forEach(function(t){ if(t.activo) costoPersonal += costoEmpresaTrabajador(t.sueldoBase); });
+
+      var sueldoAdmin = sueldoAdminPara(year, sueldoAdminBase, anioAdminBase);
+
+      var gastosFijos = 685000;
+      var gastosVariables = residentes * 150000;
+      var gastosNeto = gastosFijos + gastosVariables;
+      var ivaCredito = gastosNeto * IVA_PCT / 100;
+      var servicios = 400000 + residentes * 15000;
+      var ivaNetoAPagar = Math.max(0, ivaDebito - ivaCredito);
+
+      mesesDesdeUltimaInversion++;
+      var inversionMes = 0;
+      if(inversionesRealizadas < numInversiones && margenAcumulado >= montoInversion && mesesDesdeUltimaInversion >= 12){
+        inversionMes = montoInversion; inversionesRealizadas++; mesesDesdeUltimaInversion = 0; margenAcumulado -= montoInversion;
+        eventos.push('Inversión: aire acondicionado / instalaciones nuevas (' + inversionesRealizadas + '/' + numInversiones + ')');
+      }
+
+      var egresos = costoPersonal + sueldoAdmin + gastosNeto + ivaCredito + servicios + ivaNetoAPagar + inversionMes;
+      var margen = ingresos - egresos;
+      margenAcumulado += margen;
+
+      meses.push({
+        monthKey: monthKey, origen: 'simulado', residentes: residentes,
+        personalEsencial: trabajadores.filter(function(t){ return t.rol==='cuidador' && t.activo; }).length,
+        personalAseo: trabajadores.filter(function(t){ return t.rol==='aseo' && t.activo; }).length,
+        ingresos: ingresos, egresos: egresos, margen: margen, inversion: inversionMes, eventos: eventos
+      });
+    }
+    return meses;
+  }
+
+  // ---------------- Datos reales (módulo Gastos) desde el mes actual en adelante ----------------
+  function readJSON(key, def){ try{ var raw = localStorage.getItem(key); return raw===null ? def : JSON.parse(raw); }catch(e){ return def; } }
+  function sumRows(rows){ return (rows||[]).reduce(function(a,r){ return a + (parseFloat(r.monto)||0); }, 0); }
+
+  function totalesRealesParaMes(monthKey){
+    var finData = readJSON('eleam-control-financiero-v2', null);
+    if(!finData || !finData.months || !finData.months[monthKey]) return null;
+    var month = finData.months[monthKey];
+    var params = finData.params || {};
+    var ivaPct = params.ivaPct != null ? params.ivaPct : 19;
+
+    var year = parseInt(monthKey.split('-')[0],10), mm = parseInt(monthKey.split('-')[1],10);
+    var inicioMes = year+'-'+pad2(mm)+'-01', finMes = year+'-'+pad2(mm)+'-31';
+    var residentes = readJSON('rha_residentes', []);
+    var activos = residentes.filter(function(r){
+      var ingresoOk = !r.fechaIngreso || r.fechaIngreso <= finMes;
+      var egresoOk = !r.fechaEgreso || r.fechaEgreso >= inicioMes;
+      return ingresoOk && egresoOk;
+    });
+    var totIngresosResidentes = activos.reduce(function(a,r){ return a + (r.cuotaPermanencia||0); }, 0);
+    var totIngresos = totIngresosResidentes + sumRows(month.ingresosExtra);
+
+    var imm = readJSON('rha_imm', 500000);
+    var trabajadores = readJSON('rha_trabajadores', []);
+    var liquidaciones = readJSON('rha_liquidaciones', {});
+    var topeGrat = (4.75 * imm) / 12;
+    var totCostoBase = 0, totBaseImponible = 0;
+    trabajadores.forEach(function(t){
+      var key = t.id+'_'+year+'_'+mm;
+      var saved = liquidaciones[key];
+      var gratifDefault = Math.round(Math.min((t.sueldoBase||0)*0.25, topeGrat)/100)*100;
+      var f = saved || { sueldoBase: t.sueldoBase, gratificacion: gratifDefault, bonos:0, bonoAsistencia:0, bonoPuntualidad:0, heCantidad:0, heValor:0, diasFalta:0, impuesto:0, otros:0 };
+      var montoHorasExtra = (f.heCantidad||0)*(f.heValor||0);
+      var totalHaberes = (f.sueldoBase||0)+(f.gratificacion||0)+(f.bonos||0)+(f.bonoAsistencia||0)+(f.bonoPuntualidad||0)+montoHorasExtra;
+      var baseImponible = (f.sueldoBase||0)+(f.gratificacion||0)+montoHorasExtra+(f.bonoAsistencia||0)+(f.bonoPuntualidad||0);
+      var descInasistencia = ((f.sueldoBase||0)/30)*(f.diasFalta||0);
+      totCostoBase += totalHaberes - descInasistencia;
+      totBaseImponible += baseImponible;
+    });
+    var cargasEmpresa = totBaseImponible * (SIS_PCT+AFC_EMPRESA_PCT+MUTUAL_PCT) / 100;
+    var costoPersonalTotal = totCostoBase + cargasEmpresa;
+
+    var totGastosNeto = sumRows(month.gastos);
+    var ivaCredito = totGastosNeto * ivaPct / 100;
+    var gastosConIva = totGastosNeto + ivaCredito;
+    var totServicios = sumRows(month.servicios);
+    var ivaDebito = totIngresosResidentes * ivaPct / (100+ivaPct);
+    var ivaAPagar = Math.max(0, ivaDebito - ivaCredito);
+    var sueldoAdmin = sueldoAdminPara(year, params.sueldoAdminBase||700000, params.sueldoAdminAnioBase||year);
+
+    var totEgresos = costoPersonalTotal + gastosConIva + totServicios + ivaAPagar + sueldoAdmin;
+    return {
+      monthKey: monthKey, origen: 'real', residentes: activos.length,
+      personalEsencial: trabajadores.filter(function(t){ return t.tipo==='esencial'; }).length,
+      personalAseo: trabajadores.filter(function(t){ return t.tipo!=='esencial'; }).length,
+      ingresos: totIngresos, egresos: totEgresos, margen: totIngresos-totEgresos, inversion: 0, eventos: []
+    };
+  }
+
+  // ---------------- Combinar simulación (pasado) + datos reales (mes actual en adelante) ----------------
+  function construirLineaDeTiempo(opts){
+    var hoy = new Date();
+    var mesActualKey = monthKeyOf(hoy.getFullYear(), hoy.getMonth()+1);
+    var simulado = simular10Anios(Object.assign({ hoy: hoy }, opts));
+    var linea = simulado.filter(function(m){ return m.monthKey < mesActualKey; });
+
+    // Continúa con datos reales del mes actual en adelante, mientras existan en el módulo Gastos.
+    var finData = readJSON('eleam-control-financiero-v2', null);
+    var mesesReales = finData && finData.months ? Object.keys(finData.months).filter(function(k){ return k >= mesActualKey; }).sort() : [];
+    if(mesesReales.indexOf(mesActualKey) === -1) mesesReales.unshift(mesActualKey);
+    mesesReales.sort();
+    mesesReales.forEach(function(k){
+      var real = totalesRealesParaMes(k);
+      if(real) linea.push(real);
+    });
+    return linea;
+  }
+
+  // ---------------- Render ----------------
+  function box(label, value, note, tone){
+    return '<div class="stat'+(tone?' '+tone:'')+'"><div class="stat-label">'+label+'</div><div class="stat-value">'+value+'</div>'+(note?'<div class="stat-note">'+note+'</div>':'')+'</div>';
+  }
+
+  function renderKPIs(linea){
+    var ultimo = linea[linea.length-1];
+    var totalInversiones = linea.reduce(function(a,m){ return a + (m.inversion||0); }, 0);
+    var margenAcum = linea.reduce(function(a,m){ return a + m.margen; }, 0);
+    var html = '';
+    html += box('Residentes (' + monthLabel(ultimo.monthKey) + ')', ultimo.residentes, ultimo.origen==='real'?'Dato real':'Simulado');
+    html += box('Personal esencial', ultimo.personalEsencial, ultimo.personalAseo + ' de aseo');
+    html += box('Margen mensual actual', fmtCLP(ultimo.margen), '', ultimo.margen>=0?'':'warn');
+    html += box('Total invertido en capex', fmtCLP(totalInversiones), 'Aire acondicionado / instalaciones');
+    html += box('Margen acumulado (10 años + real)', fmtCLP(margenAcum), '', margenAcum>=0?'gold':'warn');
+    document.getElementById('kpi-grid').innerHTML = html;
+  }
+
+  function agruparPorAnio(linea){
+    var anios = {};
+    linea.forEach(function(m){
+      var anio = m.monthKey.split('-')[0];
+      if(!anios[anio]) anios[anio] = { anio: anio, ingresos:0, egresos:0, margen:0, residentesFin:0, personalFin:0 };
+      anios[anio].ingresos += m.ingresos;
+      anios[anio].egresos += m.egresos;
+      anios[anio].margen += m.margen;
+      anios[anio].residentesFin = m.residentes;
+      anios[anio].personalFin = m.personalEsencial + m.personalAseo;
+    });
+    return Object.keys(anios).sort().map(function(k){ return anios[k]; });
+  }
+
+  function renderTablaAnual(porAnio){
+    var html = porAnio.map(function(a){
+      return '<tr'+(a.margen<0?' class="margen-neg"':'')+'>'+
+        '<td>'+a.anio+'</td>'+
+        '<td class="num">'+fmtCLP(a.ingresos)+'</td>'+
+        '<td class="num">'+fmtCLP(a.egresos)+'</td>'+
+        '<td class="num margen">'+fmtCLP(a.margen)+'</td>'+
+        '<td class="num">'+a.residentesFin+'</td>'+
+        '<td class="num">'+a.personalFin+'</td>'+
+      '</tr>';
+    }).join('');
+    document.getElementById('tabla-anual').innerHTML = html;
+  }
+
+  function renderChart(porAnio){
+    var W=900, H=300, padL=60, padR=16, padT=16, padB=34;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    var maxVal = Math.max.apply(null, porAnio.map(function(a){ return Math.max(a.ingresos, a.egresos); }).concat([1]));
+    var minMargen = Math.min.apply(null, porAnio.map(function(a){ return a.margen; }).concat([0]));
+    var yMin = Math.min(0, minMargen), yMax = maxVal*1.1;
+    function yPix(v){ return padT + (1-(v-yMin)/(yMax-yMin))*plotH; }
+    var zeroY = yPix(0);
+    var groupW = plotW/porAnio.length;
+    var svg = '';
+    svg += '<line x1="'+padL+'" y1="'+zeroY+'" x2="'+(W-padR)+'" y2="'+zeroY+'" stroke="#c9bfa0" stroke-width="1"/>';
+    var puntosMargen = [];
+    porAnio.forEach(function(a,i){
+      var gx = padL + i*groupW;
+      var barW = groupW*0.32;
+      var yIng = yPix(a.ingresos), yEgr = yPix(a.egresos);
+      svg += '<rect x="'+(gx+groupW*0.12)+'" y="'+Math.min(yIng,zeroY)+'" width="'+barW+'" height="'+Math.abs(zeroY-yIng)+'" fill="#5f7c68" rx="2"/>';
+      svg += '<rect x="'+(gx+groupW*0.52)+'" y="'+Math.min(yEgr,zeroY)+'" width="'+barW+'" height="'+Math.abs(zeroY-yEgr)+'" fill="#c9a35e" rx="2"/>';
+      svg += '<text x="'+(gx+groupW/2)+'" y="'+(H-10)+'" text-anchor="middle" font-size="11" fill="#6f6858">'+a.anio+'</text>';
+      puntosMargen.push([gx+groupW/2, yPix(a.margen)]);
+    });
+    svg += '<polyline points="'+puntosMargen.map(function(p){ return p[0]+','+p[1]; }).join(' ')+'" fill="none" stroke="#5f8a63" stroke-width="2.5"/>';
+    puntosMargen.forEach(function(p){ svg += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="#5f8a63"/>'; });
+    document.getElementById('chart-svg').innerHTML = svg;
+  }
+
+  function renderEventos(linea){
+    var conEventos = linea.filter(function(m){ return m.eventos.length>0; });
+    var html = conEventos.map(function(m){
+      return '<li><span class="fecha">'+monthLabel(m.monthKey)+'</span><span>'+m.eventos.join(' · ')+'</span></li>';
+    }).join('');
+    document.getElementById('lista-eventos').innerHTML = html || '<li>Sin eventos destacados.</li>';
+  }
+
+  function renderTablaMensual(linea){
+    var html = linea.map(function(m){
+      return '<tr class="tag-'+m.origen+(m.margen<0?' margen-neg':'')+'">'+
+        '<td>'+monthLabel(m.monthKey)+'</td>'+
+        '<td class="tag">'+(m.origen==='real'?'Real':'Simulado')+'</td>'+
+        '<td class="num">'+m.residentes+'</td>'+
+        '<td class="num">'+m.personalEsencial+'</td>'+
+        '<td class="num">'+m.personalAseo+'</td>'+
+        '<td class="num">'+fmtCLP(m.ingresos)+'</td>'+
+        '<td class="num">'+fmtCLP(m.egresos)+'</td>'+
+        '<td class="num margen">'+fmtCLP(m.margen)+'</td>'+
+        '<td>'+m.eventos.join(' · ')+'</td>'+
+      '</tr>';
+    }).join('');
+    document.getElementById('tabla-mensual').innerHTML = html;
+  }
+
+  function renderTodo(opts){
+    var linea = construirLineaDeTiempo(opts);
+    renderKPIs(linea);
+    var porAnio = agruparPorAnio(linea);
+    renderTablaAnual(porAnio);
+    renderChart(porAnio);
+    renderEventos(linea);
+    renderTablaMensual(linea);
+  }
+
+  // ---------------- Controles ----------------
+  var simCuota = document.getElementById('sim-cuota');
+  var simMortalidad = document.getElementById('sim-mortalidad');
+  var simUmbral = document.getElementById('sim-umbral');
+  var simInversion = document.getElementById('sim-inversion');
+  var simSeed = document.getElementById('sim-seed');
+
+  simCuota.value = 950000;
+  simMortalidad.value = 0.9;
+  simUmbral.value = 16;
+  simInversion.value = 15000000;
+  simSeed.value = 20260812;
+
+  function leerOpts(){
+    return {
+      cuotaPromedioResidente: parseFloat(simCuota.value) || 950000,
+      tasaMortalidadMensual: (parseFloat(simMortalidad.value) || 0.9) / 100,
+      umbralDoblarPersonal: parseInt(simUmbral.value,10) || 16,
+      montoInversion: parseFloat(simInversion.value) || 15000000,
+      seed: parseInt(simSeed.value,10) || 20260812
+    };
+  }
+
+  document.getElementById('btn-recalcular').addEventListener('click', function(){ renderTodo(leerOpts()); });
+
+  document.getElementById('btn-toggle-detalle').addEventListener('click', function(){
+    var wrap = document.getElementById('detalle-mensual-wrap');
+    var visible = wrap.style.display !== 'none';
+    wrap.style.display = visible ? 'none' : 'block';
+    this.textContent = visible ? 'Mostrar detalle mensual' : 'Ocultar detalle mensual';
+  });
+
+  renderTodo(leerOpts());
+})();
+</script>
+</body>
+</html>

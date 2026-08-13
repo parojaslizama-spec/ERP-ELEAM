@@ -6,7 +6,8 @@
     { file: "control-residentes.html", num: "1", label: "Ingreso de residentes" },
     { file: "ficha-medica.html", num: "2", label: "Ficha médica y cuidados" },
     { file: "control-horas.html", num: "3", label: "Trabajadores y liquidaciones" },
-    { file: "control-financiero.html", num: "4", label: "Gastos" }
+    { file: "control-financiero.html", num: "4", label: "Gastos" },
+    { file: "estado-resultados.html", num: "5", label: "Estado de resultados" }
   ];
 
   function currentFile() {

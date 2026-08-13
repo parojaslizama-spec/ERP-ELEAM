@@ -587,7 +587,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     return {
       afpPct: 11.44, saludPct: 7, afcTrabajadorPct: 0.6,
       sisPct: 1.49, afcEmpresaPct: 2.4, mutualPct: 0.93,
-      ivaPct: 19
+      ivaPct: 19,
+      sueldoAdminBase: 700000, sueldoAdminAnioBase: new Date().getFullYear()
     };
   }
 
@@ -653,6 +654,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       if (raw) {
         var parsed = JSON.parse(raw);
         if (!parsed.params) parsed.params = defaultParams();
+        if (parsed.params.sueldoAdminBase === undefined) parsed.params.sueldoAdminBase = 700000;
+        if (parsed.params.sueldoAdminAnioBase === undefined) parsed.params.sueldoAdminAnioBase = new Date().getFullYear();
         if (aplicarValoresReferenciales(parsed)) saveData(parsed);
         return parsed;
       }
@@ -724,6 +727,15 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     };
   }
 
+  // Sueldo de administración (inversor/administrador): no pasa por AFP/salud/impuesto — es un retiro
+  // fijo mensual de gasto de administración, reajustado 5% cada enero desde el año base configurado.
+  function sueldoAdminPara(monthKey, params) {
+    var year = parseInt((monthKey || '').split('-')[0], 10) || new Date().getFullYear();
+    var anioBase = params.sueldoAdminAnioBase || year;
+    var anios = Math.max(0, year - anioBase);
+    return Math.round((params.sueldoAdminBase || 0) * Math.pow(1.05, anios) / 100) * 100;
+  }
+
   function monthTotals(month, params, monthKey) {
     var ingresosAutoRows = monthKey ? residentesAutoRows(monthKey) : [];
     var totIngresosResidentes = sumAuto(ingresosAutoRows);
@@ -736,7 +748,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var gastos = gastosBreakdown(totGastosNeto, params);
     var totServicios = sum(month.servicios);
     var tributacion = tributacionBreakdown(ivaResidentes.iva, gastos.iva);
-    var totEgresos = payroll.costoTotal + gastos.conIva + totServicios + tributacion.ivaAPagar;
+    var sueldoAdmin = sueldoAdminPara(monthKey, params);
+    var totEgresos = payroll.costoTotal + gastos.conIva + totServicios + tributacion.ivaAPagar + sueldoAdmin;
     return {
       totIngresos: totIngresos,
       ingresosAutoRows: ingresosAutoRows, totIngresosResidentes: totIngresosResidentes,
@@ -745,6 +758,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       totPersonalLiquido: totPersonalLiquido, payroll: payroll,
       gastos: gastos, totServicios: totServicios,
       tributacion: tributacion,
+      sueldoAdmin: sueldoAdmin,
       totEgresos: totEgresos, margen: totIngresos - totEgresos
     };
   }
@@ -962,6 +976,9 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     lines.push(["Subtotal obligaciones legales de empresa", totals.payroll.empresa.total].map(csvEscape).join(","));
     lines.push(["Costo total de personal (líquido + legales)", totals.payroll.costoTotal].map(csvEscape).join(","));
     lines.push([]);
+    lines.push(["ADMINISTRACIÓN (sueldo administrador/inversor, reajustado 5% cada enero)", "Monto"].map(csvEscape).join(","));
+    lines.push(["Sueldo administración este mes", totals.sueldoAdmin].map(csvEscape).join(","));
+    lines.push([]);
     lines.push(["GASTOS (neto)", "Monto"].map(csvEscape).join(","));
     month.gastos.forEach(function (r) { lines.push([r.concepto, r.monto].map(csvEscape).join(",")); });
     lines.push(["Subtotal gastos neto", totals.gastos.neto].map(csvEscape).join(","));
@@ -1068,6 +1085,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
               { label: "Mutual de seguridad", valor: money(t.payroll.empresa.mutual) }
             ],
             total: { label: "Subtotal obligaciones legales de empresa", valor: money(t.payroll.empresa.total) }
+          },
+          {
+            titulo: "Administración",
+            sub: "Sueldo del administrador/inversor — retiro fijo de gasto de administración, reajustado 5% cada enero.",
+            filas: [],
+            total: { label: "Sueldo administración este mes", valor: money(t.sueldoAdmin) }
           },
           {
             titulo: "Gastos",
@@ -1252,6 +1275,22 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           total: totals.payroll.empresa.total
         }),
         h("div", { className: "total-row" }, h("span", null, "Costo total de personal (líquido + legales)"), h("span", { className: "total-amount" }, money(totals.payroll.costoTotal)))
+      ),
+
+      h("div", { className: "card" },
+        h("h2", null, "Administración"),
+        h("p", { className: "sub" }, "Sueldo del administrador/inversor — no es un trabajador con liquidación (sin AFP ni impuesto), es un retiro fijo de gasto de administración, reajustado 5% cada enero."),
+        h("div", { className: "params-grid", style: { maxWidth: "480px" } },
+          h("div", { className: "field" },
+            h("div", { className: "field-row" }, h("label", null, "Sueldo base (CLP)")),
+            h("input", { type: "number", step: "1000", value: data.params.sueldoAdminBase, onChange: function (e) { updateParam("sueldoAdminBase", e.target.value === "" ? 0 : parseFloat(e.target.value)); } })
+          ),
+          h("div", { className: "field" },
+            h("div", { className: "field-row" }, h("label", null, "Año base (sin reajuste)")),
+            h("input", { type: "number", step: "1", value: data.params.sueldoAdminAnioBase, onChange: function (e) { updateParam("sueldoAdminAnioBase", e.target.value === "" ? new Date().getFullYear() : parseInt(e.target.value, 10)); } })
+          )
+        ),
+        h("div", { className: "total-row" }, h("span", null, "Sueldo administración este mes (" + monthLabel(currentKey) + ")"), h("span", { className: "total-amount" }, money(totals.sueldoAdmin)))
       ),
 
       h("div", { className: "card" },

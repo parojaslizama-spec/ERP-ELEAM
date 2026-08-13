@@ -346,10 +346,12 @@
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <h2 style="border:none; padding:0; margin:0;">N&oacute;mina</h2>
         <div>
+          <button id="btn-dotacion-minima" class="secondary" type="button">Cargar dotaci&oacute;n m&iacute;nima (4 cuidadores + 1 aseo)</button>
           <button id="btn-pdf-nomina" class="gold" type="button">Generar reporte PDF de n&oacute;mina</button>
           <span id="nomina-save-flash" class="save-flash"></span>
         </div>
       </div>
+      <p class="field-hint" id="dotacion-minima-hint">"Cargar dotaci&oacute;n m&iacute;nima" agrega 4 cuidadores (esencial, turnos 4&times;4 escalonados en 2 pares para asegurar 2 personas presentes en todo momento) y 1 auxiliar de aseo, todos al sueldo m&iacute;nimo vigente. &Uacute;salo una sola vez; despu&eacute;s edita nombres y RUT reales.</p>
       <table>
         <thead>
           <tr>
@@ -635,6 +637,39 @@
   }
   document.getElementById('btn-cancelar-trabajador').addEventListener('click', cancelarEdicionTrabajador);
 
+  function updateDotacionMinimaHint(){
+    document.getElementById('dotacion-minima-hint').textContent =
+      '"Cargar dotación mínima" agrega 4 cuidadores (esencial, turnos 4×4 escalonados en 2 pares para asegurar 2 personas presentes en todo momento) y 1 auxiliar de aseo, todos al sueldo mínimo vigente (' + fmtCLP(immVigente) + '). Úsalo una sola vez; después edita nombres y RUT reales.';
+  }
+  updateDotacionMinimaHint();
+
+  document.getElementById('btn-dotacion-minima').addEventListener('click', function(){
+    if(!confirm('Esto agrega 4 cuidadores y 1 auxiliar de aseo nuevos a la nómina, todos al sueldo mínimo (' + fmtCLP(immVigente) + '). ¿Continuar?')) return;
+    function fechaISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+    var hoyStr = fechaISO(new Date());
+    var hace4Dias = new Date(); hace4Dias.setDate(hace4Dias.getDate()-4);
+    var hace4DiasStr = fechaISO(hace4Dias);
+    function cuidador(n, ciclo){
+      return { nombre:'Cuidador(a) '+n, rut:'', cargo:'Cuidador(a)', tipo:'esencial', cicloInicio: ciclo,
+        sueldoBase: immVigente, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        horasJornada:12, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} };
+    }
+    var nuevos = [
+      cuidador(1, hoyStr), cuidador(2, hoyStr),
+      cuidador(3, hace4DiasStr), cuidador(4, hace4DiasStr),
+      { nombre:'Auxiliar de Aseo', rut:'', cargo:'Aseo', tipo:'soporte', cicloInicio:'',
+        sueldoBase: immVigente, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        horasJornada:8, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} }
+    ];
+    nuevos.forEach(function(n){ n.id = uid(); trabajadores.push(n); });
+    saveTrabajadores();
+    renderTrabajadores();
+    refreshSelectors();
+    var flash = document.getElementById('nomina-save-flash');
+    flash.textContent = '5 trabajadores agregados ✓ — completa RUT y nombres reales cuando corresponda.';
+    setTimeout(function(){ flash.textContent=''; }, 8000);
+  });
+
   document.getElementById('form-trabajador').addEventListener('submit', function(e){
     e.preventDefault();
     var nombre = document.getElementById('trab-nombre').value.trim();
@@ -789,6 +824,7 @@
     immVigente = num(liqImmInput.value) || 500000;
     saveImm();
     loadLiquidacion();
+    updateDotacionMinimaHint();
   });
   liqUtmInput.addEventListener('input', function(){
     utmVigente = num(liqUtmInput.value) || 68000;
