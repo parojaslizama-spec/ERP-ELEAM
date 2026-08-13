@@ -489,6 +489,9 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   function getImmGlobal() {
     try { return JSON.parse(localStorage.getItem("rha_imm") || "500000"); } catch (e) { return 500000; }
   }
+  function getTopeImponibleGlobal() {
+    try { return JSON.parse(localStorage.getItem("rha_tope_imponible") || "3300000"); } catch (e) { return 3300000; }
+  }
   // Gratificación legal Art. 50: 25% de lo devengado, con tope de 4,75 IMM al año (mensualizado) —
   // misma fórmula que usa el formulario de liquidación en control-horas.html.
   function gratificacionDefaultPara(trab) {
@@ -503,10 +506,13 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var montoHorasExtra = (f.heCantidad || 0) * (f.heValor || 0);
     var totalHaberes = (f.sueldoBase || 0) + (f.gratificacion || 0) + (f.bonos || 0) + (f.bonoAsistencia || 0) + (f.bonoPuntualidad || 0) + montoHorasExtra;
     var baseImponible = (f.sueldoBase || 0) + (f.gratificacion || 0) + montoHorasExtra + (f.bonoAsistencia || 0) + (f.bonoPuntualidad || 0);
+    // AFP, salud y cesantía se calculan solo hasta el tope imponible legal (misma cifra configurable
+    // que usa control-horas.html, para no divergir entre los dos módulos).
+    var baseImponibleTope = Math.min(baseImponible, getTopeImponibleGlobal() || Infinity);
     var descInasistencia = ((f.sueldoBase || 0) / 30) * (f.diasFalta || 0);
-    var afpMonto = baseImponible * ((trab.afpPct || 0) / 100);
-    var saludMonto = trab.saludTipo === "fonasa" ? baseImponible * 0.07 : (trab.saludMonto || 0);
-    var cesantiaMonto = baseImponible * ((trab.cesantiaPct || 0) / 100);
+    var afpMonto = baseImponibleTope * ((trab.afpPct || 0) / 100);
+    var saludMonto = trab.saludTipo === "fonasa" ? baseImponibleTope * 0.07 : (trab.saludMonto || 0);
+    var cesantiaMonto = baseImponibleTope * ((trab.cesantiaPct || 0) / 100);
     var totalDescuentos = afpMonto + saludMonto + cesantiaMonto + descInasistencia + (f.impuesto || 0) + (f.otros || 0);
     return {
       liquido: totalHaberes - totalDescuentos,
