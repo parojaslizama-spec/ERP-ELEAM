@@ -44,4 +44,11 @@
   } else {
     render();
   }
+
+  // Registra el service worker para que la app se pueda instalar y funcione sin internet.
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () { /* sin soporte o sin https: no es grave, sigue funcionando como página normal */ });
+    });
+  }
 })();
