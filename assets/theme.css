@@ -96,3 +96,39 @@
 @media print {
   .app-nav { display: none !important; }
 }
+
+.app-backup-reminder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: #f3e6c0;
+  border-bottom: 1px solid #d9be82;
+  padding: 10px 22px;
+  font-family: "Inter", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 12.5px;
+  color: #6b4f1a;
+}
+.app-backup-reminder-msg { max-width: 900px; }
+.app-backup-reminder-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.app-backup-reminder-btn {
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid #b3812f;
+  background: transparent;
+  color: #6b4f1a;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.app-backup-reminder-btn.primary {
+  background: #b3812f;
+  color: #fffaf0;
+}
+.app-backup-reminder-btn:hover { opacity: .85; }
+@media print {
+  .app-backup-reminder { display: none !important; }
+}

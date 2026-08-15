@@ -2,6 +2,22 @@
 (function () {
   "use strict";
 
+  var RESPALDO_KEY = "rha_ultimo_respaldo";
+
+  function marcarRespaldoHecho() {
+    try { localStorage.setItem(RESPALDO_KEY, new Date().toISOString()); } catch (e) {}
+  }
+
+  // Devuelve los días desde el último respaldo (exportado o restaurado), o null si nunca se ha hecho uno.
+  function diasDesdeUltimoRespaldo() {
+    var raw;
+    try { raw = localStorage.getItem(RESPALDO_KEY); } catch (e) { raw = null; }
+    if (!raw) return null;
+    var fecha = new Date(raw);
+    if (isNaN(fecha.getTime())) return null;
+    return Math.floor((Date.now() - fecha.getTime()) / 86400000);
+  }
+
   function exportBackup() {
     var datos = {};
     for (var i = 0; i < localStorage.length; i++) {
@@ -19,6 +35,7 @@
     a.click();
     document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    marcarRespaldoHecho();
   }
 
   function importBackup(file, callback) {
@@ -29,6 +46,7 @@
         var datos = payload && payload.datos ? payload.datos : payload;
         if (!datos || typeof datos !== "object") throw new Error("El archivo no tiene el formato esperado.");
         Object.keys(datos).forEach(function (k) { localStorage.setItem(k, datos[k]); });
+        marcarRespaldoHecho();
         callback(null);
       } catch (e) {
         callback(e);
@@ -38,5 +56,5 @@
     reader.readAsText(file);
   }
 
-  window.RhaBackup = { exportBackup: exportBackup, importBackup: importBackup };
+  window.RhaBackup = { exportBackup: exportBackup, importBackup: importBackup, diasDesdeUltimoRespaldo: diasDesdeUltimoRespaldo };
 })();
