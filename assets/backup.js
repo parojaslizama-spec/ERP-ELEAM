@@ -8,13 +8,13 @@
       var k = localStorage.key(i);
       datos[k] = localStorage.getItem(k);
     }
-    var payload = { app: "ERP ELEAM", generadoEn: new Date().toISOString(), datos: datos };
+    var payload = { app: "ERP Residencia Senior Omar Wall", generadoEn: new Date().toISOString(), datos: datos };
     var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     var fecha = new Date().toISOString().slice(0, 10);
     a.href = url;
-    a.download = "respaldo-eleam-" + fecha + ".json";
+    a.download = "respaldo-wall-" + fecha + ".json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

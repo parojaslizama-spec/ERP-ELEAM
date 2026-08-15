@@ -4,22 +4,22 @@
 <meta charset="UTF-8">
 <script src="assets/auth.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Estado de Resultados — ELEAM</title>
+<title>Estado de Resultados — Residencia Senior Omar Wall</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#5f7c68">
+<meta name="theme-color" content="#8a6a35">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ELEAM">
+<meta name="apple-mobile-web-app-title" content="Wall">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/theme.css">
 <style>
   :root{
-    --paper:#F8F4EC; --paper-dark:#f0e9d7; --ink:#3d3a33; --ink-soft:#6f6858;
-    --petroleo:#5f7c68; --petroleo-dark:#48604f; --dorado:#c9a35e; --dorado-soft:#eeddb3;
-    --line:#e0d7bf; --card:#fffdf8; --danger:#ad5c4c; --danger-bg:#f5e2da; --ok:#5f8a63;
+    --paper:#F7F1E2; --paper-dark:#efe2c4; --ink:#3a2b1c; --ink-soft:#6b5842;
+    --petroleo:#8a6a35; --petroleo-dark:#6b4f24; --dorado:#c79a3f; --dorado-soft:#ecd9ad;
+    --line:#e2d0a8; --card:#fffcf5; --danger:#a4452f; --danger-bg:#f4d9cc; --ok:#4f7a4a;
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
@@ -117,9 +117,9 @@
     <h2>Ingresos, egresos y margen por año</h2>
     <div class="chart-scroll"><svg id="chart-svg" viewBox="0 0 900 300" style="width:100%; min-width:700px; height:auto;"></svg></div>
     <div class="legend">
-      <span><i style="background:var(--petroleo);"></i>Ingresos</span>
-      <span><i style="background:var(--dorado);"></i>Egresos</span>
-      <span><i style="background:var(--ok);"></i>Margen (línea)</span>
+      <span><i style="background:var(--ok);"></i>Ingresos</span>
+      <span><i style="background:var(--danger);"></i>Egresos</span>
+      <span><i style="background:var(--petroleo);"></i>Margen (línea)</span>
     </div>
   </div>
 
@@ -460,13 +460,13 @@
       var gx = padL + i*groupW;
       var barW = groupW*0.32;
       var yIng = yPix(a.ingresos), yEgr = yPix(a.egresos);
-      svg += '<rect x="'+(gx+groupW*0.12)+'" y="'+Math.min(yIng,zeroY)+'" width="'+barW+'" height="'+Math.abs(zeroY-yIng)+'" fill="#5f7c68" rx="2"/>';
-      svg += '<rect x="'+(gx+groupW*0.52)+'" y="'+Math.min(yEgr,zeroY)+'" width="'+barW+'" height="'+Math.abs(zeroY-yEgr)+'" fill="#c9a35e" rx="2"/>';
-      svg += '<text x="'+(gx+groupW/2)+'" y="'+(H-10)+'" text-anchor="middle" font-size="11" fill="#6f6858">'+a.anio+'</text>';
+      svg += '<rect x="'+(gx+groupW*0.12)+'" y="'+Math.min(yIng,zeroY)+'" width="'+barW+'" height="'+Math.abs(zeroY-yIng)+'" fill="#4f7a4a" rx="2"/>';
+      svg += '<rect x="'+(gx+groupW*0.52)+'" y="'+Math.min(yEgr,zeroY)+'" width="'+barW+'" height="'+Math.abs(zeroY-yEgr)+'" fill="#a4452f" rx="2"/>';
+      svg += '<text x="'+(gx+groupW/2)+'" y="'+(H-10)+'" text-anchor="middle" font-size="11" fill="#6b5842">'+a.anio+'</text>';
       puntosMargen.push([gx+groupW/2, yPix(a.margen)]);
     });
-    svg += '<polyline points="'+puntosMargen.map(function(p){ return p[0]+','+p[1]; }).join(' ')+'" fill="none" stroke="#5f8a63" stroke-width="2.5"/>';
-    puntosMargen.forEach(function(p){ svg += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="#5f8a63"/>'; });
+    svg += '<polyline points="'+puntosMargen.map(function(p){ return p[0]+','+p[1]; }).join(' ')+'" fill="none" stroke="#8a6a35" stroke-width="2.5"/>';
+    puntosMargen.forEach(function(p){ svg += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="#8a6a35"/>'; });
     document.getElementById('chart-svg').innerHTML = svg;
   }
 

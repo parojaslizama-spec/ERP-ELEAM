@@ -2,34 +2,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="assets/auth.js"></script>
-<title>Control financiero ELEAM</title>
+<title>Control financiero — Residencia Senior Omar Wall</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#5f7c68">
+<meta name="theme-color" content="#8a6a35">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ELEAM">
+<meta name="apple-mobile-web-app-title" content="Wall">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/theme.css">
 <style>
 :root {
-  --bg: #f8f4ec; --surface: #fffdf8; --surface-2: #f1ead9;
-  --ink: #3d3a33; --ink-soft: #6f6858; --ink-faint: #a49b86; --border: #e4dcc7;
-  --accent: #5f7c68; --accent-ink: #ffffff; --accent-soft: #e4ecdf; --accent-soft-ink: #3f5c47;
-  --good: #5f8a63; --good-soft: #e2eedf;
-  --warn: #b98a3d; --warn-soft: #f6ecd3;
-  --critical: #ad5c4c; --critical-soft: #f5e0da;
-  --shadow: 0 1px 2px rgba(61,58,51,.06), 0 8px 24px -12px rgba(61,58,51,.18);
+  --bg: #f7f1e2; --surface: #fffcf5; --surface-2: #efe2c4;
+  --ink: #3a2b1c; --ink-soft: #6b5842; --ink-faint: #a3927a; --border: #e2d0a8;
+  --accent: #8a6a35; --accent-ink: #fffaf0; --accent-soft: #f0e3c1; --accent-soft-ink: #5c451f;
+  --good: #4f7a4a; --good-soft: #dfe9d3;
+  --warn: #b3812f; --warn-soft: #f3e6c0;
+  --critical: #a4452f; --critical-soft: #f4d9cc;
+  --shadow: 0 1px 2px rgba(58,43,28,.08), 0 8px 24px -12px rgba(58,43,28,.22);
   --radius: 10px;
   --serif: "Lora", "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
   --sans: "Inter", -apple-system,"Segoe UI","Helvetica Neue",Roboto,Arial,sans-serif;
   --mono: ui-monospace,"SF Mono","Cascadia Mono","Segoe UI Mono",Consolas,monospace;
 }
 /* Tema claro fijo — no cambia automáticamente con el modo oscuro del sistema. */
-:root[data-theme="dark"] { --bg:#1c1a15;--surface:#24221c;--surface-2:#2a2721;--ink:#ece6d6;--ink-soft:#b9b09a;--ink-faint:#857c67;--border:#3a362c;--accent:#8fae98;--accent-ink:#16261c;--accent-soft:#313b2f;--accent-soft-ink:#c9dccb;--good:#8fbb93;--good-soft:#26331f;--warn:#d9ab61;--warn-soft:#3a301c;--critical:#d98f7d;--critical-soft:#3a2620;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5); }
-:root[data-theme="light"] { --bg:#f8f4ec;--surface:#fffdf8;--surface-2:#f1ead9;--ink:#3d3a33;--ink-soft:#6f6858;--ink-faint:#a49b86;--border:#e4dcc7;--accent:#5f7c68;--accent-ink:#ffffff;--accent-soft:#e4ecdf;--accent-soft-ink:#3f5c47;--good:#5f8a63;--good-soft:#e2eedf;--warn:#b98a3d;--warn-soft:#f6ecd3;--critical:#ad5c4c;--critical-soft:#f5e0da;--shadow:0 1px 2px rgba(61,58,51,.06),0 8px 24px -12px rgba(61,58,51,.18); }
+:root[data-theme="dark"] { --bg:#201a12;--surface:#2a2217;--surface-2:#34291a;--ink:#ece2cf;--ink-soft:#c2b193;--ink-faint:#8d7a5e;--border:#453724;--accent:#c9a15a;--accent-ink:#241b0c;--accent-soft:#3c2f1a;--accent-soft-ink:#e6cd9a;--good:#8bb37e;--good-soft:#2c3a24;--warn:#dab569;--warn-soft:#3d3018;--critical:#d98868;--critical-soft:#3c261c;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5); }
+:root[data-theme="light"] { --bg:#f7f1e2;--surface:#fffcf5;--surface-2:#efe2c4;--ink:#3a2b1c;--ink-soft:#6b5842;--ink-faint:#a3927a;--border:#e2d0a8;--accent:#8a6a35;--accent-ink:#fffaf0;--accent-soft:#f0e3c1;--accent-soft-ink:#5c451f;--good:#4f7a4a;--good-soft:#dfe9d3;--warn:#b3812f;--warn-soft:#f3e6c0;--critical:#a4452f;--critical-soft:#f4d9cc;--shadow:0 1px 2px rgba(58,43,28,.08),0 8px 24px -12px rgba(58,43,28,.22); }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
@@ -122,6 +122,10 @@ table.data-table tfoot tr.extra-row .col-label { font-family: var(--sans); }
   border-top: 1px solid var(--border); font-weight: 700; font-size: 15px;
 }
 .total-row .total-amount { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--accent); }
+.total-row .total-amount.ingreso { color: var(--good); }
+.total-row .total-amount.egreso { color: var(--critical); }
+.kpi-value.ingreso { color: var(--good); }
+.kpi-value.egreso { color: var(--critical); }
 
 .export-card .export-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
 .export-status { margin: 12px 0 0; font-size: 13px; color: var(--ink); background: var(--surface-2); border-radius: 6px; padding: 8px 12px; }
@@ -925,7 +929,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         onChange: function (e) { props.onSelect(e.target.value); }
       }, keys.map(function (k) { return h("option", { key: k, value: k }, monthLabel(k)); })),
       h("button", { className: "btn-nav", type: "button", onClick: function () { props.onNavigate(1); } }, "→"),
-      h("button", { className: "btn-ghost-sm", type: "button", onClick: props.onNewMonth }, "+ Nuevo mes")
+      h("button", { className: "btn-ghost-sm", type: "button", onClick: props.onNewMonth }, "+ Nuevo mes"),
+      h("button", { className: "btn-ghost-sm", type: "button", onClick: props.onProyectar }, "Proyectar gastos hasta diciembre 2026")
     );
   }
 
@@ -939,8 +944,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     return h("div", { className: "card" },
       h("h2", null, "Resumen — " + monthLabel(props.currentKey)),
       h("div", { className: "kpi-grid" },
-        h("div", { className: "kpi" }, h("div", { className: "kpi-label" }, "Total ingresos"), h("div", { className: "kpi-value" }, money(t.totIngresos))),
-        h("div", { className: "kpi" }, h("div", { className: "kpi-label" }, "Total egresos"), h("div", { className: "kpi-value" }, money(t.totEgresos))),
+        h("div", { className: "kpi" }, h("div", { className: "kpi-label" }, "Total ingresos"), h("div", { className: "kpi-value ingreso" }, money(t.totIngresos))),
+        h("div", { className: "kpi" }, h("div", { className: "kpi-label" }, "Total egresos"), h("div", { className: "kpi-value egreso" }, money(t.totEgresos))),
         h("div", { className: "kpi tone-" + tone }, h("div", { className: "kpi-label" }, "Margen neto"), h("div", { className: "kpi-value" }, money(t.margen))),
         h("div", { className: "kpi" }, h("div", { className: "kpi-label" }, "Margen %"), h("div", { className: "kpi-value" }, t.totIngresos > 0 ? pctFmt.format((t.margen / t.totIngresos) * 100) + "%" : "—")),
         h("div", { className: "kpi tone-" + toneAcum }, h("div", { className: "kpi-label" }, "Margen acumulado (histórico)"), h("div", { className: "kpi-value" }, money(margenAcumulado)))
@@ -1000,7 +1005,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   function csvEscape(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }
   function exportCsv(monthKey, month, totals) {
     var lines = [];
-    lines.push(["ELEAM - Control financiero", monthLabel(monthKey)].map(csvEscape).join(","));
+    lines.push(["Residencia Senior Omar Wall - Control financiero", monthLabel(monthKey)].map(csvEscape).join(","));
     lines.push([]);
     lines.push(["INGRESOS — Residentes (sincronizado desde Residentes)", "Monto"].map(csvEscape).join(","));
     totals.ingresosAutoRows.forEach(function (r) {
@@ -1110,12 +1115,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
             titulo: "Ingresos — Residentes (sincronizado)",
             sub: t.ingresosAutoRows.length ? "Cuota de permanencia de cada residente activo, calculada desde el módulo de Residentes." : "Sin residentes registrados en el módulo de Residentes.",
             filas: t.ingresosAutoRows.map(function (r) { return { label: r.nombre, valor: money(r.monto), nota: r.origen }; }),
-            total: { label: "Subtotal residentes", valor: money(t.totIngresosResidentes) }
+            total: { label: "Subtotal residentes", valor: money(t.totIngresosResidentes), color: "good" }
           },
           {
             titulo: "Ingresos extra",
             filas: month.ingresosExtra.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; }),
-            total: { label: "Total ingresos", valor: money(t.totIngresos) }
+            total: { label: "Total ingresos", valor: money(t.totIngresos), color: "good" }
           },
           {
             titulo: "Personal — sincronizado desde Trabajadores",
@@ -1124,7 +1129,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
               { label: "Gratificación legal (total del mes, ya incluida arriba en cada líquido)", valor: money(t.totGratificacion) },
               { label: "Bonos asistencia + puntualidad + otros (total del mes, ya incluidos arriba)", valor: money(t.totBonos) }
             ]),
-            total: { label: "Subtotal líquido personal", valor: money(t.totPersonalLiquido) }
+            total: { label: "Subtotal líquido personal", valor: money(t.totPersonalLiquido), color: "critical" }
           },
           {
             titulo: "Descuentos legales trabajador",
@@ -1144,24 +1149,24 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
               { label: "Seguro cesantía empresa", valor: money(t.payroll.empresa.afc) },
               { label: "Mutual de seguridad", valor: money(t.payroll.empresa.mutual) }
             ],
-            total: { label: "Subtotal obligaciones legales de empresa", valor: money(t.payroll.empresa.total) }
+            total: { label: "Subtotal obligaciones legales de empresa", valor: money(t.payroll.empresa.total), color: "critical" }
           },
           {
             titulo: "Administración",
             sub: "Sueldo del administrador/inversor — retiro fijo de gasto de administración, reajustado 5% cada enero.",
             filas: [],
-            total: { label: "Sueldo administración este mes", valor: money(t.sueldoAdmin) }
+            total: { label: "Sueldo administración este mes", valor: money(t.sueldoAdmin), color: "critical" }
           },
           {
             titulo: "Gastos",
             filas: month.gastos.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; })
               .concat([{ label: "IVA (" + numFmt(data.params.ivaPct) + "%)", valor: money(t.gastos.iva) }]),
-            total: { label: "Total gastos con IVA", valor: money(t.gastos.conIva) }
+            total: { label: "Total gastos con IVA", valor: money(t.gastos.conIva), color: "critical" }
           },
           {
             titulo: "Servicios",
             filas: month.servicios.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; }),
-            total: { label: "Total servicios", valor: money(t.totServicios) }
+            total: { label: "Total servicios", valor: money(t.totServicios), color: "critical" }
           },
           {
             titulo: "Tributación — IVA (Formulario 29)",
@@ -1170,7 +1175,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
               { label: "IVA débito fiscal (cuotas de residentes)", valor: money(t.tributacion.ivaDebito) },
               { label: "IVA crédito fiscal (gastos)", valor: "− " + money(t.tributacion.ivaCredito) }
             ].concat(t.tributacion.ivaRemanente > 0 ? [{ label: "Remanente de crédito a favor (próximo mes)", valor: money(t.tributacion.ivaRemanente) }] : []),
-            total: { label: "IVA a pagar al SII este mes", valor: money(t.tributacion.ivaAPagar) }
+            total: { label: "IVA a pagar al SII este mes", valor: money(t.tributacion.ivaAPagar), color: "critical" }
           }
         ];
         var doc = ReportPDF.buildDoc({
@@ -1179,7 +1184,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           empresa: empresa,
           secciones: secciones,
           resumenFinal: { label: "Margen neto del mes", valor: money(t.margen) },
-          notaPie: "Reporte generado desde el módulo de Gastos — Residencia de ancianos. El personal se sincroniza automáticamente desde el módulo de Trabajadores y Liquidaciones."
+          notaPie: "Reporte generado desde el módulo de Gastos — Residencia Senior Omar Wall. El personal se sincroniza automáticamente desde el módulo de Trabajadores y Liquidaciones."
         });
         var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify("gastos-" + currentKey) + ".pdf");
         setExportStatus(res.mensaje);
@@ -1243,6 +1248,29 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       if (newIdx >= 0 && newIdx < keys.length) setCurrentKey(keys[newIdx]);
     }
 
+    // Proyección: replica los gastos y servicios recurrentes del último mes cargado (con sus montos
+    // reales, no en cero) hacia cada mes que falte hasta diciembre 2026 — los ingresos extra (no
+    // recurrentes) y los residentes/personal sincronizados no se tocan, se siguen calculando solos.
+    var PROYECCION_GASTOS_MESES = ["2026-09", "2026-10", "2026-11", "2026-12"];
+    function handleProyectarGastos() {
+      var keys = Object.keys(stateRef.current.months).sort();
+      var lastKey = keys[keys.length - 1];
+      var base = stateRef.current.months[lastKey];
+      if (!base) return;
+      var faltantes = PROYECCION_GASTOS_MESES.filter(function (k) { return !stateRef.current.months[k]; });
+      if (!faltantes.length) { setExportStatus("Ya existen todos los meses hasta diciembre 2026 — nada que proyectar."); return; }
+      if (!window.confirm("Esto copia los gastos y servicios de " + monthLabel(lastKey) + " (con sus montos actuales) hacia " + faltantes.length + " mes(es) que aún no existen (hasta diciembre 2026). No modifica meses que ya tengas cargados. ¿Continuar?")) return;
+      faltantes.forEach(function (key) {
+        var cloned = { ingresosExtra: [], gastos: [], servicios: [] };
+        ["gastos", "servicios"].forEach(function (cat) {
+          cloned[cat] = (base[cat] || []).map(function (r) { return Object.assign({}, r, { id: uid() }); });
+        });
+        stateRef.current.months[key] = cloned;
+      });
+      persist();
+      setExportStatus("✓ " + faltantes.length + " mes(es) proyectado(s) con los gastos y servicios de " + monthLabel(lastKey) + ".");
+    }
+
     var data = stateRef.current;
     ensureMonth(currentKey);
     var month = data.months[currentKey];
@@ -1252,12 +1280,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     return h("div", { className: "page" },
       h("header", { className: "topbar" },
         h("div", null,
-          h("p", { className: "eyebrow" }, "ELEAM · Control financiero"),
+          h("p", { className: "eyebrow" }, "Residencia Senior Omar Wall · Control financiero"),
           h("h1", null, "Ingresos y egresos mes a mes")
         ),
         h(MonthSelector, {
           monthKeys: sortedKeys, currentKey: currentKey,
-          onSelect: setCurrentKey, onNavigate: handleNavigate, onNewMonth: handleNewMonth
+          onSelect: setCurrentKey, onNavigate: handleNavigate, onNewMonth: handleNewMonth, onProyectar: handleProyectarGastos
         })
       ),
 
@@ -1285,7 +1313,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           onUpdate: function (id, f, v) { updateRow("ingresosExtra", currentKey, id, f, v); },
           onDelete: function (id) { deleteRow("ingresosExtra", currentKey, id); }
         }),
-        h("div", { className: "total-row" }, h("span", null, "Total ingresos"), h("span", { className: "total-amount" }, money(totals.totIngresos)))
+        h("div", { className: "total-row" }, h("span", null, "Total ingresos"), h("span", { className: "total-amount ingreso" }, money(totals.totIngresos)))
       ),
 
       h("div", { className: "card" },
@@ -1379,7 +1407,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           onUpdate: function (id, f, v) { updateRow("servicios", currentKey, id, f, v); },
           onDelete: function (id) { deleteRow("servicios", currentKey, id); }
         }),
-        h("div", { className: "total-row" }, h("span", null, "Total egresos"), h("span", { className: "total-amount" }, money(totals.totEgresos)))
+        h("div", { className: "total-row" }, h("span", null, "Total egresos"), h("span", { className: "total-amount egreso" }, money(totals.totEgresos)))
       ),
 
       h("div", { className: "card" },

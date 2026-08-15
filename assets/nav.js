@@ -4,7 +4,7 @@
 
   // Número de versión visible en toda la app — súbelo con cada tanda de cambios notables
   // (sobre todo de diseño/paleta) para poder referirse a "la versión X" al dar feedback.
-  var APP_VERSION = "1.0";
+  var APP_VERSION = "2.0";
 
   var STEPS = [
     { file: "control-residentes.html", num: "1", label: "Ingreso de residentes" },
@@ -32,7 +32,7 @@
     nav.className = "app-nav";
     nav.innerHTML =
       '<div class="app-nav-inner">' +
-        '<a class="app-nav-brand" href="index.html"><span class="mark">&#127968;</span>Residencia de ancianos &middot; ELEAM<span class="app-nav-version">v' + APP_VERSION + '</span></a>' +
+        '<a class="app-nav-brand" href="index.html"><img class="mark" src="assets/icons/logo-mark.png" alt="" onerror="this.style.display=\'none\'">Residencia Senior Omar Wall<span class="app-nav-version">v' + APP_VERSION + '</span></a>' +
         '<div class="app-nav-steps">' + stepsHtml + '</div>' +
       '</div>';
 

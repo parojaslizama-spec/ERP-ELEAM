@@ -1,5 +1,5 @@
 /*
- * Generador de reportes PDF compartido — Residencia de ancianos (ELEAM)
+ * Generador de reportes PDF compartido — Residencia Senior Omar Wall (ELEAM)
  * Usa jsPDF (cargado por CDN en cada página) para construir un documento
  * con la misma identidad visual en los tres módulos, y lo guarda con
  * el selector de archivos del navegador (o lo descarga si no está disponible).
@@ -7,14 +7,16 @@
 window.ReportPDF = (function () {
   "use strict";
 
-  var COL_INK = [61, 58, 51];
-  var COL_SOFT = [111, 104, 88];
-  var COL_ACCENT = [95, 124, 104];
-  var COL_ACCENT_DARK = [72, 97, 81];
-  var COL_GOLD = [163, 124, 58];
-  var COL_BORDER = [228, 220, 199];
-  var COL_BG_SOFT = [244, 238, 224];
+  var COL_INK = [58, 43, 28];
+  var COL_SOFT = [107, 88, 66];
+  var COL_ACCENT = [138, 106, 53];
+  var COL_ACCENT_DARK = [107, 79, 36];
+  var COL_GOLD = [199, 154, 63];
+  var COL_BORDER = [226, 208, 168];
+  var COL_BG_SOFT = [240, 227, 193];
   var COL_WHITE = [255, 255, 255];
+  var COL_GOOD = [79, 122, 74];
+  var COL_CRITICAL = [164, 69, 47];
 
   function money(n) {
     n = Math.round(Number(n) || 0);
@@ -52,7 +54,7 @@ window.ReportPDF = (function () {
       doc.setTextColor(COL_WHITE[0], COL_WHITE[1], COL_WHITE[2]);
       doc.setFont("times", "bold");
       doc.setFontSize(16);
-      doc.text((opts.empresa && opts.empresa.nombre) || "Residencia de ancianos", margin, 30);
+      doc.text((opts.empresa && opts.empresa.nombre) || "Residencia Senior Omar Wall", margin, 30);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       var rutLine = (opts.empresa && opts.empresa.rut) ? "RUT: " + opts.empresa.rut : "";
@@ -125,14 +127,15 @@ window.ReportPDF = (function () {
 
       if (sec.total) {
         checkPageBreak(60);
+        var totalCol = sec.total.color === "good" ? COL_GOOD : sec.total.color === "critical" ? COL_CRITICAL : COL_GOLD;
         y += 2;
-        doc.setDrawColor(COL_GOLD[0], COL_GOLD[1], COL_GOLD[2]);
+        doc.setDrawColor(totalCol[0], totalCol[1], totalCol[2]);
         doc.setLineWidth(1.1);
         doc.line(margin, y, pageW - margin, y);
         y += 15;
         doc.setFont("helvetica", "bold");
         doc.setFontSize(10.5);
-        doc.setTextColor(COL_GOLD[0], COL_GOLD[1], COL_GOLD[2]);
+        doc.setTextColor(totalCol[0], totalCol[1], totalCol[2]);
         doc.text(sec.total.label, margin, y);
         doc.text(sec.total.valor, pageW - margin, y, { align: "right" });
         y += 24;

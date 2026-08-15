@@ -4,39 +4,39 @@
 <meta charset="UTF-8">
 <script src="assets/auth.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Control de Horas, Asistencia y Liquidaciones</title>
+<title>Control de Horas, Asistencia y Liquidaciones — Residencia Senior Omar Wall</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#5f7c68">
+<meta name="theme-color" content="#8a6a35">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ELEAM">
+<meta name="apple-mobile-web-app-title" content="Wall">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/theme.css">
 <style>
   :root{
-    --paper:#F8F4EC;
-    --paper-dark:#f0e9d7;
-    --ink:#3d3a33;
-    --ink-soft:#6f6858;
-    --petroleo:#5f7c68;
-    --petroleo-dark:#48604f;
-    --dorado:#c9a35e;
-    --dorado-soft:#eeddb3;
-    --line:#e0d7bf;
-    --card:#fffdf8;
-    --danger:#ad5c4c;
-    --danger-bg:#f5e2da;
-    --ok:#5f8a63;
-    --weekend-bg:#f0ead9;
+    --paper:#F7F1E2;
+    --paper-dark:#efe2c4;
+    --ink:#3a2b1c;
+    --ink-soft:#6b5842;
+    --petroleo:#8a6a35;
+    --petroleo-dark:#6b4f24;
+    --dorado:#c79a3f;
+    --dorado-soft:#ecd9ad;
+    --line:#e2d0a8;
+    --card:#fffcf5;
+    --danger:#a4452f;
+    --danger-bg:#f4d9cc;
+    --ok:#4f7a4a;
+    --weekend-bg:#efe4cd;
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
   body{
     background:
-      repeating-linear-gradient(#F8F4EC 0px, #F8F4EC 27px, #f0e8d2 28px),
+      repeating-linear-gradient(#F7F1E2 0px, #F7F1E2 27px, #ede0c1 28px),
       var(--paper);
     color:var(--ink);
     font-family:'Inter',sans-serif;
@@ -208,17 +208,17 @@
     #printArea{ display:block; position:absolute; top:0; left:0; width:100%; background:#fff; }
     .copia{ page-break-after:always; padding:30px 40px; }
     .copia:last-child{ page-break-after:auto; }
-    .slip-header{ display:flex; justify-content:space-between; border-bottom:2px solid #5f7c68; padding-bottom:10px; margin-bottom:14px; }
-    .slip-tag{ display:inline-block; background:#c9a35e; color:#fff; padding:3px 12px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
-    .slip-title{ font-family:'Lora',serif; font-size:20px; color:#48604f; margin:0; }
+    .slip-header{ display:flex; justify-content:space-between; border-bottom:2px solid #8a6a35; padding-bottom:10px; margin-bottom:14px; }
+    .slip-tag{ display:inline-block; background:#c79a3f; color:#fff; padding:3px 12px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .slip-title{ font-family:'Lora',serif; font-size:20px; color:#6b4f24; margin:0; }
     .slip-sub{ font-size:12px; color:#555; }
     .slip-block{ margin-bottom:14px; font-size:13px; }
-    .slip-block b{ color:#48604f; }
+    .slip-block b{ color:#6b4f24; }
     table.slip-table{ width:100%; border-collapse:collapse; margin-bottom:10px; font-size:12.5px; }
-    table.slip-table th{ background:#f0ead6; border:1px solid #ccc; padding:5px 8px; text-align:left; color:#48604f; }
+    table.slip-table th{ background:#efe2c4; border:1px solid #ccc; padding:5px 8px; text-align:left; color:#6b4f24; }
     table.slip-table td{ border:1px solid #ccc; padding:5px 8px; }
     table.slip-table td.num{ text-align:right; font-family:'JetBrains Mono',monospace; }
-    .slip-total{ display:flex; justify-content:space-between; font-weight:700; font-size:15px; border-top:2px solid #5f7c68; padding-top:8px; margin-top:6px; }
+    .slip-total{ display:flex; justify-content:space-between; font-weight:700; font-size:15px; border-top:2px solid #8a6a35; padding-top:8px; margin-top:6px; }
     .slip-firmas{ display:flex; justify-content:space-between; margin-top:60px; }
     .firma-box{ width:40%; text-align:center; font-size:12px; }
     .firma-line{ border-top:1px solid #333; margin-bottom:6px; padding-top:4px; }
@@ -516,6 +516,12 @@
         </div>
       </div>
       <p class="field-hint">El Ingreso M&iacute;nimo Mensual (IMM) se usa para el tope legal de la gratificaci&oacute;n (4,75 IMM al a&ntilde;o) y como sueldo predeterminado al agregar un trabajador nuevo — se actualiza solo seg&uacute;n el calendario legal (avisa cuando la ley lo reajuste para agregarlo). La UTM (Unidad Tributaria Mensual) se usa para calcular el Impuesto &Uacute;nico y cambia cada mes: actual&iacute;zala aqu&iacute; (ver sii.cl). El tope imponible de AFP/salud/cesant&iacute;a se calcula multiplicando el <b>valor de la UF de hoy</b> (actual&iacute;zalo aqu&iacute; desde la fuente oficial — sii.cl o Banco Central) por el <b>tope legal en UF</b> vigente (Superintendencia de Pensiones, reajustado normalmente cada enero) — as&iacute; el monto en pesos se recalcula solo.</p>
+
+      <div class="actions-row">
+        <button id="btn-proyectar-liq" class="gold" type="button">Proyectar liquidaciones hasta diciembre 2026 (bonos completos)</button>
+        <span id="proyeccion-liq-flash" class="save-flash"></span>
+      </div>
+      <p class="field-hint">Genera, para cada trabajador activo, una liquidaci&oacute;n en cada mes desde septiembre hasta diciembre de 2026 (sueldo base + gratificaci&oacute;n legal + los bonos a los que ese trabajador tiene derecho, asumiendo asistencia y puntualidad perfectas). No sobreescribe liquidaciones que ya hayas guardado a mano para esos meses.</p>
 
       <div id="liq-content" style="display:none;">
         <div class="liq-columns">
@@ -1749,6 +1755,49 @@
     setTimeout(function(){ flash.textContent=''; }, 2500);
   });
 
+  // Proyección: genera liquidaciones "como si todo hubiera salido perfecto" (sin ausencias, bonos
+  // completos según el tipo de trabajador) para los meses futuros hasta diciembre 2026, reutilizando
+  // exactamente la misma fórmula de gratificación/impuesto que usa una liquidación real.
+  var PROYECCION_MESES = [{ year: 2026, month: 9 }, { year: 2026, month: 10 }, { year: 2026, month: 11 }, { year: 2026, month: 12 }];
+  function liquidacionProyectada(trab){
+    var heValorDefault = Math.round((trab.sueldoBase / 30 / trab.horasJornada) * 1.5);
+    var bonoAsistencia = trab.tipo === 'esencial' ? 50000 : 0;
+    var bonoPuntualidad = 20000;
+    var imponibleParaGratificacion = trab.sueldoBase + bonoAsistencia + bonoPuntualidad;
+    var topeGratificacionMensual = (4.75 * immVigente) / 12;
+    var gratificacion = Math.round(Math.min(imponibleParaGratificacion * 0.25, topeGratificacionMensual) / 100) * 100;
+    var baseImponible = trab.sueldoBase + gratificacion + bonoAsistencia + bonoPuntualidad;
+    var legal = legalDeductions(trab, baseImponible);
+    var rentaTributable = baseImponible - legal.afpMonto - legal.saludMonto - legal.cesantiaMonto;
+    var impuesto = calcularImpuestoUnico(rentaTributable, utmVigente);
+    var adelanto = Math.round((trab.sueldoBase / 2) / 100) * 100;
+    return {
+      sueldoBase: trab.sueldoBase, gratificacion: gratificacion, bonos: 0,
+      bonoAsistencia: bonoAsistencia, bonoPuntualidad: bonoPuntualidad,
+      heCantidad: 0, heValor: heValorDefault, diasFalta: 0,
+      impuesto: impuesto, otros: 0, adelanto: adelanto
+    };
+  }
+  document.getElementById('btn-proyectar-liq').addEventListener('click', function(){
+    var activos = trabajadoresActivos();
+    if(!activos.length){ alert('No hay trabajadores activos para proyectar.'); return; }
+    if(!confirm('Esto genera liquidaciones para ' + activos.length + ' trabajador(es) activos en cada mes desde septiembre hasta diciembre de 2026, asumiendo asistencia y puntualidad perfectas. No sobreescribe liquidaciones que ya hayas guardado para esos meses. ¿Continuar?')) return;
+    var generadas = 0;
+    activos.forEach(function(trab){
+      PROYECCION_MESES.forEach(function(m){
+        var key = keyLiq(trab.id, m.year, m.month);
+        if(liquidaciones[key]) return;
+        liquidaciones[key] = liquidacionProyectada(trab);
+        generadas++;
+      });
+    });
+    saveLiquidaciones();
+    loadLiquidacion();
+    var flash = document.getElementById('proyeccion-liq-flash');
+    flash.textContent = generadas + ' liquidación(es) generada(s) ✓ — revísalas en el selector de mes de arriba.';
+    setTimeout(function(){ flash.textContent=''; }, 8000);
+  });
+
   document.getElementById('btn-imprimir-liq').addEventListener('click', function(){
     var trab = currentTrabajador(liqTrabSel);
     if(!trab) return;
@@ -1793,7 +1842,7 @@
           '<tr><td>Anticipo de sueldo (quincena, ya pagado)</td><td class="num">'+fmtCLP(c.adelanto)+'</td></tr>'+
         '</tbody></table>'+
         '<div class="slip-total"><span>Total descuentos</span><span>'+fmtCLP(c.totalDescuentos)+'</span></div>'+
-        '<div class="slip-total" style="color:#48604f; font-size:17px;"><span>LÍQUIDO A PAGAR</span><span>'+fmtCLP(c.liquido)+'</span></div>'+
+        '<div class="slip-total" style="color:#6b4f24; font-size:17px;"><span>LÍQUIDO A PAGAR</span><span>'+fmtCLP(c.liquido)+'</span></div>'+
         '<div class="slip-firmas">'+
           '<div class="firma-box"><div class="firma-line">&nbsp;</div>Firma Trabajador</div>'+
           '<div class="firma-box"><div class="firma-line">&nbsp;</div>Firma Empleador</div>'+
@@ -1967,7 +2016,7 @@
         empresa: empresa,
         secciones: secciones,
         resumenFinal: { label:'Total sueldos base (mensual)', valor: fmtCLP(totalBase) },
-        notaPie: 'Reporte generado desde el módulo de Trabajadores, Asistencia y Liquidaciones — Residencia de ancianos.'
+        notaPie: 'Reporte generado desde el módulo de Trabajadores, Asistencia y Liquidaciones — Residencia Senior Omar Wall.'
       });
       var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('nomina-'+(empresa.nombre||'residencia'))+'.pdf');
       flash('nomina-save-flash', res.mensaje, 6000);
@@ -2027,7 +2076,7 @@
         ],
         resumenFinal: { label:'Líquido a pagar', valor: fmtCLP(c.liquido) },
         firmas: [{ label:'Firma Trabajador' }, { label:'Firma Empleador' }],
-        notaPie: 'Documento generado desde el módulo de Trabajadores, Asistencia y Liquidaciones — Residencia de ancianos.'
+        notaPie: 'Documento generado desde el módulo de Trabajadores, Asistencia y Liquidaciones — Residencia Senior Omar Wall.'
       });
       var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('liquidacion-'+trab.nombre+'-'+periodo)+'.pdf');
       flash('liq-save-flash', res.mensaje, 6000);

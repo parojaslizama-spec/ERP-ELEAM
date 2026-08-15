@@ -4,28 +4,28 @@
 <meta charset="UTF-8">
 <script src="assets/auth.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ficha médica y control de cuidados</title>
+<title>Ficha médica y control de cuidados — Residencia Senior Omar Wall</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#5f7c68">
+<meta name="theme-color" content="#8a6a35">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ELEAM">
+<meta name="apple-mobile-web-app-title" content="Wall">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/theme.css">
 <style>
   :root{
-    --paper:#F8F4EC; --paper-dark:#f0e9d7; --ink:#3d3a33; --ink-soft:#6f6858;
-    --petroleo:#5f7c68; --petroleo-dark:#48604f; --dorado:#c9a35e; --dorado-soft:#eeddb3;
-    --line:#e0d7bf; --card:#fffdf8; --danger:#ad5c4c; --danger-bg:#f5e2da; --ok:#5f8a63;
-    --rose:#b97d76; --rose-soft:#f2ddd8; --sky:#6f8fa6; --sky-soft:#dde6ec;
+    --paper:#F7F1E2; --paper-dark:#efe2c4; --ink:#3a2b1c; --ink-soft:#6b5842;
+    --petroleo:#8a6a35; --petroleo-dark:#6b4f24; --dorado:#c79a3f; --dorado-soft:#ecd9ad;
+    --line:#e2d0a8; --card:#fffcf5; --danger:#a4452f; --danger-bg:#f4d9cc; --ok:#4f7a4a;
+    --rose:#b07a68; --rose-soft:#f3ddd2; --sky:#6f8fa6; --sky-soft:#dde6ec;
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
   body{
-    background: repeating-linear-gradient(#F8F4EC 0px, #F8F4EC 27px, #f0e8d2 28px), var(--paper);
+    background: repeating-linear-gradient(#F7F1E2 0px, #F7F1E2 27px, #ede0c1 28px), var(--paper);
     color:var(--ink); font-family:'Inter',sans-serif; font-size:14px; line-height:1.45; padding-bottom:60px;
   }
   h1,h2,h3{ font-family:'Lora',serif; font-weight:600; color:var(--petroleo-dark); margin:0 0 6px; }
@@ -874,7 +874,7 @@
         subtitulo: r.nombre,
         empresa: empresa,
         secciones: secciones,
-        notaPie: 'Ficha médica generada desde el módulo de Ficha médica y control de cuidados — Residencia de ancianos.'
+        notaPie: 'Ficha médica generada desde el módulo de Ficha médica y control de cuidados — Residencia Senior Omar Wall.'
       });
       var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('ficha-medica-'+r.nombre)+'.pdf');
       flash('diag-save-flash', res.mensaje, 6000);
@@ -904,7 +904,7 @@
         secciones: [{ titulo:'Checklist del día', filas: filas }],
         resumenFinal: { label:'Cumplimiento del día', valor: c.pct+'% ('+c.hechos+'/'+c.total+')' },
         firmas: [{ label:'Firma responsable del turno' }],
-        notaPie: 'Reporte generado desde el módulo de Ficha médica y control de cuidados — Residencia de ancianos.'
+        notaPie: 'Reporte generado desde el módulo de Ficha médica y control de cuidados — Residencia Senior Omar Wall.'
       });
       var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('cuidados-'+r.nombre+'-'+fecha)+'.pdf');
       flash('control-save-flash', res.mensaje, 6000);

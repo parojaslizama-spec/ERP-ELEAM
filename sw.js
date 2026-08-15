@@ -1,10 +1,10 @@
 /* Service worker — cachea la app para que funcione instalada y sin internet.
    Los datos (residentes, trabajadores, gastos, etc.) viven en localStorage, no aquí:
-   este archivo solo cachea el código de la app (HTML/CSS/JS/íconos), no información del ELEAM. */
+   este archivo solo cachea el código de la app (HTML/CSS/JS/íconos), no información de la residencia. */
 "use strict";
 
 // Sube este número cada vez que cambies algún archivo cacheado, para forzar la actualización.
-var CACHE_NAME = "eleam-app-v1";
+var CACHE_NAME = "wall-app-v2";
 
 var APP_SHELL = [
   "index.html",
@@ -28,7 +28,8 @@ var APP_SHELL = [
   "assets/icons/icon-192.png",
   "assets/icons/icon-384.png",
   "assets/icons/icon-512.png",
-  "assets/icons/icon-maskable-512.png"
+  "assets/icons/icon-maskable-512.png",
+  "assets/icons/logo-mark.png"
 ];
 
 self.addEventListener("install", function (event) {

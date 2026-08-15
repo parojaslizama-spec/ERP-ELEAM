@@ -2,22 +2,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="assets/auth.js"></script>
-<title>Plan de inversión — ELEAM</title>
+<title>Plan de inversión — Residencia Senior Omar Wall</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#5f7c68">
+<meta name="theme-color" content="#8a6a35">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ELEAM">
+<meta name="apple-mobile-web-app-title" content="Wall">
 <style>
   :root {
-    --bg: #eef0ee; --surface: #ffffff; --surface-2: #f6f8f6;
-    --ink: #1e2624; --ink-soft: #57625d; --ink-faint: #8b948f; --border: #dbe0dc;
-    --accent: #1f5f5b; --accent-ink: #ffffff; --accent-soft: #d9e9e6; --accent-soft-ink: #14403d;
-    --good: #2f7a4f; --good-soft: #e1f0e5;
-    --warn: #96660f; --warn-soft: #f5ead2;
-    --critical: #a83636; --critical-soft: #f6e0df;
-    --shadow: 0 1px 2px rgba(30,38,36,.06), 0 8px 24px -12px rgba(30,38,36,.18);
+    --bg: #f7f1e2; --surface: #fffcf5; --surface-2: #efe2c4;
+    --ink: #3a2b1c; --ink-soft: #6b5842; --ink-faint: #a3927a; --border: #e2d0a8;
+    --accent: #8a6a35; --accent-ink: #fffaf0; --accent-soft: #f0e3c1; --accent-soft-ink: #5c451f;
+    --good: #4f7a4a; --good-soft: #dfe9d3;
+    --warn: #b3812f; --warn-soft: #f3e6c0;
+    --critical: #a4452f; --critical-soft: #f4d9cc;
+    --shadow: 0 1px 2px rgba(58,43,28,.08), 0 8px 24px -12px rgba(58,43,28,.22);
     --radius: 10px;
     --serif: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
     --sans: -apple-system,"Segoe UI","Helvetica Neue",Roboto,Arial,sans-serif;
@@ -25,17 +25,17 @@
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #14181a; --surface: #1b2124; --surface-2: #20282b;
-      --ink: #e7ebe9; --ink-soft: #a3aeaa; --ink-faint: #6d7975; --border: #2d373a;
-      --accent: #55b8b0; --accent-ink: #0e2422; --accent-soft: #1f3a38; --accent-soft-ink: #a9dcd6;
-      --good: #55b481; --good-soft: #1c3327;
-      --warn: #d9a648; --warn-soft: #3a2f18;
-      --critical: #e07a72; --critical-soft: #3b2220;
+      --bg: #201a12; --surface: #2a2217; --surface-2: #34291a;
+      --ink: #ece2cf; --ink-soft: #c2b193; --ink-faint: #8d7a5e; --border: #453724;
+      --accent: #c9a15a; --accent-ink: #241b0c; --accent-soft: #3c2f1a; --accent-soft-ink: #e6cd9a;
+      --good: #8bb37e; --good-soft: #2c3a24;
+      --warn: #dab569; --warn-soft: #3d3018;
+      --critical: #d98868; --critical-soft: #3c261c;
       --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
     }
   }
-  :root[data-theme="dark"] { --bg:#14181a;--surface:#1b2124;--surface-2:#20282b;--ink:#e7ebe9;--ink-soft:#a3aeaa;--ink-faint:#6d7975;--border:#2d373a;--accent:#55b8b0;--accent-ink:#0e2422;--accent-soft:#1f3a38;--accent-soft-ink:#a9dcd6;--good:#55b481;--good-soft:#1c3327;--warn:#d9a648;--warn-soft:#3a2f18;--critical:#e07a72;--critical-soft:#3b2220;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5); }
-  :root[data-theme="light"] { --bg:#eef0ee;--surface:#ffffff;--surface-2:#f6f8f6;--ink:#1e2624;--ink-soft:#57625d;--ink-faint:#8b948f;--border:#dbe0dc;--accent:#1f5f5b;--accent-ink:#ffffff;--accent-soft:#d9e9e6;--accent-soft-ink:#14403d;--good:#2f7a4f;--good-soft:#e1f0e5;--warn:#96660f;--warn-soft:#f5ead2;--critical:#a83636;--critical-soft:#f6e0df;--shadow:0 1px 2px rgba(30,38,36,.06),0 8px 24px -12px rgba(30,38,36,.18); }
+  :root[data-theme="dark"] { --bg:#201a12;--surface:#2a2217;--surface-2:#34291a;--ink:#ece2cf;--ink-soft:#c2b193;--ink-faint:#8d7a5e;--border:#453724;--accent:#c9a15a;--accent-ink:#241b0c;--accent-soft:#3c2f1a;--accent-soft-ink:#e6cd9a;--good:#8bb37e;--good-soft:#2c3a24;--warn:#dab569;--warn-soft:#3d3018;--critical:#d98868;--critical-soft:#3c261c;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5); }
+  :root[data-theme="light"] { --bg:#f7f1e2;--surface:#fffcf5;--surface-2:#efe2c4;--ink:#3a2b1c;--ink-soft:#6b5842;--ink-faint:#a3927a;--border:#e2d0a8;--accent:#8a6a35;--accent-ink:#fffaf0;--accent-soft:#f0e3c1;--accent-soft-ink:#5c451f;--good:#4f7a4a;--good-soft:#dfe9d3;--warn:#b3812f;--warn-soft:#f3e6c0;--critical:#a4452f;--critical-soft:#f4d9cc;--shadow:0 1px 2px rgba(58,43,28,.08),0 8px 24px -12px rgba(58,43,28,.22); }
 
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.5; }
@@ -137,7 +137,7 @@
 <div class="page">
   <header class="topbar">
     <div>
-      <p class="eyebrow">ELEAM · Plan de inversión</p>
+      <p class="eyebrow">Residencia Senior Omar Wall · Plan de inversión</p>
       <h1>¿Conviene invertir en este proyecto?</h1>
     </div>
     <div class="verdict-chip" id="verdictChip">

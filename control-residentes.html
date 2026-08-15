@@ -4,41 +4,41 @@
 <meta charset="UTF-8">
 <script src="assets/auth.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ingreso de residentes — Datos personales y cuota</title>
+<title>Ingreso de residentes — Residencia Senior Omar Wall</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#5f7c68">
+<meta name="theme-color" content="#8a6a35">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ELEAM">
+<meta name="apple-mobile-web-app-title" content="Wall">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/theme.css">
 <style>
   :root{
-    --paper:#F8F4EC;
-    --paper-dark:#f0e9d7;
-    --ink:#3d3a33;
-    --ink-soft:#6f6858;
-    --petroleo:#5f7c68;
-    --petroleo-dark:#48604f;
-    --dorado:#c9a35e;
-    --dorado-soft:#eeddb3;
-    --line:#e0d7bf;
-    --card:#fffdf8;
-    --danger:#ad5c4c;
-    --danger-bg:#f5e2da;
-    --ok:#5f8a63;
-    --weekend-bg:#f0ead9;
-    --rose:#b97d76;
-    --rose-soft:#f2ddd8;
+    --paper:#F7F1E2;
+    --paper-dark:#efe2c4;
+    --ink:#3a2b1c;
+    --ink-soft:#6b5842;
+    --petroleo:#8a6a35;
+    --petroleo-dark:#6b4f24;
+    --dorado:#c79a3f;
+    --dorado-soft:#ecd9ad;
+    --line:#e2d0a8;
+    --card:#fffcf5;
+    --danger:#a4452f;
+    --danger-bg:#f4d9cc;
+    --ok:#4f7a4a;
+    --weekend-bg:#efe4cd;
+    --rose:#b07a68;
+    --rose-soft:#f3ddd2;
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
   body{
     background:
-      repeating-linear-gradient(#F8F4EC 0px, #F8F4EC 27px, #f0e8d2 28px),
+      repeating-linear-gradient(#F7F1E2 0px, #F7F1E2 27px, #ede0c1 28px),
       var(--paper);
     color:var(--ink);
     font-family:'Inter',sans-serif;
@@ -663,7 +663,7 @@
         empresa: empresa,
         secciones: [{ titulo:'Residentes', filas: filas }],
         resumenFinal: { label:'Ingreso mensual por cuotas (residentes activos)', valor: fmtCLP(totalCuota) },
-        notaPie: 'Reporte confidencial generado desde el módulo de Ingreso — Residencia de ancianos.'
+        notaPie: 'Reporte confidencial generado desde el módulo de Ingreso — Residencia Senior Omar Wall.'
       });
       var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('residentes-'+(empresa.nombre||'residencia'))+'.pdf');
       flash('residentes-save-flash', res.mensaje, 6000);
@@ -701,7 +701,7 @@
         subtitulo: r.nombre,
         empresa: empresa,
         secciones: secciones,
-        notaPie: 'Ficha confidencial generada desde el módulo de Ingreso — Residencia de ancianos. Contiene datos personales, de contacto y financieros — uso interno restringido.'
+        notaPie: 'Ficha confidencial generada desde el módulo de Ingreso — Residencia Senior Omar Wall. Contiene datos personales, de contacto y financieros — uso interno restringido.'
       });
       var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('ingreso-'+r.nombre)+'.pdf');
       flash('ficha-save-flash', res.mensaje, 6000);

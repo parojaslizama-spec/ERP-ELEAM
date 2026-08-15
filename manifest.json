@@ -1,13 +1,13 @@
 {
-  "name": "Residencia de ancianos · ELEAM",
-  "short_name": "ELEAM",
-  "description": "ERP para la gestión de un Establecimiento de Larga Estadía para Adultos Mayores (ELEAM): residentes, ficha médica, personal, gastos y estado de resultados.",
+  "name": "Residencia Senior Omar Wall",
+  "short_name": "Wall",
+  "description": "ERP para la gestión de Residencia Senior Omar Wall, un Establecimiento de Larga Estadía para Adultos Mayores (ELEAM): residentes, ficha médica, personal, gastos y estado de resultados.",
   "start_url": "index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#f8f4ec",
-  "theme_color": "#5f7c68",
+  "background_color": "#f7f1e2",
+  "theme_color": "#8a6a35",
   "lang": "es-CL",
   "icons": [
     { "src": "assets/icons/icon-72.png", "sizes": "72x72", "type": "image/png", "purpose": "any" },
