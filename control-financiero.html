@@ -1058,14 +1058,13 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     lines.push(["Seguro cesantía (AFC)", totals.payroll.trabajador.afc].map(csvEscape).join(","));
     lines.push(["Subtotal descuentos legales trabajador", totals.payroll.trabajador.total].map(csvEscape).join(","));
     lines.push([]);
-    lines.push(["OBLIGACIONES LEGALES DE EMPRESA (calculado; la gratificación y el IVA a pagar no se suman de nuevo aquí, ya van incluidos en Personal y Tributación)", "Monto"].map(csvEscape).join(","));
+    lines.push(["OBLIGACIONES LEGALES DE EMPRESA (calculado; la gratificación no se suma de nuevo aquí, ya va incluida en Personal)", "Monto"].map(csvEscape).join(","));
     lines.push(["SIS", totals.payroll.empresa.sis].map(csvEscape).join(","));
     lines.push(["Seguro cesantía empresa (2,4% indefinido / 3,0% plazo fijo)", totals.payroll.empresa.afc].map(csvEscape).join(","));
     lines.push(["Mutual de seguridad", totals.payroll.empresa.mutual].map(csvEscape).join(","));
     lines.push(["Subtotal obligaciones legales de empresa", totals.payroll.empresa.total].map(csvEscape).join(","));
     lines.push(["Costo total de personal (líquido + legales)", totals.payroll.costoTotal].map(csvEscape).join(","));
     lines.push(["Gratificación legal (total del mes, ya incluida en Personal)", totals.totGratificacion].map(csvEscape).join(","));
-    lines.push(["IVA a pagar al SII este mes (ya incluido en Total egresos)", totals.tributacion.ivaAPagar].map(csvEscape).join(","));
     lines.push([]);
     lines.push(["ADMINISTRACIÓN (sueldo administrador/inversor, reajustado 5% cada enero)", "Monto"].map(csvEscape).join(","));
     lines.push(["Sueldo administración este mes", totals.sueldoAdmin].map(csvEscape).join(","));
@@ -1083,7 +1082,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     lines.push(["Total egresos", totals.totEgresos].map(csvEscape).join(","));
     lines.push(["Margen neto", totals.margen].map(csvEscape).join(","));
     lines.push([]);
-    lines.push(["TRIBUTACIÓN — IVA (FORMULARIO 29, calculado)", "Monto"].map(csvEscape).join(","));
+    lines.push(["IVA A PAGAR AL SII — GASTO DE EMPRESA (FORMULARIO 29, calculado de los ingresos de los residentes)", "Monto"].map(csvEscape).join(","));
     lines.push(["IVA débito fiscal (cuotas de residentes)", totals.tributacion.ivaDebito].map(csvEscape).join(","));
     lines.push(["IVA crédito fiscal (gastos)", totals.tributacion.ivaCredito].map(csvEscape).join(","));
     lines.push(["Remanente de crédito a favor (próximo mes)", totals.tributacion.ivaRemanente].map(csvEscape).join(","));
@@ -1172,13 +1171,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           },
           {
             titulo: "Obligaciones legales de Empresa",
-            sub: "La gratificación legal y el IVA a pagar no se suman de nuevo aquí (ya están en Personal y en Tributación) — se listan abajo solo como referencia del costo legal total.",
+            sub: "La gratificación legal no se suma de nuevo aquí (ya está en Personal) — se lista abajo solo como referencia del costo legal total. El IVA a pagar es un gasto de empresa aparte, calculado de los ingresos de los residentes — se detalla en Tributación, más abajo.",
             filas: [
               { label: "SIS", valor: money(t.payroll.empresa.sis) },
               { label: "Seguro cesantía empresa (2,4% indefinido / 3,0% plazo fijo)", valor: money(t.payroll.empresa.afc) },
               { label: "Mutual de seguridad", valor: money(t.payroll.empresa.mutual) },
-              { label: "Gratificación legal (total del mes, ya incluida en Personal)", valor: money(t.totGratificacion) },
-              { label: "IVA a pagar al SII este mes (ya incluido en Total egresos)", valor: money(t.tributacion.ivaAPagar) }
+              { label: "Gratificación legal (total del mes, ya incluida en Personal)", valor: money(t.totGratificacion) }
             ],
             total: { label: "Subtotal obligaciones legales de empresa", valor: money(t.payroll.empresa.total), color: "critical" }
           },
@@ -1200,8 +1198,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
             total: { label: "Total servicios", valor: money(t.totServicios), color: "critical" }
           },
           {
-            titulo: "Tributación — IVA (Formulario 29)",
-            sub: "Las cuotas de residentes incluyen IVA (débito fiscal) y los gastos pagados también (crédito fiscal, recuperable). Al SII se paga solo la diferencia.",
+            titulo: "IVA a pagar al SII — gasto de empresa (Formulario 29)",
+            sub: "El IVA de las cuotas de los residentes (débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en los gastos de la empresa (crédito fiscal, recuperable) — al SII se paga solo la diferencia.",
             filas: [
               { label: "IVA débito fiscal (cuotas de residentes)", valor: money(t.tributacion.ivaDebito) },
               { label: "IVA crédito fiscal (gastos)", valor: "− " + money(t.tributacion.ivaCredito) }
@@ -1385,7 +1383,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
       h("div", { className: "card" },
         h("h2", null, "Obligaciones legales de Empresa"),
-        h("p", { className: "sub" }, "Cargas que paga la empresa además del sueldo bruto del personal sincronizado — SIS, seguro de cesantía, mutual. La gratificación legal y el IVA a pagar no se suman de nuevo al subtotal de abajo (ya están incluidos en Personal y en Tributación, más abajo) — se muestran aquí solo como referencia del costo legal total de la empresa."),
+        h("p", { className: "sub" }, "Cargas que paga la empresa además del sueldo bruto del personal sincronizado — SIS, seguro de cesantía, mutual. La gratificación legal no se suma de nuevo al subtotal de abajo (ya está incluida en Personal) — se muestra aquí solo como referencia del costo legal total de la empresa. El IVA a pagar es otro gasto de empresa, calculado de los ingresos de los residentes — se detalla en la sección Tributación, más abajo."),
         h(LegalBreakdown, {
           title: "Concepto",
           rows: [
@@ -1396,8 +1394,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           total: totals.payroll.empresa.total
         }),
         h("div", { className: "total-row" }, h("span", null, "Costo total de personal (líquido + legales)"), h("span", { className: "total-amount" }, money(totals.payroll.costoTotal))),
-        h("div", { className: "total-row" }, h("span", null, "Gratificación legal (total del mes, ya incluida en Personal)"), h("span", null, money(totals.totGratificacion))),
-        h("div", { className: "total-row" }, h("span", null, "IVA a pagar al SII este mes (ya incluido en Total egresos)"), h("span", { className: "total-amount egreso" }, money(totals.tributacion.ivaAPagar)))
+        h("div", { className: "total-row" }, h("span", null, "Gratificación legal (total del mes, ya incluida en Personal)"), h("span", null, money(totals.totGratificacion)))
       ),
 
       h("div", { className: "card" },
@@ -1444,14 +1441,14 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       ),
 
       h("div", { className: "card" },
-        h("h2", null, "Tributación — IVA (Formulario 29)"),
-        h("p", { className: "sub" }, "Las cuotas de los residentes se cobran con IVA (" + numFmt(data.params.ivaPct) + "%) incluido — eso es débito fiscal. Los gastos pagados también incluyen IVA — eso es crédito fiscal, recuperable. Al SII se declara y paga solo la diferencia entre ambos."),
+        h("h2", null, "IVA a pagar al SII — gasto de empresa"),
+        h("p", { className: "sub" }, "El IVA de las cuotas de los residentes (" + numFmt(data.params.ivaPct) + "% incluido — débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en los gastos de la empresa (crédito fiscal, recuperable) — al SII se paga solo la diferencia."),
         h("div", { className: "total-row" }, h("span", null, "IVA débito fiscal (cuotas de residentes)"), h("span", null, money(totals.tributacion.ivaDebito))),
         h("div", { className: "total-row" }, h("span", null, "IVA crédito fiscal (gastos)"), h("span", null, "− " + money(totals.tributacion.ivaCredito))),
         totals.tributacion.ivaRemanente > 0
           ? h("div", { className: "total-row" }, h("span", null, "Remanente de crédito a favor (para el próximo mes)"), h("span", null, money(totals.tributacion.ivaRemanente)))
           : null,
-        h("div", { className: "total-row" }, h("span", null, "IVA a pagar al SII este mes"), h("span", { className: "total-amount" }, money(totals.tributacion.ivaAPagar))),
+        h("div", { className: "total-row" }, h("span", null, "IVA a pagar al SII este mes"), h("span", { className: "total-amount egreso" }, money(totals.tributacion.ivaAPagar))),
         h("p", { className: "calc-note" }, "Este monto ya está incluido en Total egresos, arriba.")
       ),
 

@@ -90,7 +90,8 @@
   .top-header .header-inner{ max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
   .brand{ display:flex; align-items:center; gap:14px; }
   .brand-mark{ font-family:'Lora',serif; font-size:26px; color:var(--dorado-soft); }
-  .empresa-fields{ display:flex; gap:10px; flex-wrap:wrap; }
+  .empresa-fields{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .empresa-nombre-fija{ font-family:'Lora',serif; font-size:15px; font-weight:600; color:#f6f2e7; }
   .empresa-fields input{
     background:rgba(255,255,255,.08);
     border:1px solid rgba(255,255,255,.25);
@@ -234,7 +235,7 @@
       <div class="brand-mark">&#9998;</div>
       <div>
         <div class="empresa-fields">
-          <input id="empresa-nombre" placeholder="Nombre de la empresa">
+          <span class="empresa-nombre-fija">Residencia Senior Omar Wall</span>
           <input id="empresa-rut" placeholder="RUT empresa (ej. 76.123.456-7)">
         </div>
         <div class="subtitle">Libro de control &middot; horas, asistencia y liquidaciones</div>
@@ -668,11 +669,10 @@
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
   // ---------- HEADER EMPRESA ----------
-  var elEmpresaNombre = document.getElementById('empresa-nombre');
+  // El nombre ya está definido (Residencia Senior Omar Wall) — no hace falta pedirlo, solo el RUT.
   var elEmpresaRut = document.getElementById('empresa-rut');
-  elEmpresaNombre.value = empresa.nombre || '';
+  if (empresa.nombre !== 'Residencia Senior Omar Wall') { empresa.nombre = 'Residencia Senior Omar Wall'; saveEmpresa(); }
   elEmpresaRut.value = empresa.rut || '';
-  elEmpresaNombre.addEventListener('input', function(){ empresa.nombre = elEmpresaNombre.value; saveEmpresa(); });
   elEmpresaRut.addEventListener('input', function(){ empresa.rut = elEmpresaRut.value; saveEmpresa(); });
 
   // ---------- TABS ----------
