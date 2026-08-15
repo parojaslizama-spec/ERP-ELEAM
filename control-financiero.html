@@ -542,7 +542,10 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       totalHaberes: totalHaberes,
       baseImponible: baseImponible,
       descInasistencia: descInasistencia,
-      afp: afpMonto, salud: saludMonto, cesantia: cesantiaMonto
+      afp: afpMonto, salud: saludMonto, cesantia: cesantiaMonto,
+      gratificacion: f.gratificacion || 0,
+      bonos: (f.bonos || 0) + (f.bonoAsistencia || 0) + (f.bonoPuntualidad || 0),
+      bonoAsistencia: f.bonoAsistencia || 0, bonoPuntualidad: f.bonoPuntualidad || 0, bonosOtros: f.bonos || 0
     };
   }
   function calcularLiquidoTrabajador(trab, form) {
@@ -565,6 +568,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         costoBase: detalle.totalHaberes - detalle.descInasistencia,
         baseImponible: detalle.baseImponible,
         afp: detalle.afp, salud: detalle.salud, cesantia: detalle.cesantia,
+        gratificacion: detalle.gratificacion, bonos: detalle.bonos,
         origen: saved ? "Liquidación de " + monthLabel(monthKey) : "Estimado (sueldo base)"
       };
     });
@@ -788,6 +792,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var ivaResidentes = ivaResidentesBreakdown(totIngresosResidentes, params);
     var autoRows = monthKey ? personalAutoRows(monthKey) : [];
     var totPersonalLiquido = sumAuto(autoRows);
+    var totGratificacion = autoRows.reduce(function (a, r) { return a + (r.gratificacion || 0); }, 0);
+    var totBonos = autoRows.reduce(function (a, r) { return a + (r.bonos || 0); }, 0);
     var payroll = payrollBreakdown(autoRows, params);
     var totGastosNeto = sum(month.gastos);
     var gastos = gastosBreakdown(totGastosNeto, params);
@@ -800,7 +806,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       ingresosAutoRows: ingresosAutoRows, totIngresosResidentes: totIngresosResidentes,
       ivaResidentes: ivaResidentes,
       autoRows: autoRows,
-      totPersonalLiquido: totPersonalLiquido, payroll: payroll,
+      totPersonalLiquido: totPersonalLiquido, totGratificacion: totGratificacion, totBonos: totBonos, payroll: payroll,
       gastos: gastos, totServicios: totServicios,
       tributacion: tributacion,
       sueldoAdmin: sueldoAdmin,
@@ -1011,6 +1017,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     totals.autoRows.forEach(function (r) { lines.push([r.nombre + " (" + r.origen + ")", r.monto].map(csvEscape).join(",")); });
     lines.push(["Subtotal líquido", totals.totPersonalLiquido].map(csvEscape).join(","));
     lines.push(["Sueldo bruto (calculado)", totals.payroll.bruto].map(csvEscape).join(","));
+    lines.push(["Gratificación legal (total del mes, ya incluida arriba en cada líquido)", totals.totGratificacion].map(csvEscape).join(","));
+    lines.push(["Bonos asistencia + puntualidad + otros (total del mes, ya incluidos arriba)", totals.totBonos].map(csvEscape).join(","));
     lines.push([]);
     lines.push(["DESCUENTOS LEGALES TRABAJADOR (retenido, calculado)", "Monto"].map(csvEscape).join(","));
     lines.push(["AFP", totals.payroll.trabajador.afp].map(csvEscape).join(","));
@@ -1112,7 +1120,10 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           {
             titulo: "Personal — sincronizado desde Trabajadores",
             sub: t.autoRows.length ? "Calculado automáticamente desde el módulo de Trabajadores y Liquidaciones." : "Sin trabajadores registrados en el módulo de Trabajadores.",
-            filas: t.autoRows.map(function (r) { return { label: r.nombre, valor: money(r.monto), nota: r.origen }; }),
+            filas: t.autoRows.map(function (r) { return { label: r.nombre, valor: money(r.monto), nota: r.origen }; }).concat([
+              { label: "Gratificación legal (total del mes, ya incluida arriba en cada líquido)", valor: money(t.totGratificacion) },
+              { label: "Bonos asistencia + puntualidad + otros (total del mes, ya incluidos arriba)", valor: money(t.totBonos) }
+            ]),
             total: { label: "Subtotal líquido personal", valor: money(t.totPersonalLiquido) }
           },
           {
@@ -1291,7 +1302,9 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
                 rows: totals.autoRows.map(function (r) { return { label: r.nombre + " — " + r.origen, amount: r.monto }; }),
                 total: totals.totPersonalLiquido
               }),
-              h("p", { className: "calc-note" }, "Sueldo bruto calculado: " + money(totals.payroll.bruto))
+              h("p", { className: "calc-note" }, "Sueldo bruto calculado: " + money(totals.payroll.bruto)),
+              h("div", { className: "total-row" }, h("span", null, "Gratificación legal (total del mes, ya incluida arriba en cada líquido)"), h("span", null, money(totals.totGratificacion))),
+              h("div", { className: "total-row" }, h("span", null, "Bonos asistencia + puntualidad + otros (total del mes, ya incluidos arriba)"), h("span", null, money(totals.totBonos)))
             )
       ),
 
