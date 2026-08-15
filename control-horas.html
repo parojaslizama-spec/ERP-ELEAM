@@ -247,6 +247,7 @@
   <nav class="tabbar">
     <button class="tab-btn active" data-tab="trabajadores">Trabajadores</button>
     <button class="tab-btn" data-tab="asistencia">Asistencia y horas</button>
+    <button class="tab-btn" data-tab="vacaciones">Vacaciones</button>
     <button class="tab-btn" data-tab="liquidaciones">Liquidaciones</button>
   </nav>
 
@@ -459,7 +460,24 @@
     </div>
   </section>
 
-  <!-- TAB 3: LIQUIDACIONES -->
+  <!-- TAB 3: VACACIONES -->
+  <section id="tab-vacaciones" class="tab-panel">
+    <div class="card">
+      <h2>Feriado legal (vacaciones)</h2>
+      <p class="field-hint">Cada trabajador acumula 15 d&iacute;as h&aacute;biles de feriado legal por cada a&ntilde;o de servicio (Art. 67 C&oacute;digo del Trabajo), contados desde su fecha de ingreso. El saldo se puede acumular hasta por 2 per&iacute;odos (30 d&iacute;as) — si un trabajador llega a ese tope sin tomar vacaciones, la ley exige programarle el feriado pronto. Los d&iacute;as tomados se cuentan autom&aacute;ticamente desde los d&iacute;as marcados "Vacaciones" en la pesta&ntilde;a Asistencia.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Trabajador</th><th>Cargo</th><th class="mono">Ingreso</th><th class="num">Antig&uuml;edad</th>
+            <th class="num">D&iacute;as acumulados</th><th class="num">D&iacute;as tomados</th><th class="num">Saldo disponible</th><th class="mono">Pr&oacute;ximo aniversario</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-vacaciones"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TAB 4: LIQUIDACIONES -->
   <section id="tab-liquidaciones" class="tab-panel">
     <div class="card">
       <h2>Liquidaci&oacute;n de sueldo</h2>
@@ -485,11 +503,19 @@
           <input id="liq-utm" type="number" min="0" step="100">
         </div>
         <div class="field small">
-          <label for="liq-tope-imponible">Tope imponible mensual (CLP)</label>
-          <input id="liq-tope-imponible" type="number" min="0" step="10000">
+          <label for="liq-uf">Valor UF de hoy (CLP)</label>
+          <input id="liq-uf" type="number" min="0" step="1">
+        </div>
+        <div class="field small">
+          <label for="liq-tope-uf">Tope imponible (en UF)</label>
+          <input id="liq-tope-uf" type="number" min="0" step="0.1">
+        </div>
+        <div class="field small">
+          <label>Tope imponible mensual (CLP)</label>
+          <input id="liq-tope-imponible" type="text" disabled class="mono">
         </div>
       </div>
-      <p class="field-hint">El Ingreso M&iacute;nimo Mensual (IMM) se usa para el tope legal de la gratificaci&oacute;n (4,75 IMM al a&ntilde;o) y como sueldo predeterminado al agregar un trabajador nuevo — se actualiza solo seg&uacute;n el calendario legal (avisa cuando la ley lo reajuste para agregarlo). La UTM (Unidad Tributaria Mensual) se usa para calcular el Impuesto &Uacute;nico y cambia cada mes: actual&iacute;zala aqu&iacute; (ver sii.cl). El tope imponible limita cu&aacute;nto de la base imponible paga AFP, salud y cesant&iacute;a (aprox. 87 UF — simplificado a un monto fijo en pesos): actual&iacute;zalo cuando corresponda (ver la Superintendencia de Pensiones).</p>
+      <p class="field-hint">El Ingreso M&iacute;nimo Mensual (IMM) se usa para el tope legal de la gratificaci&oacute;n (4,75 IMM al a&ntilde;o) y como sueldo predeterminado al agregar un trabajador nuevo — se actualiza solo seg&uacute;n el calendario legal (avisa cuando la ley lo reajuste para agregarlo). La UTM (Unidad Tributaria Mensual) se usa para calcular el Impuesto &Uacute;nico y cambia cada mes: actual&iacute;zala aqu&iacute; (ver sii.cl). El tope imponible de AFP/salud/cesant&iacute;a se calcula multiplicando el <b>valor de la UF de hoy</b> (actual&iacute;zalo aqu&iacute; desde la fuente oficial — sii.cl o Banco Central) por el <b>tope legal en UF</b> vigente (Superintendencia de Pensiones, reajustado normalmente cada enero) — as&iacute; el monto en pesos se recalcula solo.</p>
 
       <div id="liq-content" style="display:none;">
         <div class="liq-columns">
@@ -500,8 +526,8 @@
               <div><label for="liq-sueldo-base">Sueldo base</label><input id="liq-sueldo-base" type="number" min="0" step="1000" disabled class="mono"></div>
               <div><label for="liq-gratificacion">Gratificaci&oacute;n legal mensual (25%, tope 4,75 IMM/12, pagada en 2 cuotas quincenales)</label><input id="liq-gratificacion" type="number" min="0" step="1000" disabled class="mono"></div>
               <div><label for="liq-bonos">Bonos</label><input id="liq-bonos" type="number" min="0" step="1000" disabled class="mono"></div>
-              <div><label for="liq-bono-asistencia">Bono asistencia (100%=$100.000 &middot; 95-99,9%=$50.000 &middot; solo esencial)</label><input id="liq-bono-asistencia" type="number" min="0" step="1000" disabled class="mono"></div>
-              <div><label for="liq-bono-puntualidad">Bono puntualidad (100%=$20.000 &middot; 95-99,9%=$10.000)</label><input id="liq-bono-puntualidad" type="number" min="0" step="1000" disabled class="mono"></div>
+              <div><label for="liq-bono-asistencia">Bono asistencia ($50.000 fijo, 100% asistencia y sin ausencias &middot; solo esencial)</label><input id="liq-bono-asistencia" type="number" min="0" step="1000" disabled class="mono"></div>
+              <div><label for="liq-bono-puntualidad">Bono puntualidad ($20.000 fijo, 100% puntualidad y sin ausencias)</label><input id="liq-bono-puntualidad" type="number" min="0" step="1000" disabled class="mono"></div>
               <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5" disabled class="mono"></div>
               <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100" disabled class="mono"></div>
               <div><label>Total valor hora extra</label><input id="liq-he-total" type="text" disabled class="mono"></div>
@@ -598,11 +624,17 @@
   var liquidaciones = window.storage.get('liquidaciones', {});
   var immVigente = immLegalVigente(new Date());
   var utmVigente = window.storage.get('utm', 68000);
-  var topeImponibleMensual = window.storage.get('tope_imponible', 3300000);
+  // El tope imponible de AFP/salud/cesantía NO es un monto fijo: es un tope legal expresado en UF
+  // (Superintendencia de Pensiones) multiplicado por el valor de la UF del día (SII/Banco Central).
+  // Ambos valores hay que actualizarlos desde la fuente oficial — no se pueden calcular solos aquí.
+  var valorUF = window.storage.get('valor_uf', 39000);
+  var topeImponibleUF = window.storage.get('tope_imponible_uf', 87.8);
+  function topeImponibleMensualCLP(){ return valorUF * topeImponibleUF; }
 
   function saveEmpresa(){ window.storage.set('empresa', empresa); }
   function saveUtm(){ window.storage.set('utm', utmVigente); }
-  function saveTopeImponible(){ window.storage.set('tope_imponible', topeImponibleMensual); }
+  function saveValorUF(){ window.storage.set('valor_uf', valorUF); }
+  function saveTopeImponibleUF(){ window.storage.set('tope_imponible_uf', topeImponibleUF); }
   function saveTrabajadores(){ window.storage.set('trabajadores', trabajadores); }
   function saveAsistencia(){ window.storage.set('asistencia', asistencia); }
   function saveLiquidaciones(){ window.storage.set('liquidaciones', liquidaciones); }
@@ -625,6 +657,7 @@
   var tabPanels = {
     trabajadores: document.getElementById('tab-trabajadores'),
     asistencia: document.getElementById('tab-asistencia'),
+    vacaciones: document.getElementById('tab-vacaciones'),
     liquidaciones: document.getElementById('tab-liquidaciones')
   };
   tabBtns.forEach(function(btn){
@@ -634,6 +667,7 @@
       Object.keys(tabPanels).forEach(function(k){ tabPanels[k].classList.remove('active'); });
       tabPanels[btn.dataset.tab].classList.add('active');
       if(btn.dataset.tab === 'asistencia') renderCalendar();
+      if(btn.dataset.tab === 'vacaciones') renderVacaciones();
       if(btn.dataset.tab === 'liquidaciones') loadLiquidacion();
     });
   });
@@ -1036,6 +1070,78 @@
     refreshSelectors();
   });
 
+  // ---------- VACACIONES ----------
+  // Días de feriado ya tomados: se cuentan directo desde los días marcados "Vacaciones" en Asistencia,
+  // a través de todos los meses y años guardados para este trabajador.
+  function diasVacacionesTomados(trabId){
+    var total = 0;
+    Object.keys(asistencia).forEach(function(key){
+      if(key.indexOf(trabId+'_') !== 0) return;
+      var monthData = asistencia[key];
+      Object.keys(monthData).forEach(function(day){
+        if(monthData[day].estado === 'vacaciones') total++;
+      });
+    });
+    return total;
+  }
+
+  var FERIADO_DIAS_POR_ANIO = 15;
+  var FERIADO_TOPE_ACUMULACION = 30; // 2 períodos consecutivos, Art. 70 Código del Trabajo
+
+  function calcularVacaciones(trab, hoy){
+    hoy = hoy || new Date();
+    if(!trab.fechaIngreso) return null;
+    var inicio = new Date(trab.fechaIngreso+'T00:00:00');
+    var mesesServicio = (hoy.getFullYear()-inicio.getFullYear())*12 + (hoy.getMonth()-inicio.getMonth());
+    if(hoy.getDate() < inicio.getDate()) mesesServicio--;
+    mesesServicio = Math.max(0, mesesServicio);
+    var aniosCompletos = Math.floor(mesesServicio/12);
+    var mesesResto = mesesServicio - aniosCompletos*12;
+
+    var diasAcumulados = Math.floor((mesesServicio/12) * FERIADO_DIAS_POR_ANIO);
+    var diasTomados = diasVacacionesTomados(trab.id);
+    var saldoBruto = diasAcumulados - diasTomados;
+    var saldo = Math.max(0, Math.min(saldoBruto, FERIADO_TOPE_ACUMULACION));
+    var enTope = saldoBruto >= FERIADO_TOPE_ACUMULACION;
+
+    var proximoAniversario = new Date(hoy.getFullYear(), inicio.getMonth(), inicio.getDate());
+    if(proximoAniversario <= hoy) proximoAniversario = new Date(hoy.getFullYear()+1, inicio.getMonth(), inicio.getDate());
+
+    return {
+      aniosCompletos: aniosCompletos, mesesResto: mesesResto,
+      diasAcumulados: diasAcumulados, diasTomados: diasTomados,
+      saldo: saldo, enTope: enTope, proximoAniversario: proximoAniversario
+    };
+  }
+
+  function renderVacaciones(){
+    var tbody = document.getElementById('tabla-vacaciones');
+    var activos = trabajadoresActivos();
+    if(activos.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">A&uacute;n no hay trabajadores activos registrados.</td></tr>';
+      return;
+    }
+    var hoy = new Date();
+    tbody.innerHTML = activos.map(function(t){
+      var v = calcularVacaciones(t, hoy);
+      if(!v){
+        return '<tr><td>'+esc(t.nombre)+'</td><td>'+esc(t.cargo||'—')+'</td><td colspan="6" style="color:var(--danger);">Falta fecha de ingreso — edítalo en Trabajadores para calcular sus vacaciones.</td></tr>';
+      }
+      var antiguedadTxt = v.aniosCompletos+' a&ntilde;o(s) '+v.mesesResto+' mes(es)';
+      var saldoTxt = v.saldo + (v.enTope ? ' <span class="badge" style="background:var(--danger-bg); color:var(--danger); margin-left:6px;">tope alcanzado</span>' : '');
+      return '<tr>'+
+        '<td>'+esc(t.nombre)+'</td>'+
+        '<td>'+esc(t.cargo||'—')+'</td>'+
+        '<td class="mono">'+esc(t.fechaIngreso)+'</td>'+
+        '<td class="num">'+antiguedadTxt+'</td>'+
+        '<td class="num">'+v.diasAcumulados+'</td>'+
+        '<td class="num">'+v.diasTomados+'</td>'+
+        '<td class="num">'+saldoTxt+'</td>'+
+        '<td class="mono">'+v.proximoAniversario.toLocaleDateString('es-CL')+'</td>'+
+      '</tr>';
+    }).join('');
+  }
+
   // ---------- SELECT POBLADORES COMPARTIDOS ----------
   function fillMesSelect(sel){
     sel.innerHTML = MESES.map(function(m,i){ return '<option value="'+(i+1)+'">'+m+'</option>'; }).join('');
@@ -1059,6 +1165,8 @@
   var liqAnioInput = document.getElementById('liq-anio');
   var liqImmInput = document.getElementById('liq-imm');
   var liqUtmInput = document.getElementById('liq-utm');
+  var liqUFInput = document.getElementById('liq-uf');
+  var liqTopeUFInput = document.getElementById('liq-tope-uf');
   var liqTopeInput = document.getElementById('liq-tope-imponible');
 
   var today = new Date();
@@ -1068,7 +1176,9 @@
   liqAnioInput.value = today.getFullYear();
   liqImmInput.value = immVigente;
   liqUtmInput.value = utmVigente;
-  liqTopeInput.value = topeImponibleMensual;
+  liqUFInput.value = valorUF;
+  liqTopeUFInput.value = topeImponibleUF;
+  liqTopeInput.value = fmtCLP(topeImponibleMensualCLP());
 
   function refreshSelectors(){
     fillTrabajadorSelect(asisTrabSel);
@@ -1088,10 +1198,19 @@
     saveUtm();
     loadLiquidacion();
   });
-  liqTopeInput.addEventListener('input', function(){
-    topeImponibleMensual = num(liqTopeInput.value) || 3300000;
-    saveTopeImponible();
+  function actualizarTopeImponible(){
+    liqTopeInput.value = fmtCLP(topeImponibleMensualCLP());
     loadLiquidacion();
+  }
+  liqUFInput.addEventListener('input', function(){
+    valorUF = num(liqUFInput.value) || 39000;
+    saveValorUF();
+    actualizarTopeImponible();
+  });
+  liqTopeUFInput.addEventListener('input', function(){
+    topeImponibleUF = num(liqTopeUFInput.value) || 87.8;
+    saveTopeImponibleUF();
+    actualizarTopeImponible();
   });
 
   // ---------- ASISTENCIA ----------
@@ -1393,15 +1512,19 @@
     if(esperados <= 0) return null;
     return (resumen.diasTrabajados / esperados) * 100;
   }
-  // Bono asistencia: solo personal esencial. 100% asistencia -> $100.000; 95%-99,9% -> $50.000; menos, $0.
-  function nivelBonoAsistencia(pctAsistencia, tipo){
-    if(tipo !== 'esencial') return 0;
-    if(pctAsistencia === null) return 0;
-    if(pctAsistencia >= 100) return 100000;
-    if(pctAsistencia >= 95) return 50000;
-    return 0;
+  // Cualquier ausencia en el mes — con o sin justificación legal — anula ambos bonos. No hay tramos
+  // intermedios: es 100% asistencia/puntualidad o no hay bono.
+  function tuvoAusencias(resumen){
+    return (resumen.faltaInjust || 0) > 0 || (resumen.faltaJust || 0) > 0;
   }
-  // Bono puntualidad: todos los tipos. 100% puntualidad -> $20.000; 95%-99,9% -> $10.000; menos, $0.
+  // Bono asistencia: monto fijo $50.000, solo personal esencial, solo si no hubo ninguna ausencia y
+  // asistió el 100% de los turnos programados.
+  function nivelBonoAsistencia(resumen, tipo){
+    if(tipo !== 'esencial') return 0;
+    if(tuvoAusencias(resumen)) return 0;
+    var pct = attendancePct(resumen);
+    return pct === 100 ? 50000 : 0;
+  }
   // Adelanto de sueldo (quincena): anticipo sugerido según los días efectivamente trabajados hasta el día 15 del mes.
   function computeAdelantoDefault(trab, year, month){
     var monthData = getMonthData(trab.id, year, month);
@@ -1413,17 +1536,18 @@
     }
     return Math.round(total / 100) * 100;
   }
-  function nivelBonoPuntualidad(pctPuntualidad){
-    if(pctPuntualidad === null) return 0;
-    if(pctPuntualidad >= 100) return 20000;
-    if(pctPuntualidad >= 95) return 10000;
-    return 0;
+  // Bono puntualidad: monto fijo $20.000, todos los tipos, solo si no hubo ninguna ausencia y llegó
+  // puntual el 100% de los días trabajados.
+  function nivelBonoPuntualidad(resumen){
+    if(tuvoAusencias(resumen)) return 0;
+    var pct = punctualityPct(resumen);
+    return pct === 100 ? 20000 : 0;
   }
 
   // AFP, salud y cesantía se calculan sobre la base imponible, pero solo hasta el tope imponible legal
-  // (aprox. 87,8 UF para AFP/salud — se usa un monto fijo en pesos configurable arriba, por simplicidad).
+  // (tope en UF × valor de la UF de hoy, ambos configurables arriba desde la fuente oficial).
   function legalDeductions(trab, baseImponible){
-    var baseTope = Math.min(baseImponible, topeImponibleMensual || Infinity);
+    var baseTope = Math.min(baseImponible, topeImponibleMensualCLP() || Infinity);
     var afpMonto = baseTope * (trab.afpPct/100);
     var saludMonto = trab.saludTipo === 'fonasa' ? baseTope * 0.07 : trab.saludMonto;
     var cesantiaMonto = baseTope * (trab.cesantiaPct/100);
@@ -1488,8 +1612,8 @@
     var saved = liquidaciones[key];
     var pctAsistencia = attendancePct(resumen);
     var pctPuntualidad = punctualityPct(resumen);
-    var bonoAsistenciaDefault = nivelBonoAsistencia(pctAsistencia, trab.tipo);
-    var bonoPuntualidadDefault = nivelBonoPuntualidad(pctPuntualidad);
+    var bonoAsistenciaDefault = nivelBonoAsistencia(resumen, trab.tipo);
+    var bonoPuntualidadDefault = nivelBonoPuntualidad(resumen);
     var heCantidadDefault = Math.round(resumen.horasExtra*10)/10;
     var heValorDefault = Math.round((trab.sueldoBase/30/trab.horasJornada)*1.5);
     var montoHorasExtraDefault = heCantidadDefault * heValorDefault;
@@ -1541,12 +1665,17 @@
       'Calculado según la tabla de Impuesto Único del SII sobre la renta tributable (' + fmtCLP(rentaTributableDefault) + ' = base imponible − AFP − salud − cesantía), con UTM = ' + fmtCLP(utmVigente) + '. ' +
       (impuestoDefault > 0 ? 'Este trabajador queda afecto a impuesto este mes.' : 'Bajo el tramo exento (13,5 UTM = ' + fmtCLP(13.5 * utmVigente) + '): no paga impuesto este mes.');
 
+    var huboAusencias = tuvoAusencias(resumen);
     var asistenciaTxt = pctAsistencia === null ? 'Asistencia: sin datos registrados este mes.' : 'Asistencia: ' + pctAsistencia.toFixed(1) + '%';
     if(trab.tipo !== 'esencial') asistenciaTxt += ' (personal de soporte no accede al bono de asistencia, solo al de puntualidad).';
-    else if(pctAsistencia !== null) asistenciaTxt += pctAsistencia >= 100 ? ' — 100%: bono $100.000.' : pctAsistencia >= 95 ? ' — entre 95% y 99,9%: bono $50.000.' : ' — bajo 95%: sin bono.';
-    var puntualidadTxt = pctPuntualidad === null ? 'Puntualidad: sin datos registrados este mes.' : 'Puntualidad: ' + pctPuntualidad.toFixed(1) + '%' +
-      (pctPuntualidad >= 100 ? ' — 100%: bono $20.000.' : pctPuntualidad >= 95 ? ' — entre 95% y 99,9%: bono $10.000.' : ' — bajo 95%: sin bono.');
-    document.getElementById('liq-asistencia-hint').textContent = asistenciaTxt + ' ' + puntualidadTxt + ' Ambos bonos son imponibles: descuentan AFP/salud/cesantía al trabajador y generan cargas legales para la empresa.';
+    else if(huboAusencias) asistenciaTxt += ' — hubo ausencia(s) este mes (con o sin justificación): sin bono.';
+    else if(pctAsistencia === 100) asistenciaTxt += ' — 100% y sin ausencias: bono $50.000.';
+    else if(pctAsistencia !== null) asistenciaTxt += ' — sin bono (se exige 100%).';
+    var puntualidadTxt = pctPuntualidad === null ? 'Puntualidad: sin datos registrados este mes.' : 'Puntualidad: ' + pctPuntualidad.toFixed(1) + '%';
+    if(huboAusencias) puntualidadTxt += ' — hubo ausencia(s) este mes: sin bono.';
+    else if(pctPuntualidad === 100) puntualidadTxt += ' — 100% y sin ausencias: bono $20.000.';
+    else if(pctPuntualidad !== null) puntualidadTxt += ' — sin bono (se exige 100%).';
+    document.getElementById('liq-asistencia-hint').textContent = asistenciaTxt + ' ' + puntualidadTxt + ' Ambos bonos son imponibles: descuentan AFP/salud/cesantía al trabajador y generan cargas legales para la empresa. Cualquier ausencia del mes — justificada o no — anula ambos bonos.';
 
     document.getElementById('liq-save-flash').textContent = '';
     recomputeLiquidacion();
@@ -1773,8 +1902,8 @@
       var remuneracion = 'El empleador pagará al trabajador un sueldo base mensual bruto de ' + fmtCLP(t.sueldoBase) +
         ', que conforme a los descuentos legales vigentes (AFP ' + t.afpPct + '%, salud ' + saludTxt + ', seguro de cesantía ' + t.cesantiaPct + '%) equivale referencialmente a un líquido aproximado de ' + fmtCLP(liquidoRef) +
         '. El trabajador tendrá además derecho a: (i) gratificación legal mensual equivalente al 25% de lo devengado en el mes, con tope de 4,75 ingresos mínimos mensuales al año (artículo 50 del Código del Trabajo) — actualmente ' + fmtCLP(gratMensual) + ' mensuales, pagada en 2 cuotas quincenales de ' + fmtCLP(gratMensual/2) + ' cada una; (ii) un bono de cumplimiento de asistencia' +
-        (t.tipo === 'esencial' ? ' de $100.000 mensuales si asiste al 100% de los turnos programados, o $50.000 si asiste entre el 95% y el 99,9% de ellos (bajo 95% no corresponde bono)' : ' — no aplicable a este cargo, reservado a personal esencial (cuidadores)') +
-        '; y (iii) un bono de puntualidad de $20.000 mensuales si llega puntual al 100% de sus turnos, o $10.000 si es puntual entre el 95% y el 99,9% de ellos (bajo 95% no corresponde bono), aplicable a todos los cargos. La gratificación y ambos bonos son imponibles y tributables. La remuneración se pagará por período mensual, dentro de los primeros cinco días hábiles del mes siguiente al trabajado, mediante depósito en la cuenta bancaria que indique el trabajador, previo descuento de las cotizaciones legales y demás descuentos procedentes.';
+        (t.tipo === 'esencial' ? ' de $50.000 mensuales, pagadero solo si asiste al 100% de los turnos programados y no registra ninguna ausencia en el mes, con o sin justificación (cualquier ausencia anula el bono)' : ' — no aplicable a este cargo, reservado a personal esencial (cuidadores)') +
+        '; y (iii) un bono de puntualidad de $20.000 mensuales, pagadero solo si llega puntual al 100% de sus turnos y no registra ninguna ausencia en el mes, con o sin justificación (cualquier ausencia anula el bono), aplicable a todos los cargos. La gratificación y ambos bonos son imponibles y tributables. La remuneración se pagará por período mensual, dentro de los primeros cinco días hábiles del mes siguiente al trabajado, mediante depósito en la cuenta bancaria que indique el trabajador, previo descuento de las cotizaciones legales y demás descuentos procedentes.';
 
       var clauses = [
         { title: 'PRIMERO: Naturaleza de los servicios', body: cfg.primero + ' El trabajador se obliga además a cumplir las demás labores anexas y complementarias a las señaladas, propias de su cargo, que le sean encomendadas por el empleador o quien lo represente, en tanto sean compatibles con sus aptitudes e idoneidad y no importen menoscabo para el trabajador.' },
@@ -1911,6 +2040,7 @@
   document.getElementById('trab-sueldo').value = immVigente;
   renderTrabajadores();
   renderCalendar();
+  renderVacaciones();
   loadLiquidacion();
 })();
 </script>

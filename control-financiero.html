@@ -507,8 +507,13 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     }
     return actual;
   }
+  // Tope imponible de AFP/salud/cesantía = valor de la UF de hoy × tope legal en UF — misma fórmula
+  // que control-horas.html, leyendo los mismos dos valores fuente (evita que ambos módulos diverjan).
   function getTopeImponibleGlobal() {
-    try { return JSON.parse(localStorage.getItem("rha_tope_imponible") || "3300000"); } catch (e) { return 3300000; }
+    var valorUF, topeUF;
+    try { valorUF = JSON.parse(localStorage.getItem("rha_valor_uf") || "39000"); } catch (e) { valorUF = 39000; }
+    try { topeUF = JSON.parse(localStorage.getItem("rha_tope_imponible_uf") || "87.8"); } catch (e) { topeUF = 87.8; }
+    return valorUF * topeUF;
   }
   // Gratificación legal Art. 50: 25% de lo devengado, con tope de 4,75 IMM al año (mensualizado) —
   // misma fórmula que usa el formulario de liquidación en control-horas.html.
@@ -922,13 +927,17 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   function Dashboard(props) {
     var t = props.totals;
     var tone = t.margen >= 0 ? "good" : "critical";
+    var resumen = props.resumenMensual || {};
+    var margenAcumulado = Object.keys(resumen).reduce(function (a, k) { return a + (resumen[k].margen || 0); }, 0);
+    var toneAcum = margenAcumulado >= 0 ? "good" : "critical";
     return h("div", { className: "card" },
       h("h2", null, "Resumen — " + monthLabel(props.currentKey)),
       h("div", { className: "kpi-grid" },
         h("div", { className: "kpi" }, h("div", { className: "kpi-label" }, "Total ingresos"), h("div", { className: "kpi-value" }, money(t.totIngresos))),
         h("div", { className: "kpi" }, h("div", { className: "kpi-label" }, "Total egresos"), h("div", { className: "kpi-value" }, money(t.totEgresos))),
         h("div", { className: "kpi tone-" + tone }, h("div", { className: "kpi-label" }, "Margen neto"), h("div", { className: "kpi-value" }, money(t.margen))),
-        h("div", { className: "kpi" }, h("div", { className: "kpi-label" }, "Margen %"), h("div", { className: "kpi-value" }, t.totIngresos > 0 ? pctFmt.format((t.margen / t.totIngresos) * 100) + "%" : "—"))
+        h("div", { className: "kpi" }, h("div", { className: "kpi-label" }, "Margen %"), h("div", { className: "kpi-value" }, t.totIngresos > 0 ? pctFmt.format((t.margen / t.totIngresos) * 100) + "%" : "—")),
+        h("div", { className: "kpi tone-" + toneAcum }, h("div", { className: "kpi-label" }, "Margen acumulado (histórico)"), h("div", { className: "kpi-value" }, money(margenAcumulado)))
       )
     );
   }
@@ -1241,7 +1250,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         })
       ),
 
-      h(Dashboard, { totals: totals, currentKey: currentKey }),
+      h(Dashboard, { totals: totals, currentKey: currentKey, resumenMensual: data.resumenMensual }),
       h(ComparisonChart, { data: data, sortedKeys: sortedKeys }),
 
       h("div", { className: "card" },
