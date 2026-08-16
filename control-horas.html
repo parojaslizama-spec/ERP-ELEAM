@@ -260,7 +260,14 @@
             </select>
           </div>
           <div id="trab-ciclo-wrap" style="display:none;">
-            <label for="trab-ciclo-inicio">Inicio del ciclo (1&deg; turno d&iacute;a)</label>
+            <label for="trab-ciclo-tipo">Ciclo</label>
+            <select id="trab-ciclo-tipo">
+              <option value="4x4">4&times;4 (2 d&iacute;a + 2 noche + 4 descanso)</option>
+              <option value="2x2n">2&times;2 nocturno (solo turno noche)</option>
+            </select>
+          </div>
+          <div id="trab-ciclo-inicio-wrap" style="display:none;">
+            <label id="trab-ciclo-inicio-label" for="trab-ciclo-inicio">Inicio del ciclo (1&deg; turno d&iacute;a)</label>
             <input id="trab-ciclo-inicio" type="date">
           </div>
           <div>
@@ -335,7 +342,7 @@
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <h2 style="border:none; padding:0; margin:0;">N&oacute;mina</h2>
         <div>
-          <button id="btn-dotacion-minima" class="secondary" type="button">Cargar dotaci&oacute;n m&iacute;nima (4 cuidadores + 1 cocinero)</button>
+          <button id="btn-dotacion-minima" class="secondary" type="button">Cargar dotaci&oacute;n m&iacute;nima (4+2+1+1)</button>
           <button id="btn-pdf-nomina" class="gold" type="button">Generar reporte PDF de n&oacute;mina</button>
           <span id="nomina-save-flash" class="save-flash"></span>
         </div>
@@ -559,6 +566,10 @@
   var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   var DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
   var CICLO_4X4 = ['turno_dia','turno_dia','turno_noche','turno_noche','descanso_turno','descanso_turno','descanso_turno','descanso_turno'];
+  // Turno nocturno exclusivo (2 noches trabajadas + 2 libres) — para cuidadores contratados solo para
+  // cubrir la noche, distinto del ciclo 4×4 (que rota día y noche). Mismo 50% de días trabajados que el
+  // 4×4, así que promedioSemanalEsencial() (horasJornada×3.5) sirve para ambos sin cambios.
+  var CICLO_2X2_NOCTURNO = ['turno_noche','turno_noche','descanso_turno','descanso_turno'];
   var ESTADOS_TRABAJADOS = { trabajado:1, turno_dia:1, turno_noche:1 };
 
   // Calendario del Ingreso Mínimo Mensual (IMM) por ley — agrega una fila nueva cada vez que la ley
@@ -639,6 +650,9 @@
 
   var tipoSel = document.getElementById('trab-tipo');
   var cicloWrap = document.getElementById('trab-ciclo-wrap');
+  var cicloInicioWrap = document.getElementById('trab-ciclo-inicio-wrap');
+  var cicloInicioLabel = document.getElementById('trab-ciclo-inicio-label');
+  var cicloTipoSel = document.getElementById('trab-ciclo-tipo');
   var horasInput = document.getElementById('trab-horas');
   var horasLabel = document.getElementById('trab-horas-label');
   var jornadaLegalHint = document.getElementById('trab-jornada-legal-hint');
@@ -650,20 +664,27 @@
       jornadaLegalHint.className = 'field-hint';
       return;
     }
+    var nocturno = cicloTipoSel.value === '2x2n';
     var horas = num(horasInput.value) || 12;
     var promedio = promedioSemanalEsencial(horas);
     var excede = promedio > maxLegal;
-    jornadaLegalHint.textContent = 'Ciclo 4×4 (2 turnos día + 2 noche + 4 descanso): promedio semanal de ' + promedio + ' horas. Máximo legal vigente: ' + maxLegal + ' horas semanales (Ley N°21.561, "Ley de 40 horas")' +
+    jornadaLegalHint.textContent = (nocturno ? 'Ciclo 2×2 nocturno (2 noches + 2 descanso)' : 'Ciclo 4×4 (2 turnos día + 2 noche + 4 descanso)') + ': promedio semanal de ' + promedio + ' horas. Máximo legal vigente: ' + maxLegal + ' horas semanales (Ley N°21.561, "Ley de 40 horas")' +
       (excede ? ' — ¡EXCEDE EL MÁXIMO LEGAL! Reduce las horas por turno o pide autorización de la Dirección del Trabajo (Art. 38 del Código del Trabajo).' : ' — dentro del máximo, requiere de todas formas autorización de la Dirección del Trabajo como sistema excepcional (Art. 38 del Código del Trabajo).');
     jornadaLegalHint.className = 'field-hint' + (excede ? ' warn-text' : '');
   }
   function applyTipoUI(){
     var esencial = tipoSel.value === 'esencial';
     cicloWrap.style.display = esencial ? 'block' : 'none';
+    cicloInicioWrap.style.display = esencial ? 'block' : 'none';
+    cicloInicioLabel.textContent = cicloTipoSel.value === '2x2n' ? 'Inicio del ciclo (1ª noche del bloque)' : 'Inicio del ciclo (1° turno día)';
     horasLabel.textContent = esencial ? 'Horas por turno (día/noche)' : 'Horas jornada diaria';
     horasInput.value = esencial ? 12 : 8;
     updateJornadaLegalHint();
   }
+  cicloTipoSel.addEventListener('change', function(){
+    applyTipoUI();
+    if(editandoTrabajadorId === null) sueldoBaseInput.value = cicloTipoSel.value === '2x2n' ? immVigente : SUELDO_BASE_ESENCIAL;
+  });
   tipoSel.addEventListener('change', function(){
     applyTipoUI();
     // Solo autocompleta el sueldo sugerido cuando se está agregando un trabajador nuevo (no editando uno existente),
@@ -715,26 +736,40 @@
   }
   document.getElementById('btn-cancelar-trabajador').addEventListener('click', cancelarEdicionTrabajador);
 
+  // TENS de la dotación mínima: sueldo negociado distinto al mínimo legal (dato real entregado por el usuario).
+  var SUELDO_TENS_DOTACION = 600000;
+  // Toda la dotación mínima entra a contar en Gastos a partir de septiembre 2026 (fecha pedida por el usuario),
+  // no desde "hoy" — así no aparece como gasto retroactivo en meses donde aún no estaban contratados.
+  var FECHA_INGRESO_DOTACION_MINIMA = '2026-09-01';
+
   function updateDotacionMinimaHint(){
     document.getElementById('dotacion-minima-hint').textContent =
-      '4 cuidadores (' + fmtCLP(SUELDO_BASE_ESENCIAL) + ') + 1 cocinero(a) (' + fmtCLP(immVigente) + '). Úsalo una sola vez; después edita nombres y RUT reales.';
+      '4 cuidadores 4×4 (' + fmtCLP(SUELDO_BASE_ESENCIAL) + ') + 2 cuidadores nocturnos 2×2 (' + fmtCLP(immVigente) + ') + 1 TENS (' + fmtCLP(SUELDO_TENS_DOTACION) + ') + 1 cocinero(a) (' + fmtCLP(immVigente) + '), todos desde el ' + FECHA_INGRESO_DOTACION_MINIMA + '. Úsalo una sola vez; después edita nombres y RUT reales.';
   }
   updateDotacionMinimaHint();
 
   document.getElementById('btn-dotacion-minima').addEventListener('click', function(){
-    if(!confirm('Esto agrega 4 cuidadores (sueldo base ' + fmtCLP(SUELDO_BASE_ESENCIAL) + ') y 1 cocinero(a) (sueldo mínimo ' + fmtCLP(immVigente) + ') nuevos a la nómina. ¿Continuar?')) return;
-    function fechaISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-    var hoyStr = fechaISO(new Date());
-    var hace4Dias = new Date(); hace4Dias.setDate(hace4Dias.getDate()-4);
-    var hace4DiasStr = fechaISO(hace4Dias);
+    if(!confirm('Esto agrega 4 cuidadores 4×4 (' + fmtCLP(SUELDO_BASE_ESENCIAL) + '), 2 cuidadores nocturnos 2×2 (' + fmtCLP(immVigente) + '), 1 TENS (' + fmtCLP(SUELDO_TENS_DOTACION) + ') y 1 cocinero(a) (' + fmtCLP(immVigente) + ') nuevos a la nómina, todos con ingreso el ' + FECHA_INGRESO_DOTACION_MINIMA + '. ¿Continuar?')) return;
+    var hoyStr = FECHA_INGRESO_DOTACION_MINIMA;
+    var hace4Dias = new Date(FECHA_INGRESO_DOTACION_MINIMA+'T00:00:00'); hace4Dias.setDate(hace4Dias.getDate()-4);
+    var hace4DiasStr = hace4Dias.getFullYear()+'-'+String(hace4Dias.getMonth()+1).padStart(2,'0')+'-'+String(hace4Dias.getDate()).padStart(2,'0');
     function cuidador(n, ciclo){
-      return { nombre:'Cuidador(a) '+n, rut:'', cargo:'Cuidador(a)', fechaIngreso: hoyStr, tipo:'esencial', cicloInicio: ciclo,
+      return { nombre:'Cuidador(a) '+n, rut:'', cargo:'Cuidador(a)', fechaIngreso: hoyStr, tipo:'esencial', cicloTipo:'4x4', cicloInicio: ciclo,
         sueldoBase: SUELDO_BASE_ESENCIAL, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
         horasJornada:12, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} };
+    }
+    function cuidadorNocturno(n){
+      return { nombre:'Cuidador(a) nocturno(a) '+n, rut:'', cargo:'Cuidador(a) nocturno(a)', fechaIngreso: hoyStr, tipo:'esencial', cicloTipo:'2x2n', cicloInicio: hoyStr,
+        sueldoBase: immVigente, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        horasJornada:12, horaEntrada:'20:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} };
     }
     var nuevos = [
       cuidador(1, hoyStr), cuidador(2, hoyStr),
       cuidador(3, hace4DiasStr), cuidador(4, hace4DiasStr),
+      cuidadorNocturno(1), cuidadorNocturno(2),
+      { nombre:'TENS', rut:'', cargo:'TENS', fechaIngreso: hoyStr, tipo:'soporte', cicloInicio:'',
+        sueldoBase: SUELDO_TENS_DOTACION, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        horasJornada:8, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} },
       { nombre:'Cocinero(a)', rut:'', cargo:'Cocina', fechaIngreso: hoyStr, tipo:'soporte', cicloInicio:'',
         sueldoBase: immVigente, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
         horasJornada:8, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} }
@@ -744,7 +779,7 @@
     renderTrabajadores();
     refreshSelectors();
     var flash = document.getElementById('nomina-save-flash');
-    flash.textContent = '5 trabajadores agregados ✓ — completa RUT y nombres reales cuando corresponda.';
+    flash.textContent = nuevos.length + ' trabajadores agregados ✓ — completa RUT y nombres reales cuando corresponda.';
     setTimeout(function(){ flash.textContent=''; }, 8000);
   });
 
@@ -761,6 +796,7 @@
       cargo: document.getElementById('trab-cargo').value.trim(),
       fechaIngreso: fechaIngreso,
       tipo: tipoSel.value,
+      cicloTipo: tipoSel.value === 'esencial' ? cicloTipoSel.value : '4x4',
       cicloInicio: tipoSel.value === 'esencial' ? document.getElementById('trab-ciclo-inicio').value : '',
       sueldoBase: num(document.getElementById('trab-sueldo').value),
       cargasFamiliares: num(document.getElementById('trab-cargas').value),
@@ -800,6 +836,7 @@
     document.getElementById('trab-cargo').value = t.cargo || '';
     document.getElementById('trab-fecha-ingreso').value = t.fechaIngreso || '';
     tipoSel.value = t.tipo || 'soporte';
+    cicloTipoSel.value = t.cicloTipo || '4x4';
     applyTipoUI();
     document.getElementById('trab-ciclo-inicio').value = t.cicloInicio || '';
     document.getElementById('trab-afp').value = t.afpPct;
@@ -840,7 +877,9 @@
     } else {
       tbody.innerHTML = activos.map(function(t){
         var salud = t.saludTipo === 'fonasa' ? 'Fonasa (7%)' : 'Isapre (' + fmtCLP(t.saludMonto) + ')';
-        var tipoLabel = t.tipo === 'esencial' ? '<span class="badge">Esencial · 4&times;4</span>' : '<span class="badge" style="background:var(--paper-dark); color:var(--ink-soft);">Soporte</span>';
+        var tipoLabel = t.tipo === 'esencial'
+          ? (t.cicloTipo === '2x2n' ? '<span class="badge" style="background:var(--petroleo-dark);">Esencial · 2&times;2 noche</span>' : '<span class="badge">Esencial · 4&times;4</span>')
+          : '<span class="badge" style="background:var(--paper-dark); color:var(--ink-soft);">Soporte</span>';
         return '<tr>'+
           '<td>'+esc(t.nombre)+'</td>'+
           '<td class="mono">'+esc(t.rut)+'</td>'+
@@ -1175,14 +1214,18 @@
     var ms = Date.UTC(b.getFullYear(),b.getMonth(),b.getDate()) - Date.UTC(a.getFullYear(),a.getMonth(),a.getDate());
     return Math.round(ms / 86400000);
   }
+  function patronCicloPara(trab){
+    return trab.cicloTipo === '2x2n' ? CICLO_2X2_NOCTURNO : CICLO_4X4;
+  }
   function estadoCiclo4x4(trab, year, month, d){
     if(!trab.cicloInicio) return null;
+    var patron = patronCicloPara(trab);
     var parts = trab.cicloInicio.split('-');
     var inicio = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
     var fecha = new Date(year, month-1, d);
     var diff = diasEntre(inicio, fecha);
-    var idx = ((diff % 8) + 8) % 8;
-    return CICLO_4X4[idx];
+    var idx = ((diff % patron.length) + patron.length) % patron.length;
+    return patron[idx];
   }
 
   // ---------- Ayudas de horario (para puntualidad y horas trabajadas) ----------
@@ -1205,6 +1248,9 @@
   }
   function horaEntradaEsperada(trab, estado){
     var base = trab.horaEntrada || '08:00';
+    // El turno nocturno exclusivo no tiene turno día de referencia: su hora de entrada YA es la de la
+    // noche, a diferencia del 4×4 donde la noche se calcula como 12 h después del inicio del turno día.
+    if(trab.cicloTipo === '2x2n') return base;
     return estado === 'turno_noche' ? sumarHoras(base, 12) : base;
   }
   function horasEntreHoras(ingreso, salida){
@@ -1253,10 +1299,12 @@
       return;
     }
     var esencial = trab.tipo === 'esencial';
+    var nocturno2x2 = esencial && trab.cicloTipo === '2x2n';
     btnAuto.style.display = esencial ? 'none' : 'inline-block';
     btnAuto4x4.style.display = esencial ? 'inline-block' : 'none';
+    btnAuto4x4.textContent = nocturno2x2 ? 'Generar turno 2×2 nocturno' : 'Generar turno 4×4 (LLNN/OOOO)';
     hintEl.textContent = esencial
-      ? (trab.cicloInicio ? 'Ciclo 4×4 desde ' + trab.cicloInicio + '.' : 'Falta fecha de inicio de ciclo — edítala en Trabajadores.')
+      ? (trab.cicloInicio ? 'Ciclo ' + (nocturno2x2 ? '2×2 nocturno' : '4×4') + ' desde ' + trab.cicloInicio + '.' : 'Falta fecha de inicio de ciclo — edítala en Trabajadores.')
       : '';
     var monthData = getMonthData(trab.id, year, month);
     var daysInMonth = new Date(year, month, 0).getDate();
@@ -1711,18 +1759,21 @@
     var cargo = (t.cargo||'').toLowerCase();
     if(t.tipo === 'esencial' || cargo.indexOf('cuidad') !== -1){
       return {
-        subtitulo: 'CUIDADOR(A) DE PERSONAS MAYORES',
-        primero: 'El trabajador se compromete a prestar servicios como Cuidador(a) de personas mayores para el empleador, cuya función principal consiste en: la atención integral de los residentes, incluyendo apoyo en las actividades de la vida diaria (aseo e higiene personal, alimentación, movilización y vestuario), acompañamiento y vigilancia permanente, formando parte de la dotación mínima de cuidadores que debe mantener el establecimiento simultáneamente presente en la residencia en todo momento, incluido el turno nocturno.',
-        jornada: 'La jornada de trabajo se distribuirá bajo un sistema de turnos rotativos de 4×4: bloques de cuatro días de trabajo (dos turnos diurnos seguidos de dos turnos nocturnos, de ' + (t.horasJornada||12) + ' horas cada uno, con inicio de turno diurno a las ' + (t.horaEntrada||'08:00') + ' horas) seguidos de cuatro días de descanso, conforme al rol de turnos que el empleador comunicará oportunamente al trabajador (Anexo N°1), debiendo asegurarse en todo momento la presencia simultánea de al menos dos cuidadores en la residencia, incluido el turno nocturno, en cumplimiento de la dotación mínima exigida a los Establecimientos de Larga Estadía para Adultos Mayores (ELEAM).',
+        subtitulo: t.cicloTipo === '2x2n' ? 'CUIDADOR(A) NOCTURNO(A) DE PERSONAS MAYORES' : 'CUIDADOR(A) DE PERSONAS MAYORES',
+        primero: 'El trabajador se compromete a prestar servicios como Cuidador(a)' + (t.cicloTipo === '2x2n' ? ' nocturno(a)' : '') + ' de personas mayores para el empleador, cuya función principal consiste en: la atención integral de los residentes, incluyendo apoyo en las actividades de la vida diaria (aseo e higiene personal, alimentación, movilización y vestuario), acompañamiento y vigilancia permanente, formando parte de la dotación mínima de cuidadores que debe mantener el establecimiento simultáneamente presente en la residencia en todo momento, incluido el turno nocturno.',
+        jornada: t.cicloTipo === '2x2n'
+          ? 'La jornada de trabajo se distribuirá bajo un sistema de turnos rotativos de 2×2, exclusivamente en turno nocturno: bloques de dos noches de trabajo, de ' + (t.horasJornada||12) + ' horas cada una, con inicio a las ' + (t.horaEntrada||'20:00') + ' horas, seguidos de dos noches de descanso, conforme al rol de turnos que el empleador comunicará oportunamente al trabajador (Anexo N°1), debiendo asegurarse en todo momento la presencia simultánea de al menos dos cuidadores en la residencia durante el turno nocturno, en cumplimiento de la dotación mínima exigida a los Establecimientos de Larga Estadía para Adultos Mayores (ELEAM).'
+          : 'La jornada de trabajo se distribuirá bajo un sistema de turnos rotativos de 4×4: bloques de cuatro días de trabajo (dos turnos diurnos seguidos de dos turnos nocturnos, de ' + (t.horasJornada||12) + ' horas cada uno, con inicio de turno diurno a las ' + (t.horaEntrada||'08:00') + ' horas) seguidos de cuatro días de descanso, conforme al rol de turnos que el empleador comunicará oportunamente al trabajador (Anexo N°1), debiendo asegurarse en todo momento la presencia simultánea de al menos dos cuidadores en la residencia, incluido el turno nocturno, en cumplimiento de la dotación mínima exigida a los Establecimientos de Larga Estadía para Adultos Mayores (ELEAM).',
         jornadaNota: (function(){
           var maxLegal = jornadaMaximaSemanalLegal();
           var promedio = promedioSemanalEsencial(t.horasJornada||12);
           var excede = promedio > maxLegal;
+          var nombreCiclo = t.cicloTipo === '2x2n' ? 'ciclo 2×2 nocturno' : 'ciclo 4×4';
           var proximaEtapa = maxLegal === 45 ? ' Baja a 44 horas el 26-04-2024, a 42 horas el 26-04-2026 y a 40 horas el 26-04-2028.'
             : maxLegal === 44 ? ' Baja a 42 horas el 26-04-2026 y a 40 horas el 26-04-2028.'
             : maxLegal === 42 ? ' Baja a 40 horas el 26-04-2028 — revisa el turno antes de esa fecha.'
             : ' Ya en el tramo final de la reducción legal.';
-          return 'NOTA: este ciclo 4×4 promedia ' + promedio + ' horas semanales, ' + (excede ? 'lo que EXCEDE el máximo legal vigente de ' + maxLegal + ' horas semanales' : 'dentro del máximo legal vigente de ' + maxLegal + ' horas semanales') + ' según la Ley N°21.561 ("Ley de 40 horas"), verificado a la fecha de generación de este contrato.' + proximaEtapa + ' ' +
+          return 'NOTA: este ' + nombreCiclo + ' promedia ' + promedio + ' horas semanales, ' + (excede ? 'lo que EXCEDE el máximo legal vigente de ' + maxLegal + ' horas semanales' : 'dentro del máximo legal vigente de ' + maxLegal + ' horas semanales') + ' según la Ley N°21.561 ("Ley de 40 horas"), verificado a la fecha de generación de este contrato.' + proximaEtapa + ' ' +
             (excede ? '¡ADVERTENCIA! Reduce las horas por turno antes de firmar. ' : '') +
             'Además, al superar los límites de la jornada ordinaria diaria general, debe formalizarse mediante un sistema excepcional de distribución de jornada y descansos autorizado por la Dirección del Trabajo (artículo 38 del Código del Trabajo) antes de operar de forma permanente.';
         })(),
