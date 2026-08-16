@@ -160,10 +160,11 @@
   .cal-head{ font-family:'Lora',serif; font-weight:600; text-align:center; color:var(--petroleo); font-size:12.5px; padding-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
   .cal-cell{
     background:#fffef9; border:1px solid var(--line); border-radius:6px; padding:8px;
-    display:flex; flex-direction:column; gap:6px; min-height:110px;
+    display:flex; flex-direction:column; gap:6px; min-height:142px;
   }
   .cal-cell.empty{ background:transparent; border:none; }
   .cal-cell.weekend{ background:var(--weekend-bg); }
+  .cal-cell.fuera-contrato{ opacity:.55; }
   .cal-daynum{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px; display:flex; justify-content:space-between; align-items:baseline; color:var(--petroleo-dark); }
   .cal-dayname{ font-family:'Inter',sans-serif; font-weight:500; font-size:10px; color:var(--ink-soft); text-transform:uppercase; }
   .cal-estado{ font-size:11.5px; padding:5px 6px; }
@@ -201,29 +202,6 @@
   .save-flash{ font-size:12.5px; color:var(--ok); font-weight:600; margin-left:6px; }
   .badge{ display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; background:var(--dorado-soft); color:#5c4315; }
 
-  /* Print */
-  #printArea{ display:none; }
-  @media print{
-    body *{ visibility:hidden; }
-    #printArea, #printArea *{ visibility:visible; }
-    #printArea{ display:block; position:absolute; top:0; left:0; width:100%; background:#fff; }
-    .copia{ page-break-after:always; padding:30px 40px; }
-    .copia:last-child{ page-break-after:auto; }
-    .slip-header{ display:flex; justify-content:space-between; border-bottom:2px solid #8a6a35; padding-bottom:10px; margin-bottom:14px; }
-    .slip-tag{ display:inline-block; background:#c79a3f; color:#fff; padding:3px 12px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
-    .slip-title{ font-family:'Lora',serif; font-size:20px; color:#6b4f24; margin:0; }
-    .slip-sub{ font-size:12px; color:#555; }
-    .slip-block{ margin-bottom:14px; font-size:13px; }
-    .slip-block b{ color:#6b4f24; }
-    table.slip-table{ width:100%; border-collapse:collapse; margin-bottom:10px; font-size:12.5px; }
-    table.slip-table th{ background:#efe2c4; border:1px solid #ccc; padding:5px 8px; text-align:left; color:#6b4f24; }
-    table.slip-table td{ border:1px solid #ccc; padding:5px 8px; }
-    table.slip-table td.num{ text-align:right; font-family:'JetBrains Mono',monospace; }
-    .slip-total{ display:flex; justify-content:space-between; font-weight:700; font-size:15px; border-top:2px solid #8a6a35; padding-top:8px; margin-top:6px; }
-    .slip-firmas{ display:flex; justify-content:space-between; margin-top:60px; }
-    .firma-box{ width:40%; text-align:center; font-size:12px; }
-    .firma-line{ border-top:1px solid #333; margin-bottom:6px; padding-top:4px; }
-  }
   footer.note{ max-width:1180px; margin:30px auto 0; padding:0 24px; font-size:11.5px; color:var(--ink-soft); }
 </style>
 </head>
@@ -273,7 +251,6 @@
           <div>
             <label for="trab-fecha-ingreso">Fecha de ingreso (inicio de contrato)</label>
             <input id="trab-fecha-ingreso" type="date" required>
-            <p class="field-hint">Se usa para calcular antig&uuml;edad, vacaciones proporcionales e indemnizaci&oacute;n si termina la relaci&oacute;n laboral.</p>
           </div>
           <div>
             <label for="trab-tipo">Tipo de personal</label>
@@ -281,12 +258,10 @@
               <option value="soporte">Soporte (aseo, cocina, TENS) — 40 hrs/semana</option>
               <option value="esencial">Esencial (cuidadores) — turno 4&times;4 (LLNN/OOOO)</option>
             </select>
-            <p class="field-hint">Soporte trabaja de lunes a s&aacute;bado, jornada diurna, repartida en 5 o 6 d&iacute;as. Esencial rota en bloques de 4 d&iacute;as trabajados (2 turnos d&iacute;a + 2 turnos noche) y 4 d&iacute;as de descanso.</p>
           </div>
           <div id="trab-ciclo-wrap" style="display:none;">
             <label for="trab-ciclo-inicio">Inicio del ciclo (1&deg; turno d&iacute;a)</label>
             <input id="trab-ciclo-inicio" type="date">
-            <p class="field-hint">Fecha del primer d&iacute;a "L" (turno d&iacute;a) del ciclo 4&times;4 de este trabajador.</p>
           </div>
           <div>
             <label for="trab-afp">% AFP</label>
@@ -313,7 +288,6 @@
           <div>
             <label for="trab-liquido">Sueldo l&iacute;quido referencial (CLP)</label>
             <input id="trab-liquido" type="number" min="0" step="1000" placeholder="Ej. 650000">
-            <p class="field-hint">Si lo llenas, calcula el sueldo base solo (AFP + salud + cesant&iacute;a arriba). El base sigue siendo editable a mano.</p>
           </div>
           <div>
             <label for="trab-sueldo">Sueldo base (CLP)</label>
@@ -322,7 +296,6 @@
           <div>
             <label for="trab-cargas">Cargas familiares acreditadas</label>
             <input id="trab-cargas" type="number" min="0" step="1" value="0">
-            <p class="field-hint">Hijos/cónyuge u otros dependientes acreditados ante Previred. Cada carga da derecho a asignación familiar — el monto por carga depende del tramo de ingreso del trabajador, se calcula solo en la liquidación.</p>
           </div>
           <div>
             <label for="trab-horas" id="trab-horas-label">Horas jornada diaria</label>
@@ -332,12 +305,10 @@
           <div>
             <label for="trab-hora-entrada" id="trab-hora-entrada-label">Hora de entrada esperada</label>
             <input id="trab-hora-entrada" type="time" value="08:00">
-            <p class="field-hint">Se usa para calcular puntualidad. En esencial, el turno noche se asume 12 h despu&eacute;s de esta hora.</p>
           </div>
         </div>
 
-        <h3 style="margin-top:18px;">Contacto de emergencia</h3>
-        <p class="field-hint">Opcional — a qui&eacute;n avisar en caso de un accidente o emergencia con este trabajador.</p>
+        <h3 style="margin-top:18px;">Contacto de emergencia (opcional)</h3>
         <div class="grid-form" style="margin-top:8px;">
           <div>
             <label for="trab-contacto-nombre">Nombre</label>
@@ -364,18 +335,18 @@
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <h2 style="border:none; padding:0; margin:0;">N&oacute;mina</h2>
         <div>
-          <button id="btn-dotacion-minima" class="secondary" type="button">Cargar dotaci&oacute;n m&iacute;nima (4 cuidadores + 1 aseo)</button>
+          <button id="btn-dotacion-minima" class="secondary" type="button">Cargar dotaci&oacute;n m&iacute;nima (4 cuidadores + 1 cocinero)</button>
           <button id="btn-pdf-nomina" class="gold" type="button">Generar reporte PDF de n&oacute;mina</button>
           <span id="nomina-save-flash" class="save-flash"></span>
         </div>
       </div>
-      <p class="field-hint" id="dotacion-minima-hint">"Cargar dotaci&oacute;n m&iacute;nima" agrega 4 cuidadores (esencial, turnos 4&times;4 escalonados en 2 pares para asegurar 2 personas presentes en todo momento) y 1 auxiliar de aseo, todos al sueldo m&iacute;nimo vigente. &Uacute;salo una sola vez; despu&eacute;s edita nombres y RUT reales.</p>
+      <p class="field-hint" id="dotacion-minima-hint"></p>
       <table>
         <thead>
           <tr>
             <th>Nombre</th><th>RUT</th><th>Cargo</th><th>Tipo</th>
             <th class="num">Sueldo base</th><th class="num">AFP %</th>
-            <th>Salud</th><th class="num">Cesant&iacute;a %</th><th class="num">Horas/turno</th>
+            <th>Salud</th><th class="num">Cesant&iacute;a %</th><th class="num">Horas/turno</th><th class="num">Cargas</th>
             <th></th>
           </tr>
         </thead>
@@ -416,7 +387,7 @@
       </table>
       <div class="liq-total-row"><span>Total a pagar (finiquito)</span><span class="amt mono" id="fin-total">$ 0</span></div>
 
-      <p class="field-hint" style="margin-top:10px;">ADVERTENCIA: este c&aacute;lculo es una estimaci&oacute;n autom&aacute;tica a partir de los datos cargados en el sistema y NO constituye asesor&iacute;a legal. Antes de pagar y firmar, debe ser revisado por un abogado o contador — especialmente la calificaci&oacute;n de la causal y el tope de 90 UF por a&ntilde;o en la indemnizaci&oacute;n, que este c&aacute;lculo no aplica.</p>
+      <p class="field-hint warn-text" style="margin-top:10px;">Estimaci&oacute;n autom&aacute;tica, NO es asesor&iacute;a legal — revisar con abogado o contador antes de firmar.</p>
 
       <div class="actions-row">
         <button id="btn-confirmar-finiquito" class="danger" type="button" style="background:var(--danger); color:#fff;">Confirmar t&eacute;rmino y generar finiquito PDF</button>
@@ -427,7 +398,7 @@
 
     <div class="card">
       <h2>Personal desvinculado</h2>
-      <p class="field-hint">Historial de trabajadores cuya relaci&oacute;n laboral termin&oacute; — se conservan sus liquidaciones pasadas, pero ya no aparecen en asistencia ni en nuevas liquidaciones.</p>
+      <p class="field-hint">Ya no aparecen en asistencia ni en nuevas liquidaciones; sus liquidaciones pasadas se conservan.</p>
       <table>
         <thead>
           <tr><th>Nombre</th><th>RUT</th><th>Cargo</th><th>Ingreso</th><th>T&eacute;rmino</th><th>Causal</th><th></th></tr>
@@ -509,22 +480,15 @@
           <input id="liq-utm" type="number" min="0" step="100">
         </div>
       </div>
-      <p class="field-hint">El Ingreso M&iacute;nimo Mensual (IMM) se usa para el tope legal de la gratificaci&oacute;n (4,75 IMM al a&ntilde;o) y como sueldo predeterminado al agregar un trabajador nuevo — se actualiza solo seg&uacute;n el calendario legal (avisa cuando la ley lo reajuste para agregarlo). La UTM (Unidad Tributaria Mensual) se usa para calcular el Impuesto &Uacute;nico y cambia cada mes: actual&iacute;zala aqu&iacute; (ver sii.cl). AFP, salud y cesant&iacute;a se calculan sobre el 100% de la base imponible de cada trabajador, sin tope — para el rango de sueldos de esta residencia (hasta ~$1.000.000) el tope legal de AFP/salud (90 UF, ~$3,7M) y el de cesant&iacute;a (135,2 UF, ~$5,5M) nunca se alcanzan, as&iacute; que no aportaba nada mantenerlos.</p>
-
-      <div class="actions-row">
-        <button id="btn-proyectar-liq" class="gold" type="button">Proyectar liquidaciones hasta diciembre 2026</button>
-        <span id="proyeccion-liq-flash" class="save-flash"></span>
-      </div>
-      <p class="field-hint">Genera, para cada trabajador activo, una liquidaci&oacute;n en cada mes desde septiembre hasta diciembre de 2026 (sueldo base + gratificaci&oacute;n legal). No sobreescribe liquidaciones que ya hayas guardado a mano para esos meses.</p>
+      <p class="field-hint">UTM cambia cada mes — actualízala aquí (sii.cl).</p>
 
       <div id="liq-content" style="display:none;">
         <div class="liq-columns">
           <div>
             <h3>Haberes</h3>
-            <p class="field-hint">Estos montos se calculan solos según el contrato del trabajador y su registro de asistencia. Solo el anticipo (columna Descuentos) es editable a mano.</p>
             <div class="grid-form" style="grid-template-columns:1fr 1fr;">
-              <div><label for="liq-sueldo-base">Sueldo base</label><input id="liq-sueldo-base" type="number" min="0" step="1000" disabled class="mono"></div>
-              <div><label for="liq-gratificacion">Gratificaci&oacute;n legal mensual (25%, tope 4,75 IMM/12, pagada en 2 cuotas quincenales)</label><input id="liq-gratificacion" type="number" min="0" step="1000" disabled class="mono"></div>
+              <div><label for="liq-sueldo-base">Sueldo base (editable solo para este mes)</label><input id="liq-sueldo-base" type="number" min="0" step="1000" class="mono"></div>
+              <div><label for="liq-gratificacion">Gratificaci&oacute;n legal (25%, 2 cuotas)</label><input id="liq-gratificacion" type="number" min="0" step="1000" disabled class="mono"></div>
               <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5" disabled class="mono"></div>
               <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100" disabled class="mono"></div>
               <div><label>Total valor hora extra</label><input id="liq-he-total" type="text" disabled class="mono"></div>
@@ -559,7 +523,6 @@
 
         <div class="actions-row">
           <button id="btn-guardar-liq" class="secondary" type="button">Guardar liquidaci&oacute;n</button>
-          <button id="btn-imprimir-liq" type="button">Imprimir (2 copias)</button>
           <button id="btn-pdf-liq" class="gold" type="button">Generar PDF y guardar en Reportes</button>
           <span id="liq-save-flash" class="save-flash"></span>
         </div>
@@ -570,8 +533,6 @@
 </div>
 
 <footer class="note">Los datos se guardan solo en este navegador &mdash; no se env&iacute;an a ning&uacute;n servidor. Respalda peri&oacute;dicamente si es informaci&oacute;n cr&iacute;tica.</footer>
-
-<div id="printArea"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="assets/pdf-export.js"></script>
@@ -756,12 +717,12 @@
 
   function updateDotacionMinimaHint(){
     document.getElementById('dotacion-minima-hint').textContent =
-      '"Cargar dotación mínima" agrega 4 cuidadores (esencial, turnos 4×4 escalonados en 2 pares para asegurar 2 personas presentes en todo momento) al sueldo base de cuidadores (' + fmtCLP(SUELDO_BASE_ESENCIAL) + ') y 1 auxiliar de aseo al sueldo mínimo vigente (' + fmtCLP(immVigente) + '). Úsalo una sola vez; después edita nombres y RUT reales.';
+      '4 cuidadores (' + fmtCLP(SUELDO_BASE_ESENCIAL) + ') + 1 cocinero(a) (' + fmtCLP(immVigente) + '). Úsalo una sola vez; después edita nombres y RUT reales.';
   }
   updateDotacionMinimaHint();
 
   document.getElementById('btn-dotacion-minima').addEventListener('click', function(){
-    if(!confirm('Esto agrega 4 cuidadores (sueldo base ' + fmtCLP(SUELDO_BASE_ESENCIAL) + ') y 1 auxiliar de aseo (sueldo mínimo ' + fmtCLP(immVigente) + ') nuevos a la nómina. ¿Continuar?')) return;
+    if(!confirm('Esto agrega 4 cuidadores (sueldo base ' + fmtCLP(SUELDO_BASE_ESENCIAL) + ') y 1 cocinero(a) (sueldo mínimo ' + fmtCLP(immVigente) + ') nuevos a la nómina. ¿Continuar?')) return;
     function fechaISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
     var hoyStr = fechaISO(new Date());
     var hace4Dias = new Date(); hace4Dias.setDate(hace4Dias.getDate()-4);
@@ -774,7 +735,7 @@
     var nuevos = [
       cuidador(1, hoyStr), cuidador(2, hoyStr),
       cuidador(3, hace4DiasStr), cuidador(4, hace4DiasStr),
-      { nombre:'Auxiliar de Aseo', rut:'', cargo:'Aseo', fechaIngreso: hoyStr, tipo:'soporte', cicloInicio:'',
+      { nombre:'Cocinero(a)', rut:'', cargo:'Cocina', fechaIngreso: hoyStr, tipo:'soporte', cicloInicio:'',
         sueldoBase: immVigente, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
         horasJornada:8, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} }
     ];
@@ -875,7 +836,7 @@
     var tbody = document.getElementById('tabla-trabajadores');
     var activos = trabajadoresActivos();
     if(activos.length === 0){
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="10">A&uacute;n no hay trabajadores activos registrados.</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="11">A&uacute;n no hay trabajadores activos registrados.</td></tr>';
     } else {
       tbody.innerHTML = activos.map(function(t){
         var salud = t.saludTipo === 'fonasa' ? 'Fonasa (7%)' : 'Isapre (' + fmtCLP(t.saludMonto) + ')';
@@ -890,6 +851,7 @@
           '<td>'+salud+'</td>'+
           '<td class="num">'+t.cesantiaPct+'%</td>'+
           '<td class="num">'+t.horasJornada+'</td>'+
+          '<td class="num">'+(t.cargasFamiliares||0)+'</td>'+
           '<td style="white-space:nowrap;"><button class="gold small" data-contrato="'+t.id+'">Generar contrato</button> <button class="secondary small" data-edit="'+t.id+'">Editar</button> <button class="danger small" data-terminar="'+t.id+'" style="background:transparent; border-color:var(--danger); color:var(--danger);">Terminar relación</button> <button class="danger" data-del="'+t.id+'">Eliminar</button></td>'+
         '</tr>';
       }).join('');
@@ -1258,6 +1220,10 @@
   }
 
   function defaultDayInfo(trab, year, month, d, isWeekend){
+    var fecha = year + '-' + String(month).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    if((trab.fechaIngreso && fecha < trab.fechaIngreso) || (trab.fechaTermino && fecha > trab.fechaTermino)){
+      return {estado:'fuera_contrato', horas:0, horaIngreso:'', horaSalida:''};
+    }
     if(trab.tipo === 'esencial'){
       var estado = estadoCiclo4x4(trab, year, month, d) || 'descanso_turno';
       var trabajado = !!ESTADOS_TRABAJADOS[estado];
@@ -1290,14 +1256,14 @@
     btnAuto.style.display = esencial ? 'none' : 'inline-block';
     btnAuto4x4.style.display = esencial ? 'inline-block' : 'none';
     hintEl.textContent = esencial
-      ? (trab.cicloInicio ? 'Personal esencial — ciclo 4×4 desde el ' + trab.cicloInicio + '. Puedes ajustar cualquier día manualmente.' : 'Este trabajador es personal esencial pero no tiene fecha de inicio de ciclo — edítalo en la pestaña Trabajadores para generar el turno 4×4 automáticamente.')
-      : 'Personal de soporte — jornada diurna, editable día a día.';
+      ? (trab.cicloInicio ? 'Ciclo 4×4 desde ' + trab.cicloInicio + '.' : 'Falta fecha de inicio de ciclo — edítala en Trabajadores.')
+      : '';
     var monthData = getMonthData(trab.id, year, month);
     var daysInMonth = new Date(year, month, 0).getDate();
     var firstWeekday = (new Date(year, month-1, 1).getDay()+6)%7;
     var motivos = esencial
-      ? [['descanso_turno','Descanso (turno)'],['falta_injustificada','Falta injustificada'],['falta_justificada','Falta justificada'],['licencia','Licencia médica'],['vacaciones','Vacaciones']]
-      : [['no_aplica','No aplica (fin de semana)'],['falta_injustificada','Falta injustificada'],['falta_justificada','Falta justificada'],['licencia','Licencia médica'],['vacaciones','Vacaciones']];
+      ? [['descanso_turno','Descanso (turno)'],['falta_injustificada','Falta injustificada'],['falta_justificada','Falta justificada'],['licencia','Licencia médica'],['vacaciones','Vacaciones'],['fuera_contrato','Fuera de contrato']]
+      : [['no_aplica','No aplica (fin de semana)'],['falta_injustificada','Falta injustificada'],['falta_justificada','Falta justificada'],['licencia','Licencia médica'],['vacaciones','Vacaciones'],['fuera_contrato','Fuera de contrato']];
     var html = '';
     for(var i=0;i<firstWeekday;i++) html += '<div class="cal-cell empty"></div>';
     for(var d=1; d<=daysInMonth; d++){
@@ -1327,7 +1293,7 @@
           motivos.map(function(m){ return '<option value="'+m[0]+'"'+(info.estado===m[0]?' selected':'')+'>'+m[1]+'</option>'; }).join('') +
         '</select>';
       }
-      html += '<div class="cal-cell'+(isWeekend && !esencial?' weekend':'')+(tarde?' tarde':'')+'" data-day="'+d+'">'+inner+'</div>';
+      html += '<div class="cal-cell'+(isWeekend && !esencial?' weekend':'')+(tarde?' tarde':'')+(info.estado==='fuera_contrato'?' fuera-contrato':'')+'" data-day="'+d+'">'+inner+'</div>';
     }
     grid.innerHTML = html;
     saveAsistencia();
@@ -1618,14 +1584,9 @@
     liqEl('otros').value = data.otros;
     liqEl('adelanto').value = data.adelanto || 0;
 
-    document.getElementById('liq-gratificacion-hint').textContent =
-      'Gratificación sugerida: 25% del sueldo imponible del mes (sueldo base + horas extra = ' + fmtCLP(imponibleParaGratificacion) + '), tope mensual 4,75 × IMM ÷ 12 = ' + fmtCLP(topeGratificacionMensual) +
-      '. Se paga en 2 cuotas quincenales de ' + fmtCLP(data.gratificacion / 2) + ' c/u (no como pago único anual). Editable si corresponde otro monto.';
-    document.getElementById('liq-adelanto-hint').textContent =
-      'Sugerido según los días trabajados hasta el 15 del mes (' + fmtCLP(adelantoDefault) + '). Es un anticipo ya entregado al trabajador: se descuenta del líquido de esta liquidación, no es un costo adicional. Editable si corresponde otro monto.';
+    document.getElementById('liq-adelanto-hint').textContent = 'Sugerido según días trabajados hasta el 15 (' + fmtCLP(adelantoDefault) + '). Ya entregado al trabajador — se descuenta aquí.';
     document.getElementById('liq-impuesto-hint').textContent =
-      'Calculado según la tabla de Impuesto Único del SII sobre la renta tributable (' + fmtCLP(rentaTributableDefault) + ' = base imponible − AFP − salud − cesantía), con UTM = ' + fmtCLP(utmVigente) + '. ' +
-      (impuestoDefault > 0 ? 'Este trabajador queda afecto a impuesto este mes.' : 'Bajo el tramo exento (13,5 UTM = ' + fmtCLP(13.5 * utmVigente) + '): no paga impuesto este mes.');
+      'Renta tributable ' + fmtCLP(rentaTributableDefault) + ' (UTM ' + fmtCLP(utmVigente) + '). ' + (impuestoDefault > 0 ? 'Afecto a impuesto.' : 'Bajo tramo exento: no paga.');
 
     document.getElementById('liq-save-flash').textContent = '';
     recomputeLiquidacion();
@@ -1672,6 +1633,15 @@
     var trab = currentTrabajador(liqTrabSel);
     if(!trab) return;
     var form = readLiqForm();
+    // Gratificación se recalcula en vivo sobre el sueldo base editado en esta liquidación (no el de
+    // Trabajadores), para que quede concordante si se ajusta el sueldo solo para este mes.
+    var montoHorasExtraForm = form.heCantidad * form.heValor;
+    var topeGratificacionMensual = (4.75 * immVigente) / 12;
+    var gratificacionRecalculada = Math.round(Math.min((form.sueldoBase + montoHorasExtraForm) * 0.25, topeGratificacionMensual) / 100) * 100;
+    liqEl('gratificacion').value = gratificacionRecalculada;
+    form.gratificacion = gratificacionRecalculada;
+    document.getElementById('liq-gratificacion-hint').textContent =
+      'Gratificación: 25% del sueldo imponible (' + fmtCLP(form.sueldoBase + montoHorasExtraForm) + '), tope mensual ' + fmtCLP(topeGratificacionMensual) + '.';
     var c = calcularLiquidacion(trab, form);
     liqEl('he-total').value = fmtCLP(c.montoHorasExtra);
     liqEl('desc-inasistencia').value = fmtCLP(c.descInasistencia);
@@ -1681,8 +1651,8 @@
     document.getElementById('liq-asignacion-familiar').value = fmtCLP(c.asignacionFamiliarMonto);
     document.getElementById('liq-asignacion-familiar-hint').textContent =
       (trab.cargasFamiliares || 0) === 0
-        ? 'Este trabajador no tiene cargas familiares registradas (edítalo en Trabajadores si corresponde).'
-        : (trab.cargasFamiliares) + ' carga(s) × ' + fmtCLP(montoAsignacionFamiliarPorCarga(c.baseImponible)) + ' según su tramo de ingreso (Ley 21.830). No es imponible ni tributable — no descuenta AFP/salud/cesantía ni Impuesto Único, y no es un costo real de la empresa (se reembolsa vía Previred).';
+        ? 'Sin cargas familiares registradas.'
+        : (trab.cargasFamiliares) + ' carga(s) × ' + fmtCLP(montoAsignacionFamiliarPorCarga(c.baseImponible)) + ' — no imponible, se reembolsa vía Previred.';
     document.getElementById('liq-total-haberes').textContent = fmtCLP(c.totalHaberes);
     document.getElementById('liq-total-descuentos').textContent = fmtCLP(c.totalDescuentos);
     document.getElementById('liq-liquido').textContent = fmtCLP(c.liquido);
@@ -1725,106 +1695,6 @@
     var flash = document.getElementById('liq-save-flash');
     flash.textContent = 'Guardado ✓';
     setTimeout(function(){ flash.textContent=''; }, 2500);
-  });
-
-  // Proyección: genera liquidaciones "como si todo hubiera salido perfecto" (sin ausencias) para los
-  // meses futuros hasta diciembre 2026, reutilizando exactamente la misma fórmula de
-  // gratificación/impuesto que usa una liquidación real.
-  var PROYECCION_MESES = [{ year: 2026, month: 9 }, { year: 2026, month: 10 }, { year: 2026, month: 11 }, { year: 2026, month: 12 }];
-  function liquidacionProyectada(trab){
-    var heValorDefault = Math.round((trab.sueldoBase / 30 / trab.horasJornada) * 1.5);
-    var topeGratificacionMensual = (4.75 * immVigente) / 12;
-    var gratificacion = Math.round(Math.min(trab.sueldoBase * 0.25, topeGratificacionMensual) / 100) * 100;
-    var baseImponible = trab.sueldoBase + gratificacion;
-    var legal = legalDeductions(trab, baseImponible);
-    var rentaTributable = baseImponible - legal.afpMonto - legal.saludMonto - legal.cesantiaMonto;
-    var impuesto = calcularImpuestoUnico(rentaTributable, utmVigente);
-    var adelanto = Math.round((trab.sueldoBase / 2) / 100) * 100;
-    var form = {
-      sueldoBase: trab.sueldoBase, gratificacion: gratificacion,
-      heCantidad: 0, heValor: heValorDefault, diasFalta: 0,
-      impuesto: impuesto, otros: 0, adelanto: adelanto
-    };
-    return Object.assign({}, form, snapshotComputado(trab, form));
-  }
-  document.getElementById('btn-proyectar-liq').addEventListener('click', function(){
-    var activos = trabajadoresActivos();
-    if(!activos.length){ alert('No hay trabajadores activos para proyectar.'); return; }
-    if(!confirm('Esto genera liquidaciones para ' + activos.length + ' trabajador(es) activos en cada mes desde septiembre hasta diciembre de 2026, asumiendo asistencia y puntualidad perfectas. No sobreescribe liquidaciones que ya hayas guardado para esos meses. ¿Continuar?')) return;
-    var generadas = 0;
-    activos.forEach(function(trab){
-      PROYECCION_MESES.forEach(function(m){
-        // No proyectar sueldo para meses fuera del período real de contrato (antes de ingresar o
-        // después de un término ya registrado) — mismo criterio de fechas que usa Gastos.
-        var inicioMes = m.year + '-' + String(m.month).padStart(2,'0') + '-01';
-        var finMes = m.year + '-' + String(m.month).padStart(2,'0') + '-31';
-        if(trab.fechaIngreso && trab.fechaIngreso > finMes) return;
-        if(trab.fechaTermino && trab.fechaTermino < inicioMes) return;
-        var key = keyLiq(trab.id, m.year, m.month);
-        if(liquidaciones[key]) return;
-        liquidaciones[key] = liquidacionProyectada(trab);
-        generadas++;
-      });
-    });
-    saveLiquidaciones();
-    loadLiquidacion();
-    var flash = document.getElementById('proyeccion-liq-flash');
-    flash.textContent = generadas + ' liquidación(es) generada(s) ✓ — revísalas en el selector de mes de arriba.';
-    setTimeout(function(){ flash.textContent=''; }, 8000);
-  });
-
-  document.getElementById('btn-imprimir-liq').addEventListener('click', function(){
-    var trab = currentTrabajador(liqTrabSel);
-    if(!trab) return;
-    var year = parseInt(liqAnioInput.value,10);
-    var month = parseInt(liqMesSel.value,10);
-    var form = readLiqForm();
-    var c = calcularLiquidacion(trab, form);
-    var periodo = MESES[month-1] + ' ' + year;
-
-    function copia(tag){
-      var saludLabel = trab.saludTipo==='fonasa' ? 'Salud (Fonasa 7%)' : 'Salud (Isapre)';
-      return '<div class="copia">'+
-        '<div class="slip-header">'+
-          '<div>'+
-            '<p class="slip-title">'+esc(empresa.nombre||'Empresa')+'</p>'+
-            '<div class="slip-sub">RUT: '+esc(empresa.rut||'-')+'</div>'+
-          '</div>'+
-          '<div style="text-align:right;">'+
-            '<span class="slip-tag">'+tag+'</span>'+
-            '<div class="slip-sub" style="margin-top:6px;">Liquidación de sueldo &mdash; '+periodo+'</div>'+
-          '</div>'+
-        '</div>'+
-        '<div class="slip-block">'+
-          '<b>Trabajador:</b> '+esc(trab.nombre)+' &nbsp;|&nbsp; <b>RUT:</b> '+esc(trab.rut)+' &nbsp;|&nbsp; <b>Cargo:</b> '+esc(trab.cargo||'-')+
-        '</div>'+
-        '<table class="slip-table"><thead><tr><th>Haberes</th><th class="num" style="text-align:right;">Monto</th></tr></thead><tbody>'+
-          '<tr><td>Sueldo base</td><td class="num">'+fmtCLP(form.sueldoBase)+'</td></tr>'+
-          '<tr><td>Gratificación legal (2 cuotas quincenales de '+fmtCLP(form.gratificacion/2)+')</td><td class="num">'+fmtCLP(form.gratificacion)+'</td></tr>'+
-          '<tr><td>Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')</td><td class="num">'+fmtCLP(c.montoHorasExtra)+'</td></tr>'+
-          '<tr><td>Asignación familiar ('+(trab.cargasFamiliares||0)+' carga(s), no imponible)</td><td class="num">'+fmtCLP(c.asignacionFamiliarMonto)+'</td></tr>'+
-        '</tbody></table>'+
-        '<div class="slip-total"><span>Total haberes</span><span>'+fmtCLP(c.totalHaberes)+'</span></div>'+
-        '<table class="slip-table" style="margin-top:14px;"><thead><tr><th>Descuentos</th><th class="num" style="text-align:right;">Monto</th></tr></thead><tbody>'+
-          '<tr><td>AFP ('+trab.afpPct+'%)</td><td class="num">'+fmtCLP(c.afpMonto)+'</td></tr>'+
-          '<tr><td>'+saludLabel+'</td><td class="num">'+fmtCLP(c.saludMonto)+'</td></tr>'+
-          '<tr><td>Seguro cesantía ('+trab.cesantiaPct+'%)</td><td class="num">'+fmtCLP(c.cesantiaMonto)+'</td></tr>'+
-          '<tr><td>Descuento por inasistencia ('+form.diasFalta+' día(s))</td><td class="num">'+fmtCLP(c.descInasistencia)+'</td></tr>'+
-          '<tr><td>Impuesto único</td><td class="num">'+fmtCLP(form.impuesto)+'</td></tr>'+
-          '<tr><td>Otros descuentos</td><td class="num">'+fmtCLP(form.otros)+'</td></tr>'+
-          '<tr><td>Anticipo de sueldo (quincena, ya pagado)</td><td class="num">'+fmtCLP(c.adelanto)+'</td></tr>'+
-        '</tbody></table>'+
-        '<div class="slip-total"><span>Total descuentos</span><span>'+fmtCLP(c.totalDescuentos)+'</span></div>'+
-        '<div class="slip-total" style="color:#6b4f24; font-size:17px;"><span>LÍQUIDO A PAGAR</span><span>'+fmtCLP(c.liquido)+'</span></div>'+
-        '<div class="slip-firmas">'+
-          '<div class="firma-box"><div class="firma-line">&nbsp;</div>Firma Trabajador</div>'+
-          '<div class="firma-box"><div class="firma-line">&nbsp;</div>Firma Empleador</div>'+
-        '</div>'+
-      '</div>';
-    }
-
-    document.getElementById('printArea').innerHTML = copia('Copia empleador') + copia('Copia trabajador');
-    window.print();
   });
 
   // ---------- REPORTES PDF ----------

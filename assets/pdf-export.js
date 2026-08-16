@@ -194,26 +194,10 @@ window.ReportPDF = (function () {
   }
 
   async function guardarPDF(doc, nombreSugerido) {
+    // Descarga directa siempre (sin showSaveFilePicker): ese selector de archivos le pide permiso al
+    // usuario cada vez que se genera un PDF, lo cual es molesto cuando se generan muchos reportes
+    // seguidos. La descarga directa no pide nada — el PDF cae solo a la carpeta Descargas.
     var blob = doc.output("blob");
-    if (window.showSaveFilePicker) {
-      try {
-        var handle = await window.showSaveFilePicker({
-          id: "residencia-ancianos-reportes",
-          suggestedName: nombreSugerido,
-          startIn: "documents",
-          types: [{ description: "Documento PDF", accept: { "application/pdf": [".pdf"] } }]
-        });
-        var writable = await handle.createWritable();
-        await writable.write(blob);
-        await writable.close();
-        return { ok: true, metodo: "guardado", mensaje: "Guardado ✓ — elige siempre la carpeta Documentos › Residencia ancianos › Reportes; el navegador la recordará la próxima vez." };
-      } catch (e) {
-        if (e && e.name === "AbortError") {
-          return { ok: false, metodo: "cancelado", mensaje: "Guardado cancelado." };
-        }
-        // Si falla el selector de archivos, cae a la descarga estándar.
-      }
-    }
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
@@ -222,7 +206,7 @@ window.ReportPDF = (function () {
     a.click();
     document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-    return { ok: true, metodo: "descarga", mensaje: "Descargado ✓ — muévelo a Documentos › Residencia ancianos › Reportes (tu navegador no soporta guardado directo; Chrome o Edge sí lo permiten)." };
+    return { ok: true, metodo: "descarga", mensaje: "Descargado ✓ — revisa tu carpeta de Descargas." };
   }
 
   // Documento de texto corrido (contratos) — títulos de cláusula + párrafos justificados con salto de

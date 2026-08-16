@@ -4,7 +4,7 @@
 "use strict";
 
 // Sube este número cada vez que cambies algún archivo cacheado, para forzar la actualización.
-var CACHE_NAME = "wall-app-v9";
+var CACHE_NAME = "wall-app-v10";
 
 var APP_SHELL = [
   "index.html",

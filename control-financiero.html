@@ -653,12 +653,6 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     return { ingresosExtra: [], gastos: [], servicios: [] };
   }
 
-  function seedRow(labelField, label, monto) {
-    var row = { id: uid(), monto: monto || 0 };
-    row[labelField] = label;
-    return row;
-  }
-
   function defaultParams() {
     return {
       afpPct: 11.44, saludPct: 7, afcTrabajadorPct: 0.6,
@@ -668,31 +662,11 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     };
   }
 
+  // Instalación nueva: sin meses precargados de ejemplo — solo ingresos (automáticos desde Residentes)
+  // y personal (automático desde las liquidaciones guardadas en Trabajadores). Gastos y servicios los
+  // agrega el usuario a mano mes a mes.
   function defaultData() {
-    var julio = emptyMonth();
-    julio.gastos = [
-      seedRow("concepto", "Contador", 180000),
-      seedRow("concepto", "Supermercado (alimentación)", 900000),
-      seedRow("concepto", "Insumos médicos y de cuidado", 220000),
-      seedRow("concepto", "Artículos de aseo y limpieza", 130000),
-      seedRow("concepto", "Mantención y reparaciones", 120000),
-      seedRow("concepto", "Seguros", 90000),
-      seedRow("concepto", "Patente y permisos municipales", 45000)
-    ];
-    julio.servicios = [
-      seedRow("concepto", "Luz", 220000),
-      seedRow("concepto", "Agua", 110000),
-      seedRow("concepto", "Gas", 150000),
-      seedRow("concepto", "Calefacción", 130000),
-      seedRow("concepto", "Internet y teléfono", 50000)
-    ];
-
-    var agosto = JSON.parse(JSON.stringify(julio));
-
-    var data = { months: {}, params: defaultParams(), checklist: {} };
-    data.months["2026-07"] = julio;
-    data.months["2026-08"] = agosto;
-    return data;
+    return { months: {}, params: defaultParams(), checklist: {}, refGastosMigrado: true };
   }
 
   // Valores referenciales — se usan una sola vez para rellenar casillas de gastos/servicios que sigan en $0.
@@ -823,6 +797,15 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     return { bruto: totIngresosResidentesBruto, iva: iva, neto: totIngresosResidentesBruto - iva };
   }
 
+  // Las boletas de Servicios (luz, agua, gas, internet) se ingresan con el monto bruto tal como viene
+  // en la boleta (ya incluye IVA) — a diferencia de Gastos, que se ingresa neto. Ese IVA pagado en la
+  // boleta también es crédito fiscal recuperable y antes no se estaba contando, lo que sobreestimaba
+  // el IVA a pagar declarado al SII. Se descompone igual que la cuota de los residentes (bruto → neto + IVA).
+  function serviciosBreakdown(totServiciosBruto, params) {
+    var iva = totServiciosBruto * params.ivaPct / (100 + params.ivaPct);
+    return { bruto: totServiciosBruto, iva: iva, neto: totServiciosBruto - iva };
+  }
+
   // Tributación (IVA, Formulario 29): el IVA débito fiscal (cobrado en las cuotas de los residentes)
   // se paga al SII neto del IVA crédito fiscal (pagado en los gastos, que es recuperable) — no se suman
   // ambos por separado. Si el crédito supera al débito, no se paga IVA ese mes y queda un remanente
@@ -859,7 +842,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var totGastosNeto = sum(month.gastos);
     var gastos = gastosBreakdown(totGastosNeto, params);
     var totServicios = sum(month.servicios);
-    var tributacion = tributacionBreakdown(ivaResidentes.iva, gastos.iva);
+    var servicios = serviciosBreakdown(totServicios, params);
+    var tributacion = tributacionBreakdown(ivaResidentes.iva, gastos.iva + servicios.iva);
     var sueldoAdmin = sueldoAdminPara(monthKey, params);
     var totEgresos = payroll.costoTotal + gastos.conIva + totServicios + tributacion.ivaAPagar + sueldoAdmin;
     return {
@@ -868,7 +852,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       ivaResidentes: ivaResidentes,
       autoRows: autoRows,
       totPersonalLiquido: totPersonalLiquido, totGratificacion: totGratificacion, totImpuestoUnico: totImpuestoUnico, payroll: payroll,
-      gastos: gastos, totServicios: totServicios,
+      gastos: gastos, totServicios: totServicios, servicios: servicios,
       tributacion: tributacion,
       sueldoAdmin: sueldoAdmin,
       totEgresos: totEgresos, margen: totIngresos - totEgresos
@@ -1104,16 +1088,17 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     lines.push(["IVA calculado", totals.gastos.iva].map(csvEscape).join(","));
     lines.push(["Subtotal gastos con IVA", totals.gastos.conIva].map(csvEscape).join(","));
     lines.push([]);
-    lines.push(["SERVICIOS", "Monto"].map(csvEscape).join(","));
+    lines.push(["SERVICIOS (bruto, boleta)", "Monto"].map(csvEscape).join(","));
     month.servicios.forEach(function (r) { lines.push([r.concepto, r.monto].map(csvEscape).join(",")); });
     lines.push(["Subtotal servicios", totals.totServicios].map(csvEscape).join(","));
+    lines.push(["IVA incluido (crédito fiscal)", totals.servicios.iva].map(csvEscape).join(","));
     lines.push([]);
     lines.push(["Total egresos", totals.totEgresos].map(csvEscape).join(","));
     lines.push(["Margen neto", totals.margen].map(csvEscape).join(","));
     lines.push([]);
     lines.push(["IVA A PAGAR AL SII — GASTO DE EMPRESA (FORMULARIO 29, calculado de los ingresos de los residentes)", "Monto"].map(csvEscape).join(","));
     lines.push(["IVA débito fiscal (cuotas de residentes)", totals.tributacion.ivaDebito].map(csvEscape).join(","));
-    lines.push(["IVA crédito fiscal (gastos)", totals.tributacion.ivaCredito].map(csvEscape).join(","));
+    lines.push(["IVA crédito fiscal (gastos y servicios)", totals.tributacion.ivaCredito].map(csvEscape).join(","));
     lines.push(["Remanente de crédito a favor (próximo mes)", totals.tributacion.ivaRemanente].map(csvEscape).join(","));
     lines.push(["IVA a pagar al SII este mes", totals.tributacion.ivaAPagar].map(csvEscape).join(","));
 
@@ -1276,16 +1261,17 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
             total: { label: "Total gastos con IVA", valor: money(t.gastos.conIva), color: "critical" }
           },
           {
-            titulo: "Servicios",
-            filas: month.servicios.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; }),
+            titulo: "Servicios (bruto, boleta)",
+            filas: month.servicios.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; })
+              .concat([{ label: "IVA incluido (crédito fiscal)", valor: money(t.servicios.iva) }]),
             total: { label: "Total servicios", valor: money(t.totServicios), color: "critical" }
           },
           {
             titulo: "IVA a pagar al SII — gasto de empresa (Formulario 29)",
-            sub: "El IVA de las cuotas de los residentes (débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en los gastos de la empresa (crédito fiscal, recuperable) — al SII se paga solo la diferencia.",
+            sub: "El IVA de las cuotas de los residentes (débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en gastos y servicios (crédito fiscal, recuperable) — al SII se paga solo la diferencia.",
             filas: [
               { label: "IVA débito fiscal (cuotas de residentes)", valor: money(t.tributacion.ivaDebito) },
-              { label: "IVA crédito fiscal (gastos)", valor: "− " + money(t.tributacion.ivaCredito) }
+              { label: "IVA crédito fiscal (gastos y servicios)", valor: "− " + money(t.tributacion.ivaCredito) }
             ].concat(t.tributacion.ivaRemanente > 0 ? [{ label: "Remanente de crédito a favor (próximo mes)", valor: money(t.tributacion.ivaRemanente) }] : []),
             total: { label: "IVA a pagar al SII este mes", valor: money(t.tributacion.ivaAPagar), color: "critical" }
           }
@@ -1547,9 +1533,11 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
       h("div", { className: "card" },
         h("h2", null, "Servicios"),
+        h("p", { className: "sub" }, "Ingresa el monto bruto tal como viene en la boleta (con IVA incluido) — ese IVA se cuenta solo como crédito fiscal en Tributación, más abajo."),
         h(EditableTable, {
-          rows: month.servicios, labelField: "concepto", labelHeader: "Concepto", labelPlaceholder: "Ej. Luz",
+          rows: month.servicios, labelField: "concepto", labelHeader: "Concepto (bruto, boleta)", labelPlaceholder: "Ej. Luz",
           emptyText: "Sin servicios registrados.", addText: "Agregar ítem",
+          extraRows: [{ label: "IVA incluido (" + numFmt(data.params.ivaPct) + "%, crédito fiscal)", amount: totals.servicios.iva }],
           onAdd: function () { addRow("servicios", currentKey, "concepto", "Nuevo ítem"); },
           onUpdate: function (id, f, v) { updateRow("servicios", currentKey, id, f, v); },
           onDelete: function (id) { deleteRow("servicios", currentKey, id); }
@@ -1559,9 +1547,9 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
       h("div", { className: "card" },
         h("h2", null, "IVA a pagar al SII — gasto de empresa"),
-        h("p", { className: "sub" }, "El IVA de las cuotas de los residentes (" + numFmt(data.params.ivaPct) + "% incluido — débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en los gastos de la empresa (crédito fiscal, recuperable) — al SII se paga solo la diferencia."),
+        h("p", { className: "sub" }, "El IVA de las cuotas de los residentes (" + numFmt(data.params.ivaPct) + "% incluido — débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en gastos y servicios (crédito fiscal, recuperable) — al SII se paga solo la diferencia."),
         h("div", { className: "total-row" }, h("span", null, "IVA débito fiscal (cuotas de residentes)"), h("span", null, money(totals.tributacion.ivaDebito))),
-        h("div", { className: "total-row" }, h("span", null, "IVA crédito fiscal (gastos)"), h("span", null, "− " + money(totals.tributacion.ivaCredito))),
+        h("div", { className: "total-row" }, h("span", null, "IVA crédito fiscal (gastos y servicios)"), h("span", null, "− " + money(totals.tributacion.ivaCredito))),
         totals.tributacion.ivaRemanente > 0
           ? h("div", { className: "total-row" }, h("span", null, "Remanente de crédito a favor (para el próximo mes)"), h("span", null, money(totals.tributacion.ivaRemanente)))
           : null,
