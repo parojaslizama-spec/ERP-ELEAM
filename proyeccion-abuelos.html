@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<script src="assets/auth.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyección de rentabilidad por residente — Residencia Senior Omar Wall</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8a6a35">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wall">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+  :root{
+    --paper:#F7F1E2; --paper-dark:#efe2c4; --ink:#3a2b1c; --ink-soft:#6b5842;
+    --petroleo:#8a6a35; --petroleo-dark:#6b4f24; --dorado:#c79a3f; --dorado-soft:#ecd9ad;
+    --line:#e2d0a8; --card:#fffcf5; --danger:#a4452f; --danger-bg:#f4d9cc; --ok:#4f7a4a; --ok-bg:#dfe9d3;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: repeating-linear-gradient(#F7F1E2 0px, #F7F1E2 27px, #ede0c1 28px), var(--paper);
+    color:var(--ink); font-family:'Inter',sans-serif; font-size:14px; line-height:1.45; padding-bottom:60px;
+  }
+  h1,h2,h3{ font-family:'Lora',serif; font-weight:600; color:var(--petroleo-dark); margin:0 0 6px; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  label{ font-weight:600; font-size:12.5px; color:var(--ink-soft); display:block; margin-bottom:4px; }
+  input, select{
+    font-family:'JetBrains Mono',monospace; font-size:13.5px; padding:7px 9px;
+    border:1px solid var(--line); border-radius:4px; background:#fffef9; color:var(--ink); width:100%;
+  }
+  input:focus, select:focus{ outline:2px solid var(--dorado-soft); border-color:var(--dorado); }
+  button{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:13px; cursor:pointer;
+    border:1px solid var(--petroleo); background:var(--petroleo); color:#fff; padding:9px 16px;
+    border-radius:5px; transition:background .15s, transform .05s;
+  }
+  button:hover{ background:var(--petroleo-dark); }
+  button:active{ transform:translateY(1px); }
+  button.secondary{ background:transparent; color:var(--petroleo); }
+  button.secondary:hover{ background:var(--paper-dark); }
+  button.gold{ background:var(--dorado); border-color:var(--dorado); }
+  button.gold:hover{ background:#9c7325; }
+  button.danger-outline{ background:transparent; border-color:var(--danger); color:var(--danger); padding:5px 10px; font-size:12px; }
+  button.danger-outline:hover{ background:var(--danger-bg); }
+  button.small{ padding:5px 10px; font-size:12px; }
+
+  .top-header{
+    background:linear-gradient(180deg, var(--petroleo) 0%, var(--petroleo-dark) 100%);
+    color:#f3ead3; padding:18px 28px; border-bottom:4px solid var(--dorado);
+  }
+  .top-header .header-inner{ max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{ font-family:'Lora',serif; font-size:26px; color:var(--dorado-soft); }
+  .empresa-nombre-fija{ font-family:'Lora',serif; font-size:15px; font-weight:600; color:#f6f2e7; }
+  .subtitle{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--dorado-soft); margin-top:2px; }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    padding:20px 22px; margin-top:20px; box-shadow:0 1px 3px rgba(30,25,10,.06);
+  }
+  .card h2{ font-size:18px; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:16px; }
+  .card > .card-sub{ font-size:12.5px; color:var(--ink-soft); margin:-10px 0 16px; }
+
+  .grid-form{ display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:16px; align-items:end; }
+  .field-hint{ font-size:11px; color:var(--ink-soft); margin-top:3px; }
+
+  table{ width:100%; border-collapse:collapse; margin-top:6px; }
+  th{
+    text-align:left; font-family:'Inter',sans-serif; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--dorado); border-bottom:2px solid var(--petroleo); padding:8px 10px; background:var(--paper-dark);
+  }
+  td{ padding:7px 10px; border-bottom:1px solid var(--line); font-size:12.8px; vertical-align:middle; }
+  td.num, th.num{ font-family:'JetBrains Mono',monospace; text-align:right; }
+  td input[type="number"]{ padding:5px 7px; font-size:12.5px; }
+  tbody tr.tramo-inicio td{ border-top:2px solid var(--dorado); }
+  tbody tr.fila-actual{ background:var(--dorado-soft); }
+  tbody tr.fila-equilibrio td{ background:var(--ok-bg); }
+
+  .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:14px; margin-top:4px; }
+  .stat{ background:#fffef9; border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
+  .stat .stat-label{ font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; font-weight:600; }
+  .stat .stat-value{ font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:700; color:var(--petroleo-dark); margin-top:4px; }
+  .stat .stat-note{ font-size:11px; color:var(--ink-soft); margin-top:3px; }
+
+  .eq-item{
+    display:flex; align-items:center; gap:10px; background:#fffef9; border:1px solid var(--line);
+    border-radius:8px; padding:12px 14px; margin-top:10px;
+  }
+  .eq-item .eq-badge{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px; color:#fff;
+    background:var(--petroleo); border-radius:6px; padding:6px 10px; flex:none;
+  }
+  .eq-item .eq-text{ font-size:13px; }
+  .eq-item .eq-text strong{ color:var(--petroleo-dark); }
+
+  .chart-legend{ display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--ink-soft); }
+  .chart-legend .sw{ display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+
+  .actions-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  footer.note{ max-width:1180px; margin:30px auto 0; padding:0 24px; font-size:11.5px; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<header class="top-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">&#9998;</div>
+      <div>
+        <span class="empresa-nombre-fija">Residencia Senior Omar Wall</span>
+        <div class="subtitle">Proyecci&oacute;n de rentabilidad por residente</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>Datos reales actuales</h2>
+    <p class="card-sub">Se leen directo de Residentes y Trabajadores &mdash; nunca se escriben a mano aqu&iacute;. Si algo cambia en esos m&oacute;dulos, esta pantalla se actualiza sola al volver a abrirla.</p>
+    <div class="stat-grid" id="statGridReal"></div>
+  </div>
+
+  <div class="card">
+    <h2>Supuestos configurables</h2>
+    <p class="card-sub">Todo lo de aqu&iacute; abajo es un par&aacute;metro editable, no un valor fijo en el c&oacute;digo. Los montos por defecto vienen del an&aacute;lisis de diciembre 2026; aj&uacute;stalos cuando cambien.</p>
+    <div class="grid-form" id="supuestosGrid"></div>
+  </div>
+
+  <div class="card">
+    <h2>Dotaci&oacute;n m&iacute;nima por tramo</h2>
+    <p class="card-sub">Define desde cu&aacute;ntos residentes cambia la dotaci&oacute;n y cu&aacute;ntas personas de cada tipo se contratan en ese tramo. "Cuidador/TENS" y "Cocina/Aseo" usan el costo real promedio de esos cargos (o el de respaldo si a&uacute;n no los contratas) &mdash; ver Supuestos.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Tramo</th><th class="num">Hasta (N&deg; residentes)</th>
+          <th class="num">Cuidadores / TENS</th><th class="num">Cocina / Aseo</th>
+          <th class="num">N&deg; empleados</th><th class="num">Costo empresa mensual</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tablaTramos"></tbody>
+    </table>
+    <div class="actions-row">
+      <button class="secondary small" id="btnAgregarTramo" type="button">+ Agregar tramo</button>
+      <button class="secondary small" id="btnRestaurarTramos" type="button">Restaurar tramos por defecto</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Proyecci&oacute;n</h2>
+    <p class="card-sub" id="proyeccionSub"></p>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">Abuelos</th><th>Tramo</th><th class="num">N&deg; empleados</th>
+            <th class="num">Costo personal</th><th class="num">Ingresos</th><th class="num">Gastos c/IVA</th>
+            <th class="num">Servicios</th><th class="num">IVA a pagar SII</th><th class="num">Costos totales</th>
+            <th class="num">Margen total</th><th class="num">Margen por abuelo</th>
+          </tr>
+        </thead>
+        <tbody id="tablaProyeccion"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Puntos de equilibrio entre tramos</h2>
+    <p class="card-sub">El primer N, dentro del tramo nuevo, en que el margen por abuelo vuelve a igualar el mejor punto del tramo anterior &mdash; &uacute;til para decidir cu&aacute;ndo conviene aceptar el pr&oacute;ximo tramo de personal.</p>
+    <div id="listaEquilibrio"></div>
+  </div>
+
+  <div class="card">
+    <h2>Margen por abuelo seg&uacute;n N</h2>
+    <p class="card-sub">La ca&iacute;da marca el momento en que se contrata el personal del tramo siguiente, repartido entre pocos residentes nuevos.</p>
+    <div id="chartMargen"></div>
+  </div>
+
+  <div class="card">
+    <h2>Ingresos, costos y margen total seg&uacute;n N</h2>
+    <div id="chartTotales"></div>
+    <div class="chart-legend">
+      <span><span class="sw" style="background:var(--petroleo);"></span>Ingresos</span>
+      <span><span class="sw" style="background:var(--danger); opacity:.75;"></span>Costos totales</span>
+      <span><span class="sw" style="background:var(--dorado);"></span>Margen total</span>
+    </div>
+  </div>
+
+  <footer class="note">Modelo adaptado del an&aacute;lisis de rentabilidad de diciembre 2026 &mdash; f&oacute;rmulas verificadas contra esa hoja de c&aacute;lculo. Los datos de residentes y trabajadores son reales; todo lo dem&aacute;s es un supuesto editable.</footer>
+
+</div>
+
+<script src="assets/backup.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  if(!window.storage){
+    window.storage = {
+      get:function(key, def){
+        try{ var raw = localStorage.getItem('rha_'+key); return raw===null ? def : JSON.parse(raw); }catch(e){ return def; }
+      },
+      set:function(key, value){ try{ localStorage.setItem('rha_'+key, JSON.stringify(value)); }catch(e){} }
+    };
+  }
+
+  function fmtCLP(n){ n = Math.round(Number(n)||0); return '$ ' + n.toLocaleString('es-CL'); }
+  function num(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+  function todayStr(){ var d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+  // ---------- DATOS REALES: residentes ----------
+  function residentesActivos(){
+    var residentes = window.storage.get('residentes', []);
+    var hoy = todayStr();
+    return residentes.filter(function(r){ return !(r.fechaEgreso && r.fechaEgreso <= hoy); });
+  }
+
+  // ---------- DATOS REALES: costo empresa por categoría de cargo ----------
+  // sueldo bruto = líquido / (1 - tasaDescuento); costo empresa = bruto * (1 + tasaObligLegal).
+  // Se promedia entre los trabajadores activos de cada categoría que tengan una liquidación guardada;
+  // si no hay ninguno todavía (ej. TENS o aseo que aún no se contratan), se usa el costo de respaldo.
+  function costoEmpresaDesdeLiquido(liquido, tasaDescuento, tasaOblig){
+    var bruto = liquido / (1 - tasaDescuento);
+    return bruto * (1 + tasaOblig);
+  }
+
+  function liquidoMasRecienteDeTrabajador(trabId, liquidaciones){
+    var mejor = null, mejorClave = -1;
+    Object.keys(liquidaciones).forEach(function(key){
+      var partes = key.split('_');
+      if(partes[0] !== trabId) return;
+      var year = parseInt(partes[1],10), month = parseInt(partes[2],10);
+      var claveOrden = year*12+month;
+      if(claveOrden > mejorClave && liquidaciones[key].liquido != null){
+        mejorClave = claveOrden;
+        mejor = liquidaciones[key].liquido;
+      }
+    });
+    return mejor;
+  }
+
+  function esCuidadorOTens(t){
+    return t.tipo === 'esencial' || /tens/i.test(t.cargo || '');
+  }
+
+  function calcularCostosPorCargo(tasaDescuento, tasaOblig, respaldoCuidadorTens, respaldoCocinaAseo){
+    var trabajadores = window.storage.get('trabajadores', []).filter(function(t){ return t.activo !== false; });
+    var liquidaciones = window.storage.get('liquidaciones', {});
+    var muestrasCT = [], muestrasCA = [];
+    trabajadores.forEach(function(t){
+      var liquido = liquidoMasRecienteDeTrabajador(t.id, liquidaciones);
+      if(liquido == null) return;
+      var costo = costoEmpresaDesdeLiquido(liquido, tasaDescuento, tasaOblig);
+      if(esCuidadorOTens(t)) muestrasCT.push(costo); else muestrasCA.push(costo);
+    });
+    function promedio(arr, respaldo){
+      if(!arr.length) return { costo: respaldo, nMuestras: 0, esReal: false };
+      return { costo: arr.reduce(function(a,b){return a+b;},0)/arr.length, nMuestras: arr.length, esReal: true };
+    }
+    return {
+      cuidadorTens: promedio(muestrasCT, respaldoCuidadorTens),
+      cocinaAseo: promedio(muestrasCA, respaldoCocinaAseo)
+    };
+  }
+
+  // ---------- SUPUESTOS ----------
+  var SUPUESTOS_DEFAULT = {
+    precioAbueloNuevo: 1450000,
+    administracion: 1000000,
+    gastosFijos: 490000,
+    gastosVariablesBase: 1250000,
+    serviciosFijos: 2100000,
+    serviciosVariablesBase: 700000,
+    ivaPct: 19,
+    tasaDescuentoLiquidoBruto: 19.04,
+    tasaObligLegalEmpresa: 4.92,
+    respaldoCuidadorTens: 839360,
+    respaldoCocinaAseo: 813130,
+    nMaximo: 40
+  };
+  var SUPUESTOS_CAMPOS = [
+    { id: 'precioAbueloNuevo', label: 'Precio nuevo residente (mensual)', hint: 'Cuota de cada abuelo por sobre los actuales.' },
+    { id: 'administracion', label: 'Administración (fijo)', hint: 'Retiro del administrador/inversor, no varía con N.' },
+    { id: 'gastosFijos', label: 'Gastos fijos (contador, mantención, seguros, patente)' },
+    { id: 'gastosVariablesBase', label: 'Gastos variables al N actual', hint: 'Súper, insumos médicos, aseo — escala proporcional al N actual.' },
+    { id: 'serviciosFijos', label: 'Servicios fijos (arriendo, internet, TV)' },
+    { id: 'serviciosVariablesBase', label: 'Servicios variables al N actual', hint: 'Luz, agua, gas — escala proporcional al N actual.' },
+    { id: 'ivaPct', label: 'Tasa IVA (%)' },
+    { id: 'tasaDescuentoLiquidoBruto', label: 'Descuento líquido → bruto (%)', hint: 'AFP + salud + cesantía combinados, aprox.' },
+    { id: 'tasaObligLegalEmpresa', label: 'Obligaciones legales empresa (%)', hint: 'SIS + cesantía empresa + mutual.' },
+    { id: 'respaldoCuidadorTens', label: 'Costo de respaldo — cuidador/TENS', hint: 'Se usa solo si no hay ninguno contratado todavía.' },
+    { id: 'respaldoCocinaAseo', label: 'Costo de respaldo — cocina/aseo', hint: 'Se usa solo si no hay ninguno contratado todavía.' },
+    { id: 'nMaximo', label: 'Proyectar hasta N° de residentes' }
+  ];
+
+  var TRAMOS_DEFAULT = [
+    { letra: 'A', hasta: 15, cuidadoresTens: 4, cocinaAseo: 1 },
+    { letra: 'B', hasta: 25, cuidadoresTens: 9, cocinaAseo: 2 },
+    { letra: 'C', hasta: 40, cuidadoresTens: 13, cocinaAseo: 4 }
+  ];
+
+  var supuestos = window.storage.get('supuestos_proyeccion_abuelos', null) || Object.assign({}, SUPUESTOS_DEFAULT);
+  var tramos = window.storage.get('tramos_proyeccion_abuelos', null) || JSON.parse(JSON.stringify(TRAMOS_DEFAULT));
+
+  function guardarSupuestos(){ window.storage.set('supuestos_proyeccion_abuelos', supuestos); }
+  function guardarTramos(){ window.storage.set('tramos_proyeccion_abuelos', tramos); }
+
+  // ---------- MOTOR DE CÁLCULO (funciones puras) ----------
+  function tramoParaN(N, tramos){
+    for(var i=0;i<tramos.length;i++) if(N <= tramos[i].hasta) return tramos[i];
+    return tramos[tramos.length-1];
+  }
+  function numEmpleadosTramo(tramo){ return (tramo.cuidadoresTens||0) + (tramo.cocinaAseo||0); }
+  function costoPersonalTramo(tramo, costos){
+    return (tramo.cuidadoresTens||0)*costos.cuidadorTens.costo + (tramo.cocinaAseo||0)*costos.cocinaAseo.costo;
+  }
+
+  function proyectarFila(N, nBase, ingresosActuales, S, tramos, costos){
+    var ivaFrac = S.ivaPct/100;
+    var tramo = tramoParaN(N, tramos);
+    var costoPersonal = costoPersonalTramo(tramo, costos);
+    var ingresos = ingresosActuales + S.precioAbueloNuevo * (N - nBase);
+    var gastosNeto = S.gastosFijos + (nBase ? (S.gastosVariablesBase/nBase)*N : 0);
+    var gastosConIva = gastosNeto * (1+ivaFrac);
+    var serviciosBruto = S.serviciosFijos + (nBase ? (S.serviciosVariablesBase/nBase)*N : 0);
+    var ivaDebito = ingresos * (ivaFrac/(1+ivaFrac));
+    var ivaCredito = gastosNeto*ivaFrac + serviciosBruto*(ivaFrac/(1+ivaFrac));
+    var ivaAPagar = Math.max(0, ivaDebito - ivaCredito);
+    var costosTotales = costoPersonal + S.administracion + gastosConIva + serviciosBruto + ivaAPagar;
+    var margenTotal = ingresos - costosTotales;
+    return {
+      N: N, tramo: tramo.letra, numEmpleados: numEmpleadosTramo(tramo), costoPersonal: costoPersonal,
+      ingresos: ingresos, gastosConIva: gastosConIva, servicios: serviciosBruto, ivaAPagar: ivaAPagar,
+      costosTotales: costosTotales, margenTotal: margenTotal, margenPorAbuelo: N ? margenTotal/N : 0
+    };
+  }
+
+  function proyectar(nInicio, nFin, nBase, ingresosActuales, S, tramos, costos){
+    var filas = [];
+    for(var n=nInicio; n<=nFin; n++) filas.push(proyectarFila(n, nBase, ingresosActuales, S, tramos, costos));
+    return filas;
+  }
+
+  function puntosDeEquilibrio(filas, tramos){
+    var resultados = [];
+    for(var i=1;i<tramos.length;i++){
+      var finAnterior = tramos[i-1].hasta;
+      var filaAnterior = filas.filter(function(f){ return f.N === finAnterior; })[0];
+      if(!filaAnterior) continue;
+      var mejor = filaAnterior.margenPorAbuelo;
+      var encontrada = filas.filter(function(f){ return f.N > finAnterior && f.margenPorAbuelo >= mejor; })[0];
+      resultados.push({ deTramo: tramos[i-1].letra, aTramo: tramos[i].letra, mejorMargenAnterior: mejor, N: encontrada ? encontrada.N : null });
+    }
+    return resultados;
+  }
+  window.RhaProyeccionAbuelos = { proyectar: proyectar, puntosDeEquilibrio: puntosDeEquilibrio, tramoParaN: tramoParaN };
+
+  // ---------- RENDER: datos reales ----------
+  function renderDatosReales(nActual, ingresosActuales, costos){
+    var el = document.getElementById('statGridReal');
+    function stat(label, value, note){
+      return '<div class="stat"><div class="stat-label">'+label+'</div><div class="stat-value">'+value+'</div>'+(note?'<div class="stat-note">'+note+'</div>':'')+'</div>';
+    }
+    el.innerHTML =
+      stat('Residentes activos', nActual, 'Base de la proyección.') +
+      stat('Ingresos actuales', fmtCLP(ingresosActuales), 'Suma de cuotas de permanencia activas.') +
+      stat('Costo cuidador/TENS', fmtCLP(costos.cuidadorTens.costo), costos.cuidadorTens.esReal ? 'Promedio real de '+costos.cuidadorTens.nMuestras+' trabajador(es).' : 'Sin datos reales — usando costo de respaldo.') +
+      stat('Costo cocina/aseo', fmtCLP(costos.cocinaAseo.costo), costos.cocinaAseo.esReal ? 'Promedio real de '+costos.cocinaAseo.nMuestras+' trabajador(es).' : 'Sin datos reales — usando costo de respaldo.');
+  }
+
+  // ---------- RENDER: supuestos ----------
+  function renderSupuestos(){
+    var grid = document.getElementById('supuestosGrid');
+    grid.innerHTML = SUPUESTOS_CAMPOS.map(function(campo){
+      return '<div><label for="sup-'+campo.id+'">'+campo.label+'</label>'+
+        '<input type="number" step="any" id="sup-'+campo.id+'" data-supid="'+campo.id+'" value="'+supuestos[campo.id]+'">'+
+        (campo.hint ? '<div class="field-hint">'+campo.hint+'</div>' : '') +
+      '</div>';
+    }).join('');
+    grid.querySelectorAll('input').forEach(function(inp){
+      inp.addEventListener('input', function(){
+        supuestos[inp.getAttribute('data-supid')] = num(inp.value);
+        guardarSupuestos();
+        renderTodo();
+      });
+    });
+  }
+
+  // ---------- RENDER: tramos ----------
+  function renderTramos(costos){
+    var tbody = document.getElementById('tablaTramos');
+    tbody.innerHTML = tramos.map(function(tramo, i){
+      var costoMensual = costoPersonalTramo(tramo, costos);
+      return '<tr>'+
+        '<td><input type="text" data-tramo-idx="'+i+'" data-tramo-field="letra" value="'+tramo.letra+'" style="width:60px;"></td>'+
+        '<td class="num"><input type="number" data-tramo-idx="'+i+'" data-tramo-field="hasta" value="'+tramo.hasta+'"></td>'+
+        '<td class="num"><input type="number" data-tramo-idx="'+i+'" data-tramo-field="cuidadoresTens" value="'+tramo.cuidadoresTens+'"></td>'+
+        '<td class="num"><input type="number" data-tramo-idx="'+i+'" data-tramo-field="cocinaAseo" value="'+tramo.cocinaAseo+'"></td>'+
+        '<td class="num mono">'+numEmpleadosTramo(tramo)+'</td>'+
+        '<td class="num mono">'+fmtCLP(costoMensual)+'</td>'+
+        '<td><button class="danger-outline" type="button" data-eliminar-tramo="'+i+'">Eliminar</button></td>'+
+      '</tr>';
+    }).join('');
+    tbody.querySelectorAll('input').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var idx = parseInt(inp.getAttribute('data-tramo-idx'),10);
+        var field = inp.getAttribute('data-tramo-field');
+        tramos[idx][field] = field === 'letra' ? inp.value : num(inp.value);
+        tramos.sort(function(a,b){ return a.hasta - b.hasta; });
+        guardarTramos();
+        renderTodo();
+      });
+    });
+    tbody.querySelectorAll('[data-eliminar-tramo]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(tramos.length <= 1){ window.alert('Debe quedar al menos un tramo.'); return; }
+        tramos.splice(parseInt(btn.getAttribute('data-eliminar-tramo'),10), 1);
+        guardarTramos();
+        renderTodo();
+      });
+    });
+  }
+  document.getElementById('btnAgregarTramo').addEventListener('click', function(){
+    var ultimo = tramos[tramos.length-1];
+    tramos.push({ letra: String.fromCharCode(65+tramos.length), hasta: ultimo.hasta+10, cuidadoresTens: ultimo.cuidadoresTens, cocinaAseo: ultimo.cocinaAseo });
+    guardarTramos();
+    renderTodo();
+  });
+  document.getElementById('btnRestaurarTramos').addEventListener('click', function(){
+    if(!window.confirm('Esto reemplaza tus tramos actuales por los 3 tramos por defecto (A/B/C). ¿Continuar?')) return;
+    tramos = JSON.parse(JSON.stringify(TRAMOS_DEFAULT));
+    guardarTramos();
+    renderTodo();
+  });
+
+  // ---------- RENDER: tabla de proyección ----------
+  function renderProyeccion(filas, nActual, equilibrios){
+    document.getElementById('proyeccionSub').textContent =
+      'Desde N=' + filas[0].N + ' (situación actual) hasta N=' + filas[filas.length-1].N + '.';
+    var equilibrioNs = {};
+    equilibrios.forEach(function(e){ if(e.N) equilibrioNs[e.N] = true; });
+    var tbody = document.getElementById('tablaProyeccion');
+    var tramoAnterior = null;
+    tbody.innerHTML = filas.map(function(f){
+      var esInicioTramo = f.tramo !== tramoAnterior;
+      tramoAnterior = f.tramo;
+      var clases = [];
+      if(esInicioTramo) clases.push('tramo-inicio');
+      if(f.N === nActual) clases.push('fila-actual');
+      if(equilibrioNs[f.N]) clases.push('fila-equilibrio');
+      return '<tr class="'+clases.join(' ')+'">'+
+        '<td class="num mono">'+f.N+'</td>'+
+        '<td>'+f.tramo+'</td>'+
+        '<td class="num mono">'+f.numEmpleados+'</td>'+
+        '<td class="num mono">'+fmtCLP(f.costoPersonal)+'</td>'+
+        '<td class="num mono">'+fmtCLP(f.ingresos)+'</td>'+
+        '<td class="num mono">'+fmtCLP(f.gastosConIva)+'</td>'+
+        '<td class="num mono">'+fmtCLP(f.servicios)+'</td>'+
+        '<td class="num mono">'+fmtCLP(f.ivaAPagar)+'</td>'+
+        '<td class="num mono">'+fmtCLP(f.costosTotales)+'</td>'+
+        '<td class="num mono">'+fmtCLP(f.margenTotal)+'</td>'+
+        '<td class="num mono">'+fmtCLP(f.margenPorAbuelo)+'</td>'+
+      '</tr>';
+    }).join('');
+  }
+
+  // ---------- RENDER: puntos de equilibrio ----------
+  function renderEquilibrios(equilibrios){
+    var el = document.getElementById('listaEquilibrio');
+    if(!equilibrios.length){ el.innerHTML = '<p class="field-hint">Agrega al menos dos tramos para calcular puntos de equilibrio.</p>'; return; }
+    el.innerHTML = equilibrios.map(function(e){
+      var texto = e.N
+        ? 'Tras contratar para pasar de tramo <strong>'+e.deTramo+'</strong> a <strong>'+e.aTramo+'</strong>, el margen por abuelo vuelve a igualar los '+fmtCLP(e.mejorMargenAnterior)+' del tramo anterior recién en <strong>N='+e.N+'</strong> residentes.'
+        : 'Con el rango configurado, el margen por abuelo del tramo <strong>'+e.aTramo+'</strong> no alcanza a igualar el mejor punto del tramo <strong>'+e.deTramo+'</strong> ('+fmtCLP(e.mejorMargenAnterior)+') — sube el N° máximo a proyectar para verlo.';
+      return '<div class="eq-item"><span class="eq-badge">'+e.deTramo+' &rarr; '+e.aTramo+'</span><span class="eq-text">'+texto+'</span></div>';
+    }).join('');
+  }
+
+  // ---------- RENDER: gráficos SVG ----------
+  function svgWrap(inner, W, H){
+    return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:100%; height:auto; display:block;">'+inner+'</svg>';
+  }
+
+  function renderChartMargen(filas){
+    var W=720, H=240, padL=70, padR=16, padT=16, padB=30;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    var vals = filas.map(function(f){ return f.margenPorAbuelo; });
+    var yMin = Math.min(0, Math.min.apply(null,vals)), yMax = Math.max.apply(null,vals)*1.1;
+    function xPix(i){ return padL + (i/(filas.length-1||1))*plotW; }
+    function yPix(v){ return padT + (1-(v-yMin)/(yMax-yMin||1))*plotH; }
+    var zeroY = yPix(0);
+    var pts = filas.map(function(f,i){ return xPix(i)+','+yPix(f.margenPorAbuelo); }).join(' ');
+    var tramoMarks = '';
+    var prevTramo = null;
+    filas.forEach(function(f,i){
+      if(f.tramo !== prevTramo && i>0){
+        var x = xPix(i);
+        tramoMarks += '<line x1="'+x+'" y1="'+padT+'" x2="'+x+'" y2="'+(H-padB)+'" stroke="var(--danger)" stroke-width="1" stroke-dasharray="3,3" opacity="0.5" />';
+      }
+      prevTramo = f.tramo;
+    });
+    var xLabels = '';
+    var step = Math.max(1, Math.round(filas.length/8));
+    filas.forEach(function(f,i){
+      if(i % step === 0 || i === filas.length-1){
+        xLabels += '<text x="'+xPix(i)+'" y="'+(H-padB+16)+'" font-size="10" fill="var(--ink-soft)" text-anchor="middle" font-family="Inter,sans-serif">'+f.N+'</text>';
+      }
+    });
+    var svg =
+      '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="var(--card)" />' +
+      tramoMarks +
+      '<line x1="'+padL+'" y1="'+zeroY+'" x2="'+(padL+plotW)+'" y2="'+zeroY+'" stroke="var(--ink-soft)" stroke-width="1" />' +
+      '<polyline points="'+pts+'" fill="none" stroke="var(--dorado)" stroke-width="2.5" stroke-linejoin="round" />' +
+      xLabels +
+      '<text x="'+(padL+plotW/2)+'" y="'+(H-2)+'" font-size="11" fill="var(--ink-soft)" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">N&deg; de residentes</text>' +
+      '<text x="14" y="'+(padT+plotH/2)+'" font-size="11" fill="var(--ink-soft)" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600" transform="rotate(-90 14 '+(padT+plotH/2)+')">Margen/abuelo</text>';
+    document.getElementById('chartMargen').innerHTML = svgWrap(svg, W, H);
+  }
+
+  function renderChartTotales(filas){
+    var W=720, H=260, padL=76, padR=16, padT=16, padB=34;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    var maxVal = Math.max.apply(null, filas.map(function(f){ return Math.max(f.ingresos, f.costosTotales); }).concat([1]));
+    var minMargen = Math.min.apply(null, filas.map(function(f){ return f.margenTotal; }).concat([0]));
+    var yMin = Math.min(0, minMargen), yMax = maxVal*1.1;
+    function yPix(v){ return padT + (1-(v-yMin)/(yMax-yMin))*plotH; }
+    var zeroY = yPix(0);
+    var groupW = plotW/filas.length;
+    var barW = Math.min(14, groupW*0.32);
+    var bars='', linePts=[], xLabels='';
+    var step = Math.max(1, Math.round(filas.length/10));
+    filas.forEach(function(f,i){
+      var cx = padL + groupW*(i+0.5);
+      var xIng = cx-barW-2, xCos = cx+2;
+      var yIng = yPix(f.ingresos), yCos = yPix(f.costosTotales);
+      bars += '<rect x="'+xIng+'" y="'+yIng+'" width="'+barW+'" height="'+(zeroY-yIng)+'" fill="var(--petroleo)" rx="1.5" />';
+      bars += '<rect x="'+xCos+'" y="'+yCos+'" width="'+barW+'" height="'+(zeroY-yCos)+'" fill="var(--danger)" opacity="0.75" rx="1.5" />';
+      if(i % step === 0 || i === filas.length-1){
+        xLabels += '<text x="'+cx+'" y="'+(H-padB+16)+'" font-size="10" fill="var(--ink-soft)" text-anchor="middle" font-family="Inter,sans-serif">'+f.N+'</text>';
+      }
+      linePts.push(cx+','+yPix(f.margenTotal));
+    });
+    var svg =
+      '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="var(--card)" />' +
+      '<line x1="'+padL+'" y1="'+zeroY+'" x2="'+(padL+plotW)+'" y2="'+zeroY+'" stroke="var(--ink-soft)" stroke-width="1" />' +
+      bars +
+      '<polyline points="'+linePts.join(' ')+'" fill="none" stroke="var(--dorado)" stroke-width="2.5" stroke-linejoin="round" />' +
+      xLabels +
+      '<text x="'+(padL+plotW/2)+'" y="'+(H-4)+'" font-size="11" fill="var(--ink-soft)" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">N&deg; de residentes</text>' +
+      '<text x="16" y="'+(padT+plotH/2)+'" font-size="11" fill="var(--ink-soft)" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600" transform="rotate(-90 16 '+(padT+plotH/2)+')">CLP</text>';
+    document.getElementById('chartTotales').innerHTML = svgWrap(svg, W, H);
+  }
+
+  // ---------- ORQUESTADOR ----------
+  function renderTodo(){
+    var activos = residentesActivos();
+    var nActual = activos.length;
+    var ingresosActuales = activos.reduce(function(a,r){ return a+(r.cuotaPermanencia||0); },0);
+    var costos = calcularCostosPorCargo(
+      supuestos.tasaDescuentoLiquidoBruto/100, supuestos.tasaObligLegalEmpresa/100,
+      supuestos.respaldoCuidadorTens, supuestos.respaldoCocinaAseo
+    );
+    renderDatosReales(nActual, ingresosActuales, costos);
+    renderTramos(costos);
+
+    var nMax = Math.max(supuestos.nMaximo, nActual);
+    var nInicio = nActual > 0 ? nActual : 1;
+    var filas = proyectar(nInicio, nMax, nActual || 1, ingresosActuales, supuestos, tramos, costos);
+    var equilibrios = puntosDeEquilibrio(filas, tramos);
+
+    renderProyeccion(filas, nActual, equilibrios);
+    renderEquilibrios(equilibrios);
+    renderChartMargen(filas);
+    renderChartTotales(filas);
+  }
+
+  renderSupuestos();
+  renderTodo();
+})();
+</script>
+</body>
+</html>
