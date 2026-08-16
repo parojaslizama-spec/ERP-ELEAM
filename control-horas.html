@@ -1267,6 +1267,7 @@
   function horasEntreHoras(ingreso, salida){
     var i = horaAMinutos(ingreso), s = horaAMinutos(salida);
     if(i===null || s===null) return null;
+    if(i === s) return 0; // misma hora de entrada y salida: sin turno real, no un día completo de 24h
     var diff = s - i;
     if(diff <= 0) diff += 1440; // turno cruza medianoche
     return diff/60;
