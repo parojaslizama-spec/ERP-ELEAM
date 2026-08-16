@@ -508,28 +508,8 @@
           <label for="liq-utm">UTM del mes (CLP)</label>
           <input id="liq-utm" type="number" min="0" step="100">
         </div>
-        <div class="field small">
-          <label for="liq-uf">Valor UF de hoy (CLP)</label>
-          <input id="liq-uf" type="number" min="0" step="1">
-        </div>
-        <div class="field small">
-          <label for="liq-tope-uf">Tope imponible AFP/salud (en UF)</label>
-          <input id="liq-tope-uf" type="number" min="0" step="0.1">
-        </div>
-        <div class="field small">
-          <label>Tope imponible AFP/salud mensual (CLP)</label>
-          <input id="liq-tope-imponible" type="text" disabled class="mono">
-        </div>
-        <div class="field small">
-          <label for="liq-tope-uf-cesantia">Tope imponible cesant&iacute;a (en UF)</label>
-          <input id="liq-tope-uf-cesantia" type="number" min="0" step="0.1">
-        </div>
-        <div class="field small">
-          <label>Tope imponible cesant&iacute;a mensual (CLP)</label>
-          <input id="liq-tope-imponible-cesantia" type="text" disabled class="mono">
-        </div>
       </div>
-      <p class="field-hint">El Ingreso M&iacute;nimo Mensual (IMM) se usa para el tope legal de la gratificaci&oacute;n (4,75 IMM al a&ntilde;o) y como sueldo predeterminado al agregar un trabajador nuevo — se actualiza solo seg&uacute;n el calendario legal (avisa cuando la ley lo reajuste para agregarlo). La UTM (Unidad Tributaria Mensual) se usa para calcular el Impuesto &Uacute;nico y cambia cada mes: actual&iacute;zala aqu&iacute; (ver sii.cl). El tope imponible de AFP/salud se calcula multiplicando el <b>valor de la UF de hoy</b> (actual&iacute;zalo aqu&iacute; desde la fuente oficial — sii.cl o Banco Central) por el <b>tope legal en UF</b> vigente (Superintendencia de Pensiones, reajustado normalmente cada febrero) — as&iacute; el monto en pesos se recalcula solo. El seguro de cesant&iacute;a (AFC) tiene un tope legal distinto y m&aacute;s alto — no es el mismo que el de AFP/salud — por eso tiene su propio campo en UF arriba.</p>
+      <p class="field-hint">El Ingreso M&iacute;nimo Mensual (IMM) se usa para el tope legal de la gratificaci&oacute;n (4,75 IMM al a&ntilde;o) y como sueldo predeterminado al agregar un trabajador nuevo — se actualiza solo seg&uacute;n el calendario legal (avisa cuando la ley lo reajuste para agregarlo). La UTM (Unidad Tributaria Mensual) se usa para calcular el Impuesto &Uacute;nico y cambia cada mes: actual&iacute;zala aqu&iacute; (ver sii.cl). AFP, salud y cesant&iacute;a se calculan sobre el 100% de la base imponible de cada trabajador, sin tope — para el rango de sueldos de esta residencia (hasta ~$1.000.000) el tope legal de AFP/salud (90 UF, ~$3,7M) y el de cesant&iacute;a (135,2 UF, ~$5,5M) nunca se alcanzan, as&iacute; que no aportaba nada mantenerlos.</p>
 
       <div class="actions-row">
         <button id="btn-proyectar-liq" class="gold" type="button">Proyectar liquidaciones hasta diciembre 2026</button>
@@ -647,22 +627,9 @@
   var liquidaciones = window.storage.get('liquidaciones', {});
   var immVigente = immLegalVigente(new Date());
   var utmVigente = window.storage.get('utm', 71649);
-  // El tope imponible de AFP/salud NO es un monto fijo: es un tope legal expresado en UF
-  // (Superintendencia de Pensiones) multiplicado por el valor de la UF del día (SII/Banco Central).
-  // El seguro de cesantía (AFC) tiene su PROPIO tope, distinto y más alto que el de AFP/salud
-  // (135,2 UF vs 90 UF desde feb-2026) — por eso son dos campos separados, cada uno hay que
-  // actualizarlo desde la fuente oficial (Superintendencia de Pensiones / AFC Chile).
-  var valorUF = window.storage.get('valor_uf', 40850);
-  var topeImponibleUF = window.storage.get('tope_imponible_uf', 90);
-  var topeImponibleCesantiaUF = window.storage.get('tope_imponible_cesantia_uf', 135.2);
-  function topeImponibleMensualCLP(){ return valorUF * topeImponibleUF; }
-  function topeImponibleCesantiaMensualCLP(){ return valorUF * topeImponibleCesantiaUF; }
 
   function saveEmpresa(){ window.storage.set('empresa', empresa); }
   function saveUtm(){ window.storage.set('utm', utmVigente); }
-  function saveValorUF(){ window.storage.set('valor_uf', valorUF); }
-  function saveTopeImponibleUF(){ window.storage.set('tope_imponible_uf', topeImponibleUF); }
-  function saveTopeImponibleCesantiaUF(){ window.storage.set('tope_imponible_cesantia_uf', topeImponibleCesantiaUF); }
   function saveTrabajadores(){ window.storage.set('trabajadores', trabajadores); }
   function saveAsistencia(){ window.storage.set('asistencia', asistencia); }
   function saveLiquidaciones(){ window.storage.set('liquidaciones', liquidaciones); }
@@ -1194,11 +1161,6 @@
   var liqAnioInput = document.getElementById('liq-anio');
   var liqImmInput = document.getElementById('liq-imm');
   var liqUtmInput = document.getElementById('liq-utm');
-  var liqUFInput = document.getElementById('liq-uf');
-  var liqTopeUFInput = document.getElementById('liq-tope-uf');
-  var liqTopeInput = document.getElementById('liq-tope-imponible');
-  var liqTopeUFCesantiaInput = document.getElementById('liq-tope-uf-cesantia');
-  var liqTopeCesantiaInput = document.getElementById('liq-tope-imponible-cesantia');
 
   var today = new Date();
   fillMesSelect(asisMesSel); asisMesSel.value = today.getMonth()+1;
@@ -1207,11 +1169,6 @@
   liqAnioInput.value = today.getFullYear();
   liqImmInput.value = fmtCLP(immVigente);
   liqUtmInput.value = utmVigente;
-  liqUFInput.value = valorUF;
-  liqTopeUFInput.value = topeImponibleUF;
-  liqTopeInput.value = fmtCLP(topeImponibleMensualCLP());
-  liqTopeUFCesantiaInput.value = topeImponibleCesantiaUF;
-  liqTopeCesantiaInput.value = fmtCLP(topeImponibleCesantiaMensualCLP());
 
   function refreshSelectors(){
     fillTrabajadorSelect(asisTrabSel);
@@ -1227,26 +1184,6 @@
     utmVigente = num(liqUtmInput.value) || 71649;
     saveUtm();
     loadLiquidacion();
-  });
-  function actualizarTopeImponible(){
-    liqTopeInput.value = fmtCLP(topeImponibleMensualCLP());
-    liqTopeCesantiaInput.value = fmtCLP(topeImponibleCesantiaMensualCLP());
-    loadLiquidacion();
-  }
-  liqUFInput.addEventListener('input', function(){
-    valorUF = num(liqUFInput.value) || 40850;
-    saveValorUF();
-    actualizarTopeImponible();
-  });
-  liqTopeUFInput.addEventListener('input', function(){
-    topeImponibleUF = num(liqTopeUFInput.value) || 90;
-    saveTopeImponibleUF();
-    actualizarTopeImponible();
-  });
-  liqTopeUFCesantiaInput.addEventListener('input', function(){
-    topeImponibleCesantiaUF = num(liqTopeUFCesantiaInput.value) || 135.2;
-    saveTopeImponibleCesantiaUF();
-    actualizarTopeImponible();
   });
 
   // ---------- ASISTENCIA ----------
@@ -1555,15 +1492,14 @@
     return Math.round(total / 100) * 100;
   }
 
-  // AFP y salud se calculan sobre la base imponible hasta el tope imponible de AFP/salud; la cesantía
-  // (AFC) usa su PROPIO tope legal, más alto (Ley 19.728) — no comparten el mismo tope.
+  // AFP, salud y cesantía se calculan sobre el 100% de la base imponible, sin tope — para el rango de
+  // sueldos de esta residencia (hasta ~$1.000.000) el tope legal de AFP/salud (90 UF) y el de cesantía
+  // (135,2 UF) nunca se alcanzan, así que se omiten en vez de mantener un cálculo que nunca aplica.
   function legalDeductions(trab, baseImponible){
-    var baseTope = Math.min(baseImponible, topeImponibleMensualCLP() || Infinity);
-    var baseTopeCesantia = Math.min(baseImponible, topeImponibleCesantiaMensualCLP() || Infinity);
-    var afpMonto = baseTope * (trab.afpPct/100);
-    var saludMonto = trab.saludTipo === 'fonasa' ? baseTope * 0.07 : trab.saludMonto;
-    var cesantiaMonto = baseTopeCesantia * (trab.cesantiaPct/100);
-    return { baseImponibleTope: baseTope, baseImponibleTopeCesantia: baseTopeCesantia, afpMonto: afpMonto, saludMonto: saludMonto, cesantiaMonto: cesantiaMonto };
+    var afpMonto = baseImponible * (trab.afpPct/100);
+    var saludMonto = trab.saludTipo === 'fonasa' ? baseImponible * 0.07 : trab.saludMonto;
+    var cesantiaMonto = baseImponible * (trab.cesantiaPct/100);
+    return { afpMonto: afpMonto, saludMonto: saludMonto, cesantiaMonto: cesantiaMonto };
   }
 
   // Tabla de Impuesto Único de Segunda Categoría (SII) — tramos mensuales en UTM sobre la renta líquida
@@ -1717,8 +1653,8 @@
     var totalDescuentos = afpMonto + saludMonto + cesantiaMonto + descInasistencia + form.impuesto + form.otros + adelanto;
     var liquido = totalHaberes - totalDescuentos;
     return {
-      montoHorasExtra: montoHorasExtra, totalHaberes: totalHaberes, baseImponible: baseImponible, baseImponibleTope: legal.baseImponibleTope,
-      baseImponibleTopeCesantia: legal.baseImponibleTopeCesantia, asignacionFamiliarMonto: asignacionFamiliarMonto,
+      montoHorasExtra: montoHorasExtra, totalHaberes: totalHaberes, baseImponible: baseImponible,
+      asignacionFamiliarMonto: asignacionFamiliarMonto,
       sueldoDiario: sueldoDiario, descInasistencia: descInasistencia, afpMonto: afpMonto,
       saludMonto: saludMonto, cesantiaMonto: cesantiaMonto, adelanto: adelanto, totalDescuentos: totalDescuentos, liquido: liquido
     };
@@ -1731,9 +1667,9 @@
     var c = calcularLiquidacion(trab, form);
     liqEl('he-total').value = fmtCLP(c.montoHorasExtra);
     liqEl('desc-inasistencia').value = fmtCLP(c.descInasistencia);
-    liqEl('afp-monto').value = fmtCLP(c.afpMonto) + ' ('+trab.afpPct+'%' + (c.baseImponibleTope < c.baseImponible ? ', tope imponible aplicado' : '') + ')';
+    liqEl('afp-monto').value = fmtCLP(c.afpMonto) + ' ('+trab.afpPct+'%)';
     liqEl('salud-monto').value = trab.saludTipo==='fonasa' ? fmtCLP(c.saludMonto)+' (Fonasa 7%)' : fmtCLP(c.saludMonto)+' (Isapre)';
-    liqEl('cesantia-monto').value = fmtCLP(c.cesantiaMonto) + ' ('+trab.cesantiaPct+'%' + (c.baseImponibleTopeCesantia < c.baseImponible ? ', tope imponible cesantía aplicado' : '') + ')';
+    liqEl('cesantia-monto').value = fmtCLP(c.cesantiaMonto) + ' ('+trab.cesantiaPct+'%)';
     document.getElementById('liq-asignacion-familiar').value = fmtCLP(c.asignacionFamiliarMonto);
     document.getElementById('liq-asignacion-familiar-hint').textContent =
       (trab.cargasFamiliares || 0) === 0
@@ -1754,11 +1690,10 @@
 
   // Guarda, junto con las cifras que se ingresan a mano, el resultado YA CALCULADO de la liquidación
   // (AFP, salud, cesantía, líquido, costo, etc.) — así la liquidación guardada es la ÚNICA fuente que
-  // necesita leer Gastos: no vuelve a recalcular nada con las tasas del trabajador ni con la UF del día,
-  // evitando que los dos módulos diverjan si esos valores cambian después.
+  // necesita leer Gastos: no vuelve a recalcular nada con las tasas del trabajador después.
   function snapshotComputado(trab, form){
     var c = calcularLiquidacion(trab, form);
-    var afcEmpresaMonto = c.baseImponibleTopeCesantia * (afcEmpresaPctPara(trab) / 100);
+    var afcEmpresaMonto = c.baseImponible * (afcEmpresaPctPara(trab) / 100);
     // costoBase (el costo real que ve Gastos) EXCLUYE la asignación familiar: la empresa la adelanta al
     // trabajador dentro del líquido, pero Previred se la reembolsa el mismo mes — no es un gasto neto.
     return {
