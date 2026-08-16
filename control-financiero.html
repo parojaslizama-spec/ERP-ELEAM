@@ -982,6 +982,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         onChange: function (e) { props.onSelect(e.target.value); }
       }, keys.map(function (k) { return h("option", { key: k, value: k }, monthLabel(k)); })),
       h("button", { className: "btn-nav", type: "button", onClick: function () { props.onNavigate(1); } }, "→"),
+      h("button", { className: "btn-ghost-sm", type: "button", onClick: props.onMesAnterior }, "+ Mes anterior"),
       h("button", { className: "btn-ghost-sm", type: "button", onClick: props.onNewMonth }, "+ Nuevo mes"),
       h("button", { className: "btn-ghost-sm", type: "button", onClick: props.onProyectar }, "Proyectar gastos hasta diciembre 2026"),
       h("button", { className: "btn-ghost-sm danger", type: "button", onClick: props.onDeleteMonth }, "Eliminar este mes")
@@ -1363,6 +1364,22 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       setCurrentKey(nextKey);
     }
 
+    function handleMesAnterior() {
+      var keys = Object.keys(stateRef.current.months).sort();
+      var firstKey = keys[0] || currentKey;
+      var prevKey = shiftMonthKey(firstKey, -1);
+      if (stateRef.current.months[prevKey]) { setCurrentKey(prevKey); return; }
+      var base = stateRef.current.months[firstKey];
+      var cloned = JSON.parse(JSON.stringify(base || emptyMonth()));
+      ["ingresosExtra", "gastos", "servicios"].forEach(function (cat) {
+        cloned[cat].forEach(function (r) { r.id = uid(); r.monto = 0; });
+      });
+      cloned.gastosInversion = [];
+      stateRef.current.months[prevKey] = cloned;
+      persist();
+      setCurrentKey(prevKey);
+    }
+
     function handleNavigate(delta) {
       var keys = Object.keys(stateRef.current.months).sort();
       var idx = keys.indexOf(currentKey);
@@ -1442,7 +1459,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         ),
         h(MonthSelector, {
           monthKeys: sortedKeys, currentKey: currentKey,
-          onSelect: setCurrentKey, onNavigate: handleNavigate, onNewMonth: handleNewMonth, onProyectar: handleProyectarGastos, onDeleteMonth: handleDeleteMonth
+          onSelect: setCurrentKey, onNavigate: handleNavigate, onNewMonth: handleNewMonth, onMesAnterior: handleMesAnterior, onProyectar: handleProyectarGastos, onDeleteMonth: handleDeleteMonth
         })
       ),
 
