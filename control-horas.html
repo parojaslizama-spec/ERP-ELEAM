@@ -509,8 +509,8 @@
             <div class="grid-form" style="grid-template-columns:1fr 1fr;">
               <div><label for="liq-sueldo-base">Sueldo base (editable solo para este mes)</label><input id="liq-sueldo-base" type="number" min="0" step="1000" class="mono"></div>
               <div><label for="liq-gratificacion">Gratificaci&oacute;n legal (25%, 2 cuotas)</label><input id="liq-gratificacion" type="number" min="0" step="1000" disabled class="mono"></div>
-              <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5" disabled class="mono"></div>
-              <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100" disabled class="mono"></div>
+              <div><label for="liq-he-cantidad">Horas extra (cantidad, sugerido desde Asistencia — editable)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5" class="mono"></div>
+              <div><label for="liq-he-valor">Valor hora extra (editable)</label><input id="liq-he-valor" type="number" min="0" step="100" class="mono"></div>
               <div><label>Total valor hora extra</label><input id="liq-he-total" type="text" disabled class="mono"></div>
               <div><label>Asignaci&oacute;n familiar (no imponible)</label><input id="liq-asignacion-familiar" type="text" disabled class="mono"></div>
               <div style="grid-column:1/-1;"><p class="field-hint" id="liq-asignacion-familiar-hint"></p></div>
@@ -521,7 +521,7 @@
           <div>
             <h3>Descuentos</h3>
             <div class="grid-form" style="grid-template-columns:1fr 1fr;">
-              <div><label for="liq-dias-falta">D&iacute;as de falta (injustificada)</label><input id="liq-dias-falta" type="number" min="0" step="1" disabled class="mono"></div>
+              <div><label for="liq-dias-falta">D&iacute;as de falta (injustificada, sugerido desde Asistencia — editable)</label><input id="liq-dias-falta" type="number" min="0" step="1" class="mono"></div>
               <div><label>Descuento por inasistencia</label><input id="liq-desc-inasistencia" type="text" disabled class="mono"></div>
               <div><label>AFP (%)</label><input id="liq-afp-monto" type="text" disabled class="mono"></div>
               <div><label>Salud</label><input id="liq-salud-monto" type="text" disabled class="mono"></div>
@@ -1672,7 +1672,11 @@
     // para que no afecte AFP/salud/cesantía/impuesto (que ya se calculan sobre baseImponible más abajo).
     var asignacionFamiliarMonto = (trab.cargasFamiliares || 0) * montoAsignacionFamiliarPorCarga(baseImponible);
     var totalHaberes = form.sueldoBase + form.gratificacion + montoHorasExtra + asignacionFamiliarMonto;
-    var sueldoDiario = form.sueldoBase / 30;
+    // Descuento por inasistencia: se calcula sobre el total de haberes PACTADOS (sueldo base +
+    // gratificación) — no solo el sueldo base — porque la gratificación también forma parte de lo que
+    // el trabajador deja de devengar por el día no trabajado. Las horas extra y la asignación familiar
+    // quedan fuera: son variables (dependen de lo realmente trabajado) o no imponibles, no "pactadas".
+    var sueldoDiario = (form.sueldoBase + form.gratificacion) / 30;
     var descInasistencia = sueldoDiario * form.diasFalta;
     var legal = legalDeductions(trab, baseImponible);
     var afpMonto = legal.afpMonto;
