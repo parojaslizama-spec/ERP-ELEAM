@@ -21,6 +21,7 @@
   --good: #4f7a4a; --good-soft: #dfe9d3;
   --warn: #b3812f; --warn-soft: #f3e6c0;
   --critical: #a4452f; --critical-soft: #f4d9cc;
+  --coffee: #6b5233; --coffee-soft: #e8dcc5;
   --shadow: 0 1px 2px rgba(58,43,28,.08), 0 8px 24px -12px rgba(58,43,28,.22);
   --radius: 10px;
   --serif: "Lora", "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
@@ -28,8 +29,8 @@
   --mono: ui-monospace,"SF Mono","Cascadia Mono","Segoe UI Mono",Consolas,monospace;
 }
 /* Tema claro fijo — no cambia automáticamente con el modo oscuro del sistema. */
-:root[data-theme="dark"] { --bg:#201a12;--surface:#2a2217;--surface-2:#34291a;--ink:#ece2cf;--ink-soft:#c2b193;--ink-faint:#8d7a5e;--border:#453724;--accent:#c9a15a;--accent-ink:#241b0c;--accent-soft:#3c2f1a;--accent-soft-ink:#e6cd9a;--good:#8bb37e;--good-soft:#2c3a24;--warn:#dab569;--warn-soft:#3d3018;--critical:#d98868;--critical-soft:#3c261c;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5); }
-:root[data-theme="light"] { --bg:#f7f1e2;--surface:#fffcf5;--surface-2:#efe2c4;--ink:#3a2b1c;--ink-soft:#6b5842;--ink-faint:#a3927a;--border:#e2d0a8;--accent:#8a6a35;--accent-ink:#fffaf0;--accent-soft:#f0e3c1;--accent-soft-ink:#5c451f;--good:#4f7a4a;--good-soft:#dfe9d3;--warn:#b3812f;--warn-soft:#f3e6c0;--critical:#a4452f;--critical-soft:#f4d9cc;--shadow:0 1px 2px rgba(58,43,28,.08),0 8px 24px -12px rgba(58,43,28,.22); }
+:root[data-theme="dark"] { --bg:#201a12;--surface:#2a2217;--surface-2:#34291a;--ink:#ece2cf;--ink-soft:#c2b193;--ink-faint:#8d7a5e;--border:#453724;--accent:#c9a15a;--accent-ink:#241b0c;--accent-soft:#3c2f1a;--accent-soft-ink:#e6cd9a;--good:#8bb37e;--good-soft:#2c3a24;--warn:#dab569;--warn-soft:#3d3018;--critical:#d98868;--critical-soft:#3c261c;--coffee:#d9c9a8;--coffee-soft:#3a2f1e;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5); }
+:root[data-theme="light"] { --bg:#f7f1e2;--surface:#fffcf5;--surface-2:#efe2c4;--ink:#3a2b1c;--ink-soft:#6b5842;--ink-faint:#a3927a;--border:#e2d0a8;--accent:#8a6a35;--accent-ink:#fffaf0;--accent-soft:#f0e3c1;--accent-soft-ink:#5c451f;--good:#4f7a4a;--good-soft:#dfe9d3;--warn:#b3812f;--warn-soft:#f3e6c0;--critical:#a4452f;--critical-soft:#f4d9cc;--coffee:#6b5233;--coffee-soft:#e8dcc5;--shadow:0 1px 2px rgba(58,43,28,.08),0 8px 24px -12px rgba(58,43,28,.22); }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
@@ -52,6 +53,8 @@ h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(20
 .btn-ghost-sm.danger { background: var(--critical-soft); color: var(--critical); }
 
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+.card.tone-ingreso { background: var(--good-soft); }
+.card.tone-personal { background: var(--coffee-soft); }
 .card h2 { margin: 0 0 12px; font-family: var(--serif); font-weight: 500; font-size: 18px; }
 .card h3.subhead { margin: 16px 0 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); }
 .card h3.subhead:first-of-type { margin-top: 0; }
@@ -78,6 +81,9 @@ table.data-table thead th { font-size: 10.5px; text-transform: uppercase; letter
 table.data-table .col-label { text-align: left; width: 60%; }
 table.data-table .col-amount { text-align: right; width: 30%; }
 table.data-table .col-action { width: 32px; text-align: center; }
+table.data-table .col-iva { width: 90px; text-align: center; }
+table.data-table tbody tr.egreso-row-iva { background: var(--critical-soft); }
+table.data-table tbody tr.egreso-row-sin-iva { background: var(--coffee-soft); }
 table.data-table input[type="text"] {
   width: 100%; border: 1px solid transparent; background: transparent; font-family: var(--sans);
   font-size: 13.5px; color: var(--ink); padding: 5px 6px; border-radius: 6px;
@@ -650,19 +656,21 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   }
 
   function emptyMonth() {
-    return { ingresosExtra: [], gastos: [], servicios: [], gastosInversion: [] };
+    return { ingresosExtra: [], egresos: [] };
   }
 
   // Ítems de inversión ligados al cumplimiento del Decreto 20 (ELEAM) — ver pestaña Cumplimiento ELEAM.
   // Son de una sola vez, no recurrentes: "Cargar dotación mínima" los agrega al mes actual bajo demanda,
-  // nunca se copian solos a meses nuevos ni se proyectan a futuro (a diferencia de gastos/servicios).
+  // nunca se copian solos a meses nuevos ni se proyectan a futuro (a diferencia del resto de Egresos).
+  // El arancel sanitario es un derecho fiscal (no paga IVA); las certificaciones y adecuaciones son
+  // servicios/materiales de terceros (sí pagan IVA) — ajusta el interruptor si tu caso es distinto.
   var REF_GASTOS_INVERSION = [
-    { concepto: "Arancel autorización sanitaria (Seremi de Salud) — monto no fijado en el Decreto 20, confirmar valor vigente", monto: 0 },
-    { concepto: "Certificado de prevención de riesgos / Bomberos (referencial, cotizar)", monto: 150000 },
-    { concepto: "Certificación instalación eléctrica — instalador autorizado (referencial, cotizar)", monto: 120000 },
-    { concepto: "Certificación instalación de gas (referencial, cotizar)", monto: 100000 },
-    { concepto: "Adecuaciones de infraestructura — señalética, barras de apoyo, antideslizante (referencial, muy variable)", monto: 300000 },
-    { concepto: "Extintores adicionales si faltan (referencial, cotizar)", monto: 150000 }
+    { concepto: "Arancel autorización sanitaria (Seremi de Salud) — monto no fijado en el Decreto 20, confirmar valor vigente", monto: 0, pagaIva: false },
+    { concepto: "Certificado de prevención de riesgos / Bomberos (referencial, cotizar)", monto: 150000, pagaIva: true },
+    { concepto: "Certificación instalación eléctrica — instalador autorizado (referencial, cotizar)", monto: 120000, pagaIva: true },
+    { concepto: "Certificación instalación de gas (referencial, cotizar)", monto: 100000, pagaIva: true },
+    { concepto: "Adecuaciones de infraestructura — señalética, barras de apoyo, antideslizante (referencial, muy variable)", monto: 300000, pagaIva: true },
+    { concepto: "Extintores adicionales si faltan (referencial, cotizar)", monto: 150000, pagaIva: true }
   ];
 
   function defaultParams() {
@@ -675,39 +683,41 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   }
 
   // Instalación nueva: sin meses precargados de ejemplo — solo ingresos (automáticos desde Residentes)
-  // y personal (automático desde las liquidaciones guardadas en Trabajadores). Gastos y servicios los
-  // agrega el usuario a mano mes a mes.
+  // y personal (automático desde las liquidaciones guardadas en Trabajadores). Los egresos los agrega
+  // el usuario a mano mes a mes, marcando cuáles pagan IVA y cuáles no.
   function defaultData() {
-    return { months: {}, params: defaultParams(), checklist: {}, refGastosMigrado: true };
+    return { months: {}, params: defaultParams(), checklist: {}, egresosMigrados: true };
   }
 
-  // Valores referenciales — se usan una sola vez para rellenar casillas de gastos/servicios que sigan en $0.
-  var REF_GASTOS = {
-    "Contador": 180000,
-    "Supermercado": 900000, "Supermercado (alimentación)": 900000,
-    "Insumos y materiales": 220000, "Insumos médicos y de cuidado": 220000,
-    "Artículos de aseo y limpieza": 130000,
-    "Mantención y reparaciones": 120000,
-    "Seguros": 90000,
-    "Patente y permisos municipales": 45000
-  };
-  var REF_SERVICIOS = {
-    "Luz": 220000, "Agua": 110000, "Gas": 150000, "Calefacción": 130000, "Internet y teléfono": 50000
-  };
-  function aplicarValoresReferenciales(data) {
-    if (data.refGastosMigrado) return false;
+  // Migración única desde el modelo anterior (gastos neto + servicios bruto + gastosInversion sin IVA)
+  // al modelo unificado de Egresos, donde cada línea decide por sí misma si paga IVA o no — antes esa
+  // decisión dependía de en qué sección se cargaba el ítem, lo que mezclaba casos reales (ej. arriendo,
+  // que no paga IVA si es habitacional) con la regla genérica de su sección. La conversión preserva el
+  // monto total y el crédito fiscal EXACTOS de cada mes ya cargado (gasto neto → bruto = neto×1,19,
+  // pagaIva:true; servicio bruto → igual, pagaIva:true; inversión → igual, pagaIva:false).
+  function migrarAEgresosUnificados(data) {
     var cambiado = false;
     Object.keys(data.months || {}).forEach(function (key) {
       var month = data.months[key];
+      if (month.egresos) return;
+      var egresos = [];
       (month.gastos || []).forEach(function (r) {
-        if ((r.monto === 0 || !r.monto) && REF_GASTOS[r.concepto] != null) { r.monto = REF_GASTOS[r.concepto]; cambiado = true; }
+        egresos.push({ id: r.id || uid(), concepto: r.concepto, monto: Math.round((r.monto || 0) * 1.19), pagaIva: true });
       });
       (month.servicios || []).forEach(function (r) {
-        if ((r.monto === 0 || !r.monto) && REF_SERVICIOS[r.concepto] != null) { r.monto = REF_SERVICIOS[r.concepto]; cambiado = true; }
+        egresos.push({ id: r.id || uid(), concepto: r.concepto, monto: r.monto || 0, pagaIva: true });
       });
+      (month.gastosInversion || []).forEach(function (r) {
+        egresos.push({ id: r.id || uid(), concepto: r.concepto, monto: r.monto || 0, pagaIva: false });
+      });
+      month.egresos = egresos;
+      delete month.gastos;
+      delete month.servicios;
+      delete month.gastosInversion;
+      cambiado = true;
     });
-    data.refGastosMigrado = true;
-    return true;
+    data.egresosMigrados = true;
+    return cambiado;
   }
 
   function loadData() {
@@ -726,14 +736,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         if (parsed.params.sisPct === 1.49) { parsed.params.sisPct = 1.62; tasasMigradas = true; }
         if (parsed.params.mutualPct === 0.93) { parsed.params.mutualPct = 0.90; tasasMigradas = true; }
         if (parsed.params.afcEmpresaPct !== undefined) { delete parsed.params.afcEmpresaPct; tasasMigradas = true; }
-        var refsMigradas = aplicarValoresReferenciales(parsed);
-        if (refsMigradas || tasasMigradas) saveData(parsed);
+        var egresosMigrados = migrarAEgresosUnificados(parsed);
+        if (egresosMigrados || tasasMigradas) saveData(parsed);
         return parsed;
       }
     } catch (e) {}
-    var fresh = defaultData();
-    fresh.refGastosMigrado = true;
-    return fresh;
+    return defaultData();
   }
   // Guarda, junto con los datos, un resumen mensual (ingresos/egresos/margen ya calculados) para que
   // el módulo de Estado de Resultados lo lea directo — así nunca queda desincronizado con Gastos, en
@@ -797,11 +805,6 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     };
   }
 
-  function gastosBreakdown(totGastosNeto, params) {
-    var iva = totGastosNeto * params.ivaPct / 100;
-    return { neto: totGastosNeto, iva: iva, conIva: totGastosNeto + iva };
-  }
-
   // La cuota de permanencia que paga cada residente incluye IVA (así se cobra). Ese IVA no es ingreso
   // real de la empresa: hay que declararlo al SII, por lo que se descompone la cuota en neto + IVA.
   function ivaResidentesBreakdown(totIngresosResidentesBruto, params) {
@@ -809,19 +812,25 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     return { bruto: totIngresosResidentesBruto, iva: iva, neto: totIngresosResidentesBruto - iva };
   }
 
-  // Las boletas de Servicios (luz, agua, gas, internet) se ingresan con el monto bruto tal como viene
-  // en la boleta (ya incluye IVA) — a diferencia de Gastos, que se ingresa neto. Ese IVA pagado en la
-  // boleta también es crédito fiscal recuperable y antes no se estaba contando, lo que sobreestimaba
-  // el IVA a pagar declarado al SII. Se descompone igual que la cuota de los residentes (bruto → neto + IVA).
-  function serviciosBreakdown(totServiciosBruto, params) {
-    var iva = totServiciosBruto * params.ivaPct / (100 + params.ivaPct);
-    return { bruto: totServiciosBruto, iva: iva, neto: totServiciosBruto - iva };
+  // Egresos manuales unificados (antes separados en Gastos/Servicios/Inversión, cada sección con su
+  // propia regla fija de IVA — lo que mezclaba casos reales, como el arriendo, que normalmente no paga
+  // IVA si el inmueble es habitacional). Ahora cada línea se ingresa por el monto realmente pagado
+  // (bruto) y decide por sí misma, con el interruptor "¿Paga IVA?", si aporta crédito fiscal o no.
+  function egresosBreakdown(egresos, params) {
+    var total = 0, ivaCredito = 0, totalConIva = 0, totalSinIva = 0;
+    (egresos || []).forEach(function (r) {
+      var monto = parseFloat(r.monto) || 0;
+      total += monto;
+      if (r.pagaIva) { totalConIva += monto; ivaCredito += monto * (params.ivaPct / (100 + params.ivaPct)); }
+      else { totalSinIva += monto; }
+    });
+    return { total: total, ivaCredito: ivaCredito, totalConIva: totalConIva, totalSinIva: totalSinIva };
   }
 
   // Tributación (IVA, Formulario 29): el IVA débito fiscal (cobrado en las cuotas de los residentes)
-  // se paga al SII neto del IVA crédito fiscal (pagado en los gastos, que es recuperable) — no se suman
-  // ambos por separado. Si el crédito supera al débito, no se paga IVA ese mes y queda un remanente
-  // a favor para el mes siguiente.
+  // se paga al SII neto del IVA crédito fiscal (pagado en los egresos que sí pagan IVA, recuperable) —
+  // no se suman ambos por separado. Si el crédito supera al débito, no se paga IVA ese mes y queda un
+  // remanente a favor para el mes siguiente.
   function tributacionBreakdown(ivaDebito, ivaCredito) {
     var diferencia = ivaDebito - ivaCredito;
     return {
@@ -851,21 +860,17 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var totGratificacion = autoRows.reduce(function (a, r) { return a + (r.gratificacion || 0); }, 0);
     var totImpuestoUnico = autoRows.reduce(function (a, r) { return a + (r.impuesto || 0); }, 0);
     var payroll = payrollBreakdown(autoRows, params);
-    var totGastosNeto = sum(month.gastos);
-    var gastos = gastosBreakdown(totGastosNeto, params);
-    var totServicios = sum(month.servicios);
-    var servicios = serviciosBreakdown(totServicios, params);
-    var totGastosInversion = sum(month.gastosInversion);
-    var tributacion = tributacionBreakdown(ivaResidentes.iva, gastos.iva + servicios.iva);
+    var egresos = egresosBreakdown(month.egresos, params);
+    var tributacion = tributacionBreakdown(ivaResidentes.iva, egresos.ivaCredito);
     var sueldoAdmin = sueldoAdminPara(monthKey, params);
-    var totEgresos = payroll.costoTotal + gastos.conIva + totServicios + totGastosInversion + tributacion.ivaAPagar + sueldoAdmin;
+    var totEgresos = payroll.costoTotal + egresos.total + tributacion.ivaAPagar + sueldoAdmin;
     return {
       totIngresos: totIngresos,
       ingresosAutoRows: ingresosAutoRows, totIngresosResidentes: totIngresosResidentes,
       ivaResidentes: ivaResidentes,
       autoRows: autoRows,
       totPersonalLiquido: totPersonalLiquido, totGratificacion: totGratificacion, totImpuestoUnico: totImpuestoUnico, payroll: payroll,
-      gastos: gastos, totServicios: totServicios, servicios: servicios, totGastosInversion: totGastosInversion,
+      egresos: egresos,
       tributacion: tributacion,
       sueldoAdmin: sueldoAdmin,
       totEgresos: totEgresos, margen: totIngresos - totEgresos
@@ -920,6 +925,69 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         )
       ),
       h("button", { className: "btn-add", type: "button", onClick: props.onAdd }, "+ " + props.addText)
+    );
+  }
+
+  // ---------------- EgresosTable ----------------
+  // Egresos unificados: cada fila decide por sí misma si paga IVA (interruptor por fila) — el color
+  // de la fila cambia solo para que se vea de un vistazo (rojo claro = paga IVA / da crédito fiscal,
+  // café claro = no paga IVA, ej. arriendo habitacional).
+  function EgresosTable(props) {
+    var rows = props.rows;
+    return h("div", { className: "etable" },
+      h("table", { className: "data-table" },
+        h("thead", null, h("tr", null,
+          h("th", { className: "col-label" }, "Concepto"),
+          h("th", { className: "col-amount" }, "Monto"),
+          h("th", { className: "col-iva" }, "¿Paga IVA?"),
+          h("th", { className: "col-action" })
+        )),
+        h("tbody", null,
+          rows.length === 0
+            ? h("tr", null, h("td", { colSpan: 4, className: "empty-row" }, "Sin egresos registrados este mes."))
+            : rows.map(function (row) {
+                return h("tr", { key: row.id, className: row.pagaIva ? "egreso-row-iva" : "egreso-row-sin-iva" },
+                  h("td", { className: "col-label" }, h("input", {
+                    type: "text", value: row.concepto, placeholder: "Ej. Arriendo, contador, insumos...",
+                    onChange: function (e) { props.onUpdate(row.id, "concepto", e.target.value); }
+                  })),
+                  h("td", { className: "col-amount" }, h("input", {
+                    type: "number", value: row.monto, step: "1000",
+                    onChange: function (e) { props.onUpdate(row.id, "monto", e.target.value === "" ? 0 : parseFloat(e.target.value)); }
+                  })),
+                  h("td", { className: "col-iva" }, h("input", {
+                    type: "checkbox", checked: !!row.pagaIva, title: "¿Este egreso paga IVA?",
+                    onChange: function (e) { props.onUpdate(row.id, "pagaIva", e.target.checked); }
+                  })),
+                  h("td", { className: "col-action" }, h("button", {
+                    className: "btn-del", type: "button", title: "Eliminar",
+                    onClick: function () { props.onDelete(row.id); }
+                  }, "×"))
+                );
+              })
+        ),
+        h("tfoot", null,
+          h("tr", { className: "extra-row" },
+            h("td", { className: "col-label" }, "Con IVA (crédito fiscal " + numFmt(props.ivaPct) + "%, recuperable: " + money(props.ivaCredito) + ")"),
+            h("td", { className: "col-amount" }, money(props.totalConIva)),
+            h("td", { className: "col-iva" }),
+            h("td", { className: "col-action" })
+          ),
+          h("tr", { className: "extra-row" },
+            h("td", { className: "col-label" }, "Sin IVA (exento)"),
+            h("td", { className: "col-amount" }, money(props.totalSinIva)),
+            h("td", { className: "col-iva" }),
+            h("td", { className: "col-action" })
+          ),
+          h("tr", null,
+            h("td", { className: "col-label" }, "Total egresos"),
+            h("td", { className: "col-amount" }, money(props.total)),
+            h("td", { className: "col-iva" }),
+            h("td", { className: "col-action" })
+          )
+        )
+      ),
+      h("button", { className: "btn-add", type: "button", onClick: props.onAdd }, "+ Agregar egreso")
     );
   }
 
@@ -1062,20 +1130,13 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var lines = [];
     lines.push(["Residencia Senior Omar Wall - Control financiero", monthLabel(monthKey)].map(csvEscape).join(","));
     lines.push([]);
-    lines.push(["INGRESOS — Residentes (sincronizado desde Residentes)", "Monto"].map(csvEscape).join(","));
-    totals.ingresosAutoRows.forEach(function (r) {
-      lines.push([r.nombre + " (" + r.origen + ")", r.monto].map(csvEscape).join(","));
-    });
-    lines.push(["Subtotal residentes", totals.totIngresosResidentes].map(csvEscape).join(","));
-    lines.push(["INGRESOS — Extra", "Monto"].map(csvEscape).join(","));
-    month.ingresosExtra.forEach(function (r) {
-      lines.push([r.concepto, r.monto].map(csvEscape).join(","));
-    });
+    lines.push(["INGRESOS (resumen)", "Monto"].map(csvEscape).join(","));
+    lines.push(["Residentes (" + totals.ingresosAutoRows.length + ", sincronizado desde Residentes)", totals.totIngresosResidentes].map(csvEscape).join(","));
+    lines.push(["Ingresos extra", sum(month.ingresosExtra)].map(csvEscape).join(","));
     lines.push(["Total ingresos", totals.totIngresos].map(csvEscape).join(","));
     lines.push([]);
-    lines.push(["PERSONAL (líquido, sincronizado desde Trabajadores)", "Monto"].map(csvEscape).join(","));
-    totals.autoRows.forEach(function (r) { lines.push([r.nombre + " (" + r.origen + ")", r.monto].map(csvEscape).join(",")); });
-    lines.push(["Subtotal líquido", totals.totPersonalLiquido].map(csvEscape).join(","));
+    lines.push(["PERSONAL (resumen, líquido sincronizado desde Trabajadores)", "Monto"].map(csvEscape).join(","));
+    lines.push(["Total líquido (" + totals.autoRows.length + " trabajador(es))", totals.totPersonalLiquido].map(csvEscape).join(","));
     lines.push(["Sueldo bruto (calculado)", totals.payroll.bruto].map(csvEscape).join(","));
     lines.push(["Gratificación legal (total del mes, ya incluida arriba en cada líquido)", totals.totGratificacion].map(csvEscape).join(","));
     lines.push([]);
@@ -1096,27 +1157,18 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     lines.push(["ADMINISTRACIÓN (sueldo administrador/inversor, reajustado 5% cada enero)", "Monto"].map(csvEscape).join(","));
     lines.push(["Sueldo administración este mes", totals.sueldoAdmin].map(csvEscape).join(","));
     lines.push([]);
-    lines.push(["GASTOS (neto)", "Monto"].map(csvEscape).join(","));
-    month.gastos.forEach(function (r) { lines.push([r.concepto, r.monto].map(csvEscape).join(",")); });
-    lines.push(["Subtotal gastos neto", totals.gastos.neto].map(csvEscape).join(","));
-    lines.push(["IVA calculado", totals.gastos.iva].map(csvEscape).join(","));
-    lines.push(["Subtotal gastos con IVA", totals.gastos.conIva].map(csvEscape).join(","));
+    lines.push(["EGRESOS (resumen — el detalle de cada línea queda solo en pantalla, no en este reporte)", "Monto"].map(csvEscape).join(","));
+    lines.push(["Con IVA (crédito fiscal, recuperable)", totals.egresos.totalConIva].map(csvEscape).join(","));
+    lines.push(["Crédito fiscal IVA (recuperable)", totals.egresos.ivaCredito].map(csvEscape).join(","));
+    lines.push(["Sin IVA (exento)", totals.egresos.totalSinIva].map(csvEscape).join(","));
+    lines.push(["Total egresos", totals.egresos.total].map(csvEscape).join(","));
     lines.push([]);
-    lines.push(["SERVICIOS (bruto, boleta)", "Monto"].map(csvEscape).join(","));
-    month.servicios.forEach(function (r) { lines.push([r.concepto, r.monto].map(csvEscape).join(",")); });
-    lines.push(["Subtotal servicios", totals.totServicios].map(csvEscape).join(","));
-    lines.push(["IVA incluido (crédito fiscal)", totals.servicios.iva].map(csvEscape).join(","));
-    lines.push([]);
-    lines.push(["GASTOS DE INVERSIÓN — CUMPLIMIENTO ELEAM", "Monto"].map(csvEscape).join(","));
-    month.gastosInversion.forEach(function (r) { lines.push([r.concepto, r.monto].map(csvEscape).join(",")); });
-    lines.push(["Subtotal gastos de inversión", totals.totGastosInversion].map(csvEscape).join(","));
-    lines.push([]);
-    lines.push(["Total egresos", totals.totEgresos].map(csvEscape).join(","));
+    lines.push(["Total egresos generales (personal + administración + egresos + IVA SII)", totals.totEgresos].map(csvEscape).join(","));
     lines.push(["Margen neto", totals.margen].map(csvEscape).join(","));
     lines.push([]);
     lines.push(["IVA A PAGAR AL SII — GASTO DE EMPRESA (FORMULARIO 29, calculado de los ingresos de los residentes)", "Monto"].map(csvEscape).join(","));
     lines.push(["IVA débito fiscal (cuotas de residentes)", totals.tributacion.ivaDebito].map(csvEscape).join(","));
-    lines.push(["IVA crédito fiscal (gastos y servicios)", totals.tributacion.ivaCredito].map(csvEscape).join(","));
+    lines.push(["IVA crédito fiscal (egresos con IVA)", totals.tributacion.ivaCredito].map(csvEscape).join(","));
     lines.push(["Remanente de crédito a favor (próximo mes)", totals.tributacion.ivaRemanente].map(csvEscape).join(","));
     lines.push(["IVA a pagar al SII este mes", totals.tributacion.ivaAPagar].map(csvEscape).join(","));
 
@@ -1141,7 +1193,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     { key: "salud", label: "Salud (retenida a trabajadores — remitir vía Previred)", getMonto: function (t) { return t.payroll.trabajador.salud; } },
     { key: "impuestoUnico", label: "Impuesto único (retenido a trabajadores — declarar en F29)", getMonto: function (t) { return t.totImpuestoUnico; } },
     { key: "ivaSii", label: "IVA a pagar al SII (Formulario 29)", getMonto: function (t) { return t.tributacion.ivaAPagar; } },
-    { key: "servicios", label: "Servicios (luz, agua, gas, etc.)", getMonto: function (t) { return t.totServicios; } }
+    { key: "egresos", label: "Egresos del mes (arriendo, insumos, servicios, etc.)", getMonto: function (t) { return t.egresos.total; } }
   ];
 
   function ChecklistOperacional(props) {
@@ -1227,22 +1279,21 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         var t = totals;
         var secciones = [
           {
-            titulo: "Ingresos — Residentes (sincronizado)",
-            sub: t.ingresosAutoRows.length ? "Cuota de permanencia de cada residente activo, calculada desde el módulo de Residentes." : "Sin residentes registrados en el módulo de Residentes.",
-            filas: t.ingresosAutoRows.map(function (r) { return { label: r.nombre, valor: money(r.monto), nota: r.origen }; }),
-            total: { label: "Subtotal residentes", valor: money(t.totIngresosResidentes), color: "good" }
-          },
-          {
-            titulo: "Ingresos extra",
-            filas: month.ingresosExtra.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; }),
+            titulo: "Ingresos",
+            sub: "Cuota de permanencia de los residentes activos (sincronizado desde Residentes) más ingresos extra del mes — resumen, sin detalle por residente.",
+            filas: [
+              { label: "Residentes (" + t.ingresosAutoRows.length + ", sincronizado)", valor: money(t.totIngresosResidentes) },
+              { label: "Ingresos extra", valor: money(sum(month.ingresosExtra)) }
+            ],
             total: { label: "Total ingresos", valor: money(t.totIngresos), color: "good" }
           },
           {
             titulo: "Personal — sincronizado desde Trabajadores",
-            sub: t.autoRows.length ? "Calculado automáticamente desde el módulo de Trabajadores y Liquidaciones." : "Sin trabajadores registrados en el módulo de Trabajadores.",
-            filas: t.autoRows.map(function (r) { return { label: r.nombre, valor: money(r.monto), nota: r.origen }; }).concat([
-              { label: "Gratificación legal (total del mes, ya incluida arriba en cada líquido)", valor: money(t.totGratificacion) }
-            ]),
+            sub: t.autoRows.length ? "Calculado automáticamente desde el módulo de Trabajadores y Liquidaciones (" + t.autoRows.length + " trabajador(es)) — resumen, sin detalle por trabajador." : "Sin trabajadores registrados en el módulo de Trabajadores.",
+            filas: [
+              { label: "Sueldo bruto (calculado)", valor: money(t.payroll.bruto) },
+              { label: "Gratificación legal (total del mes, ya incluida abajo)", valor: money(t.totGratificacion) }
+            ],
             total: { label: "Subtotal líquido personal", valor: money(t.totPersonalLiquido), color: "critical" }
           },
           {
@@ -1273,28 +1324,20 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
             total: { label: "Sueldo administración este mes", valor: money(t.sueldoAdmin), color: "critical" }
           },
           {
-            titulo: "Gastos",
-            filas: month.gastos.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; })
-              .concat([{ label: "IVA (" + numFmt(data.params.ivaPct) + "%)", valor: money(t.gastos.iva) }]),
-            total: { label: "Total gastos con IVA", valor: money(t.gastos.conIva), color: "critical" }
-          },
-          {
-            titulo: "Servicios (bruto, boleta)",
-            filas: month.servicios.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; })
-              .concat([{ label: "IVA incluido (crédito fiscal)", valor: money(t.servicios.iva) }]),
-            total: { label: "Total servicios", valor: money(t.totServicios), color: "critical" }
-          },
-          {
-            titulo: "Gastos de inversión — cumplimiento ELEAM",
-            filas: month.gastosInversion.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; }),
-            total: { label: "Total gastos de inversión", valor: money(t.totGastosInversion), color: "critical" }
+            titulo: "Egresos",
+            sub: "Resumen — el detalle línea por línea de cada egreso (arriendo, insumos, servicios, cumplimiento ELEAM, etc.) queda solo en pantalla, no en este reporte.",
+            filas: [
+              { label: "Con IVA (crédito fiscal " + numFmt(data.params.ivaPct) + "%, recuperable)", valor: money(t.egresos.totalConIva) },
+              { label: "Sin IVA (exento)", valor: money(t.egresos.totalSinIva) }
+            ],
+            total: { label: "Total egresos", valor: money(t.egresos.total), color: "critical" }
           },
           {
             titulo: "IVA a pagar al SII — gasto de empresa (Formulario 29)",
-            sub: "El IVA de las cuotas de los residentes (débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en gastos y servicios (crédito fiscal, recuperable) — al SII se paga solo la diferencia.",
+            sub: "El IVA de las cuotas de los residentes (débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en los egresos que pagan IVA (crédito fiscal, recuperable) — al SII se paga solo la diferencia.",
             filas: [
               { label: "IVA débito fiscal (cuotas de residentes)", valor: money(t.tributacion.ivaDebito) },
-              { label: "IVA crédito fiscal (gastos y servicios)", valor: "− " + money(t.tributacion.ivaCredito) }
+              { label: "IVA crédito fiscal (egresos con IVA)", valor: "− " + money(t.tributacion.ivaCredito) }
             ].concat(t.tributacion.ivaRemanente > 0 ? [{ label: "Remanente de crédito a favor (próximo mes)", valor: money(t.tributacion.ivaRemanente) }] : []),
             total: { label: "IVA a pagar al SII este mes", valor: money(t.tributacion.ivaAPagar), color: "critical" }
           }
@@ -1341,6 +1384,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       stateRef.current.months[monthKey][category].push(row);
       persist();
     }
+    function addEgresoRow(monthKey) {
+      // Nuevo egreso parte marcado "paga IVA" por defecto (el caso más común) — el usuario lo destilda
+      // si corresponde a algo exento, como arriendo habitacional.
+      stateRef.current.months[monthKey].egresos.push({ id: uid(), concepto: "Nuevo egreso", monto: 0, pagaIva: true });
+      persist();
+    }
 
     function updateParam(key, value) {
       stateRef.current.params[key] = value;
@@ -1354,11 +1403,10 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       if (stateRef.current.months[nextKey]) { setCurrentKey(nextKey); return; }
       var base = stateRef.current.months[lastKey];
       var cloned = JSON.parse(JSON.stringify(base || emptyMonth()));
-      ["ingresosExtra", "gastos", "servicios"].forEach(function (cat) {
-        cloned[cat].forEach(function (r) { r.id = uid(); r.monto = 0; });
-      });
-      // Los gastos de inversión son de una sola vez: nunca se arrastran a un mes nuevo.
-      cloned.gastosInversion = [];
+      // Se copian las etiquetas y el interruptor de IVA de cada egreso recurrente (con monto en $0,
+      // para completar el valor real de este mes) — el ingreso extra también parte en $0.
+      cloned.ingresosExtra.forEach(function (r) { r.id = uid(); r.monto = 0; });
+      cloned.egresos.forEach(function (r) { r.id = uid(); r.monto = 0; });
       stateRef.current.months[nextKey] = cloned;
       persist();
       setCurrentKey(nextKey);
@@ -1371,10 +1419,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       if (stateRef.current.months[prevKey]) { setCurrentKey(prevKey); return; }
       var base = stateRef.current.months[firstKey];
       var cloned = JSON.parse(JSON.stringify(base || emptyMonth()));
-      ["ingresosExtra", "gastos", "servicios"].forEach(function (cat) {
-        cloned[cat].forEach(function (r) { r.id = uid(); r.monto = 0; });
-      });
-      cloned.gastosInversion = [];
+      cloned.ingresosExtra.forEach(function (r) { r.id = uid(); r.monto = 0; });
+      cloned.egresos.forEach(function (r) { r.id = uid(); r.monto = 0; });
       stateRef.current.months[prevKey] = cloned;
       persist();
       setCurrentKey(prevKey);
@@ -1392,7 +1438,6 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       if (!window.confirm("Esto borra los " + totalMeses + " mes(es) cargados, todos los gastos, servicios, ingresos extra y la lista de chequeo — vuelve todo a cero. No se puede deshacer. ¿Seguro que quieres reiniciar?")) return;
       if (!window.confirm("Última confirmación: se perderá todo lo cargado en Gastos. ¿Continuar de todos modos?")) return;
       var fresh = defaultData();
-      fresh.refGastosMigrado = true;
       stateRef.current.months = fresh.months;
       stateRef.current.checklist = {};
       persist();
@@ -1401,11 +1446,11 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     }
 
     function handleCargarInversionEleam() {
-      if (!window.confirm("Esto agrega " + REF_GASTOS_INVERSION.length + " ítem(s) de inversión de cumplimiento ELEAM (Decreto 20) al mes actual, con montos referenciales editables. ¿Continuar?")) return;
-      var rows = REF_GASTOS_INVERSION.map(function (r) { return { id: uid(), concepto: r.concepto, monto: r.monto }; });
-      stateRef.current.months[currentKey].gastosInversion = stateRef.current.months[currentKey].gastosInversion.concat(rows);
+      if (!window.confirm("Esto agrega " + REF_GASTOS_INVERSION.length + " ítem(s) de inversión de cumplimiento ELEAM (Decreto 20) a Egresos, con montos referenciales editables. ¿Continuar?")) return;
+      var rows = REF_GASTOS_INVERSION.map(function (r) { return { id: uid(), concepto: r.concepto, monto: r.monto, pagaIva: r.pagaIva }; });
+      stateRef.current.months[currentKey].egresos = stateRef.current.months[currentKey].egresos.concat(rows);
       persist();
-      setExportStatus("✓ Ítems de inversión ELEAM agregados — revisa y ajusta los montos referenciales.");
+      setExportStatus("✓ Ítems de inversión ELEAM agregados a Egresos — revisa y ajusta los montos referenciales.");
     }
 
     function handleDeleteMonth() {
@@ -1433,16 +1478,13 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       if (!base) return;
       var faltantes = PROYECCION_GASTOS_MESES.filter(function (k) { return !stateRef.current.months[k]; });
       if (!faltantes.length) { setExportStatus("Ya existen todos los meses hasta diciembre 2026 — nada que proyectar."); return; }
-      if (!window.confirm("Esto copia los gastos y servicios de " + monthLabel(lastKey) + " (con sus montos actuales) hacia " + faltantes.length + " mes(es) que aún no existen (hasta diciembre 2026). No modifica meses que ya tengas cargados. ¿Continuar?")) return;
+      if (!window.confirm("Esto copia los egresos recurrentes de " + monthLabel(lastKey) + " (con sus montos actuales) hacia " + faltantes.length + " mes(es) que aún no existen (hasta diciembre 2026). No modifica meses que ya tengas cargados. ¿Continuar?")) return;
       faltantes.forEach(function (key) {
-        var cloned = { ingresosExtra: [], gastos: [], servicios: [] };
-        ["gastos", "servicios"].forEach(function (cat) {
-          cloned[cat] = (base[cat] || []).map(function (r) { return Object.assign({}, r, { id: uid() }); });
-        });
+        var cloned = { ingresosExtra: [], egresos: (base.egresos || []).map(function (r) { return Object.assign({}, r, { id: uid() }); }) };
         stateRef.current.months[key] = cloned;
       });
       persist();
-      setExportStatus("✓ " + faltantes.length + " mes(es) proyectado(s) con los gastos y servicios de " + monthLabel(lastKey) + ".");
+      setExportStatus("✓ " + faltantes.length + " mes(es) proyectado(s) con los egresos de " + monthLabel(lastKey) + ".");
     }
 
     var data = stateRef.current;
@@ -1472,19 +1514,14 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       h(Dashboard, { totals: totals, currentKey: currentKey, resumenMensual: data.resumenMensual }),
       h(ComparisonChart, { data: data, sortedKeys: sortedKeys }),
 
-      h("div", { className: "card" },
+      h("div", { className: "card tone-ingreso" },
         h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "8px" } },
           h("h2", null, "Ingresos"),
           h("a", { className: "btn-ghost-sm", href: "control-residentes.html" }, "Ir al módulo de Residentes →")
         ),
-        h("h3", { className: "subhead" }, "Residentes — sincronizado desde Residentes"),
         totals.ingresosAutoRows.length === 0
           ? h("p", { className: "sub" }, "Aún no hay residentes registrados en el módulo de Residentes. Regístralos allí (con su cuota de permanencia) y aparecerán aquí solos, mes a mes.")
-          : h(LegalBreakdown, {
-              title: "Residente",
-              rows: totals.ingresosAutoRows.map(function (r) { return { label: r.nombre + " — " + r.origen, amount: r.monto }; }),
-              total: totals.totIngresosResidentes
-            }),
+          : h("div", { className: "total-row" }, h("span", null, "Residentes (" + totals.ingresosAutoRows.length + ", sincronizado desde Residentes)"), h("span", { className: "total-amount ingreso" }, money(totals.totIngresosResidentes))),
         h("h3", { className: "subhead" }, "Ingresos extra"),
         h(EditableTable, {
           rows: month.ingresosExtra, labelField: "concepto", labelHeader: "Concepto", labelPlaceholder: "Ej. arriendo de pieza",
@@ -1496,7 +1533,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         h("div", { className: "total-row" }, h("span", null, "Total ingresos"), h("span", { className: "total-amount ingreso" }, money(totals.totIngresos)))
       ),
 
-      h("div", { className: "card" },
+      h("div", { className: "card tone-personal" },
         h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "8px" } },
           h("h2", null, "Personal — sincronizado desde Trabajadores"),
           h("a", { className: "btn-ghost-sm", href: "control-horas.html" }, "Ir al módulo de Trabajadores →")
@@ -1506,14 +1543,10 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
               ? "Aún no hay trabajadores registrados en el módulo de Trabajadores y Liquidaciones. Regístralos allí y el costo de personal se completará solo aquí, mes a mes."
               : "Hay trabajadores registrados, pero ninguno tiene una liquidación guardada para " + monthLabel(currentKey) + " en Trabajadores. Guárdalas allí y aparecerán aquí solas.")
           : h("div", null,
-              h("p", { className: "sub" }, "El líquido de cada trabajador se lee directo de su liquidación guardada en " + monthLabel(currentKey) + ". Si un trabajador activo no aparece, es porque no le has guardado una liquidación para este mes en Trabajadores."),
-              h(LegalBreakdown, {
-                title: "Trabajador",
-                rows: totals.autoRows.map(function (r) { return { label: r.nombre + " — " + r.origen, amount: r.monto }; }),
-                total: totals.totPersonalLiquido
-              }),
+              h("p", { className: "sub" }, "Total del líquido de todos los trabajadores activos, leído directo de sus liquidaciones guardadas en " + monthLabel(currentKey) + " — sin detalle por trabajador aquí."),
+              h("div", { className: "total-row" }, h("span", null, "Personal (" + totals.autoRows.length + " trabajador(es), líquido)"), h("span", { className: "total-amount egreso" }, money(totals.totPersonalLiquido))),
               h("p", { className: "calc-note" }, "Sueldo bruto calculado: " + money(totals.payroll.bruto)),
-              h("div", { className: "total-row" }, h("span", null, "Gratificación legal (total del mes, ya incluida arriba en cada líquido)"), h("span", null, money(totals.totGratificacion)))
+              h("div", { className: "total-row" }, h("span", null, "Gratificación legal (total del mes, ya incluida arriba)"), h("span", null, money(totals.totGratificacion)))
             )
       ),
 
@@ -1566,54 +1599,26 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       ),
 
       h("div", { className: "card" },
-        h("h2", null, "Gastos"),
-        h("p", { className: "sub" }, "Ingresa el monto neto de cada gasto — el IVA se calcula solo (ese IVA es crédito fiscal: se descuenta del IVA a pagar al SII en la sección Tributación, más abajo)."),
-        h(EditableTable, {
-          rows: month.gastos, labelField: "concepto", labelHeader: "Concepto (neto)", labelPlaceholder: "Ej. Contador",
-          emptyText: "Sin gastos registrados.", addText: "Agregar gasto",
-          subtotalLabel: "Total gastos con IVA",
-          subtotalOverride: totals.gastos.conIva,
-          extraRows: [{ label: "IVA (" + numFmt(data.params.ivaPct) + "%, crédito fiscal)", amount: totals.gastos.iva }],
-          onAdd: function () { addRow("gastos", currentKey, "concepto", "Nuevo gasto"); },
-          onUpdate: function (id, f, v) { updateRow("gastos", currentKey, id, f, v); },
-          onDelete: function (id) { deleteRow("gastos", currentKey, id); }
-        })
-      ),
-
-      h("div", { className: "card" },
-        h("h2", null, "Servicios"),
-        h("p", { className: "sub" }, "Ingresa el monto bruto tal como viene en la boleta (con IVA incluido) — ese IVA se cuenta solo como crédito fiscal en Tributación, más abajo."),
-        h(EditableTable, {
-          rows: month.servicios, labelField: "concepto", labelHeader: "Concepto (bruto, boleta)", labelPlaceholder: "Ej. Luz",
-          emptyText: "Sin servicios registrados.", addText: "Agregar ítem",
-          extraRows: [{ label: "IVA incluido (" + numFmt(data.params.ivaPct) + "%, crédito fiscal)", amount: totals.servicios.iva }],
-          onAdd: function () { addRow("servicios", currentKey, "concepto", "Nuevo ítem"); },
-          onUpdate: function (id, f, v) { updateRow("servicios", currentKey, id, f, v); },
-          onDelete: function (id) { deleteRow("servicios", currentKey, id); }
-        })
-      ),
-
-      h("div", { className: "card" },
         h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "8px" } },
-          h("h2", null, "Gastos de inversión — cumplimiento ELEAM"),
+          h("h2", null, "Egresos"),
           h("button", { className: "btn-ghost-sm", type: "button", onClick: handleCargarInversionEleam }, "Cargar ítems de cumplimiento ELEAM")
         ),
-        h("p", { className: "sub" }, "Trámites y adecuaciones del Decreto 20 (ver pestaña Cumplimiento ELEAM) — de una sola vez, no se repiten cada mes. Los montos con \"(referencial, cotizar)\" son estimaciones propias: ajústalos con la cotización real."),
-        h(EditableTable, {
-          rows: month.gastosInversion, labelField: "concepto", labelHeader: "Concepto", labelPlaceholder: "Ej. Certificación eléctrica",
-          emptyText: "Sin ítems de inversión registrados este mes.", addText: "Agregar ítem",
-          onAdd: function () { addRow("gastosInversion", currentKey, "concepto", "Nuevo ítem de inversión"); },
-          onUpdate: function (id, f, v) { updateRow("gastosInversion", currentKey, id, f, v); },
-          onDelete: function (id) { deleteRow("gastosInversion", currentKey, id); }
-        }),
-        h("div", { className: "total-row" }, h("span", null, "Total egresos"), h("span", { className: "total-amount egreso" }, money(totals.totEgresos)))
+        h("p", { className: "sub" }, "Ingresa el monto real pagado de cada egreso (arriendo, insumos, contador, cumplimiento ELEAM, etc.) y marca si paga IVA o no — la fila cambia de color sola: rojo claro si paga IVA (da crédito fiscal), café claro si no paga IVA (ej. arriendo habitacional, normalmente exento)."),
+        h(EgresosTable, {
+          rows: month.egresos, ivaPct: data.params.ivaPct,
+          totalConIva: totals.egresos.totalConIva, totalSinIva: totals.egresos.totalSinIva,
+          ivaCredito: totals.egresos.ivaCredito, total: totals.egresos.total,
+          onAdd: function () { addEgresoRow(currentKey); },
+          onUpdate: function (id, f, v) { updateRow("egresos", currentKey, id, f, v); },
+          onDelete: function (id) { deleteRow("egresos", currentKey, id); }
+        })
       ),
 
       h("div", { className: "card" },
         h("h2", null, "IVA a pagar al SII — gasto de empresa"),
-        h("p", { className: "sub" }, "El IVA de las cuotas de los residentes (" + numFmt(data.params.ivaPct) + "% incluido — débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en gastos y servicios (crédito fiscal, recuperable) — al SII se paga solo la diferencia."),
+        h("p", { className: "sub" }, "El IVA de las cuotas de los residentes (" + numFmt(data.params.ivaPct) + "% incluido — débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en los egresos que pagan IVA (crédito fiscal, recuperable) — al SII se paga solo la diferencia."),
         h("div", { className: "total-row" }, h("span", null, "IVA débito fiscal (cuotas de residentes)"), h("span", null, money(totals.tributacion.ivaDebito))),
-        h("div", { className: "total-row" }, h("span", null, "IVA crédito fiscal (gastos y servicios)"), h("span", null, "− " + money(totals.tributacion.ivaCredito))),
+        h("div", { className: "total-row" }, h("span", null, "IVA crédito fiscal (egresos con IVA)"), h("span", null, "− " + money(totals.tributacion.ivaCredito))),
         totals.tributacion.ivaRemanente > 0
           ? h("div", { className: "total-row" }, h("span", null, "Remanente de crédito a favor (para el próximo mes)"), h("span", null, money(totals.tributacion.ivaRemanente)))
           : null,
