@@ -627,6 +627,9 @@
   var liquidaciones = window.storage.get('liquidaciones', {});
   var immVigente = immLegalVigente(new Date());
   var utmVigente = window.storage.get('utm', 71649);
+  // Piso interno para personal esencial (cuidadores): por sobre el IMM legal, política de la residencia
+  // desde agosto 2026. La gratificación se calcula igual, automáticamente, sobre este monto.
+  var SUELDO_BASE_ESENCIAL = 570000;
 
   function saveEmpresa(){ window.storage.set('empresa', empresa); }
   function saveUtm(){ window.storage.set('utm', utmVigente); }
@@ -700,7 +703,12 @@
     horasInput.value = esencial ? 12 : 8;
     updateJornadaLegalHint();
   }
-  tipoSel.addEventListener('change', applyTipoUI);
+  tipoSel.addEventListener('change', function(){
+    applyTipoUI();
+    // Solo autocompleta el sueldo sugerido cuando se está agregando un trabajador nuevo (no editando uno existente),
+    // para no pisar un sueldo ya negociado al cambiar el tipo por error.
+    if(editandoTrabajadorId === null) sueldoBaseInput.value = tipoSel.value === 'esencial' ? SUELDO_BASE_ESENCIAL : immVigente;
+  });
   horasInput.addEventListener('input', updateJornadaLegalHint);
   applyTipoUI();
 
@@ -748,19 +756,19 @@
 
   function updateDotacionMinimaHint(){
     document.getElementById('dotacion-minima-hint').textContent =
-      '"Cargar dotación mínima" agrega 4 cuidadores (esencial, turnos 4×4 escalonados en 2 pares para asegurar 2 personas presentes en todo momento) y 1 auxiliar de aseo, todos al sueldo mínimo vigente (' + fmtCLP(immVigente) + '). Úsalo una sola vez; después edita nombres y RUT reales.';
+      '"Cargar dotación mínima" agrega 4 cuidadores (esencial, turnos 4×4 escalonados en 2 pares para asegurar 2 personas presentes en todo momento) al sueldo base de cuidadores (' + fmtCLP(SUELDO_BASE_ESENCIAL) + ') y 1 auxiliar de aseo al sueldo mínimo vigente (' + fmtCLP(immVigente) + '). Úsalo una sola vez; después edita nombres y RUT reales.';
   }
   updateDotacionMinimaHint();
 
   document.getElementById('btn-dotacion-minima').addEventListener('click', function(){
-    if(!confirm('Esto agrega 4 cuidadores y 1 auxiliar de aseo nuevos a la nómina, todos al sueldo mínimo (' + fmtCLP(immVigente) + '). ¿Continuar?')) return;
+    if(!confirm('Esto agrega 4 cuidadores (sueldo base ' + fmtCLP(SUELDO_BASE_ESENCIAL) + ') y 1 auxiliar de aseo (sueldo mínimo ' + fmtCLP(immVigente) + ') nuevos a la nómina. ¿Continuar?')) return;
     function fechaISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
     var hoyStr = fechaISO(new Date());
     var hace4Dias = new Date(); hace4Dias.setDate(hace4Dias.getDate()-4);
     var hace4DiasStr = fechaISO(hace4Dias);
     function cuidador(n, ciclo){
       return { nombre:'Cuidador(a) '+n, rut:'', cargo:'Cuidador(a)', fechaIngreso: hoyStr, tipo:'esencial', cicloInicio: ciclo,
-        sueldoBase: immVigente, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        sueldoBase: SUELDO_BASE_ESENCIAL, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
         horasJornada:12, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} };
     }
     var nuevos = [
