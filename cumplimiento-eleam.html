@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<script src="assets/auth.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cumplimiento ELEAM (Decreto 20) — Residencia Senior Omar Wall</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8a6a35">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wall">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+  :root{
+    --paper:#F7F1E2;
+    --paper-dark:#efe2c4;
+    --ink:#3a2b1c;
+    --ink-soft:#6b5842;
+    --petroleo:#8a6a35;
+    --petroleo-dark:#6b4f24;
+    --dorado:#c79a3f;
+    --dorado-soft:#ecd9ad;
+    --line:#e2d0a8;
+    --card:#fffcf5;
+    --danger:#a4452f;
+    --danger-bg:#f4d9cc;
+    --ok:#4f7a4a;
+    --ok-bg:#dfe9d3;
+    --warn:#b3812f;
+    --warn-bg:#f3e6c0;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      repeating-linear-gradient(#F7F1E2 0px, #F7F1E2 27px, #ede0c1 28px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    line-height:1.45;
+    padding-bottom:60px;
+  }
+  h1,h2,h3{ font-family:'Lora',serif; font-weight:600; color:var(--petroleo-dark); margin:0 0 6px; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  label{ font-weight:600; font-size:12.5px; color:var(--ink-soft); display:block; margin-bottom:4px; }
+  input, select{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13.5px;
+    padding:7px 9px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:#fffef9;
+    color:var(--ink);
+    width:100%;
+  }
+  input:focus, select:focus{ outline:2px solid var(--dorado-soft); border-color:var(--dorado); }
+  button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    border:1px solid var(--petroleo);
+    background:var(--petroleo);
+    color:#fff;
+    padding:9px 16px;
+    border-radius:5px;
+    transition:background .15s, transform .05s;
+  }
+  button:hover{ background:var(--petroleo-dark); }
+  button:active{ transform:translateY(1px); }
+  button.secondary{ background:transparent; color:var(--petroleo); }
+  button.secondary:hover{ background:var(--paper-dark); }
+  button.gold{ background:var(--dorado); border-color:var(--dorado); }
+  button.gold:hover{ background:#9c7325; }
+
+  .top-header{
+    background:linear-gradient(180deg, var(--petroleo) 0%, var(--petroleo-dark) 100%);
+    color:#f3ead3;
+    padding:18px 28px;
+    border-bottom:4px solid var(--dorado);
+  }
+  .top-header .header-inner{ max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{ font-family:'Lora',serif; font-size:26px; color:var(--dorado-soft); }
+  .empresa-nombre-fija{ font-family:'Lora',serif; font-size:15px; font-weight:600; color:#f6f2e7; }
+  .subtitle{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--dorado-soft); margin-top:2px; }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px 22px;
+    margin-top:20px;
+    box-shadow:0 1px 3px rgba(30,25,10,.06);
+  }
+  .card h2{ font-size:18px; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:16px; }
+  .card > .card-sub{ font-size:12.5px; color:var(--ink-soft); margin:-10px 0 16px; }
+
+  .grid-form{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:18px; }
+  .field-hint{ font-size:11px; color:var(--ink-soft); margin-top:3px; }
+
+  table{ width:100%; border-collapse:collapse; margin-top:6px; }
+  th{
+    text-align:left; font-family:'Inter',sans-serif; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--dorado); border-bottom:2px solid var(--petroleo); padding:8px 10px; background:var(--paper-dark);
+  }
+  td{ padding:8px 10px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:middle; }
+
+  .pill{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:99px; white-space:nowrap; }
+  .pill-ok{ background:var(--ok-bg); color:var(--ok); }
+  .pill-warn{ background:var(--warn-bg); color:var(--warn); }
+  .pill-danger{ background:var(--danger-bg); color:var(--danger); }
+  .pill-info{ background:var(--dorado-soft); color:var(--petroleo-dark); }
+
+  .vig-item{ background:#fffef9; border:1px solid var(--line); border-radius:8px; padding:14px 16px; }
+  .vig-item .vig-title{ font-family:'Lora',serif; font-weight:600; color:var(--petroleo-dark); font-size:14.5px; margin-bottom:8px; }
+  .vig-item .vig-status{ margin:8px 0 6px; }
+  .vig-item .vig-note{ font-size:12px; color:var(--ink-soft); margin-top:4px; }
+
+  /* Progress + toolbar */
+  .toolbar{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-top:20px; }
+  .progress-track{ flex:1; min-width:160px; height:8px; border-radius:99px; background:var(--paper-dark); overflow:hidden; }
+  .progress-fill{ height:100%; background:linear-gradient(90deg,var(--dorado),var(--petroleo)); width:0%; transition:width .3s ease; }
+  .progress-label{ font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--ink-soft); white-space:nowrap; }
+  .btn-sm{ font-size:12px; padding:6px 12px; }
+
+  /* Sections (details) */
+  details.section{
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    margin-top:14px; box-shadow:0 1px 3px rgba(30,25,10,.06); overflow:hidden;
+  }
+  details.section > summary{
+    cursor:pointer; list-style:none; padding:16px 20px; display:flex; align-items:center; gap:14px;
+    font-family:'Lora',serif; font-size:16.5px; font-weight:600; color:var(--petroleo-dark);
+  }
+  details.section > summary::-webkit-details-marker{ display:none; }
+  .sec-num{
+    font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:var(--petroleo-dark);
+    background:var(--paper-dark); border:1px solid var(--line); border-radius:6px;
+    width:28px; height:28px; display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .sec-title-wrap{ flex:1; min-width:0; }
+  .sec-title-wrap .sec-ref{ display:block; font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-top:2px; }
+  .sec-chevron{ font-size:16px; color:var(--ink-soft); transition:transform .15s ease; flex:none; }
+  details[open] .sec-chevron{ transform:rotate(90deg); }
+  .sec-body{ padding:2px 20px 18px; border-top:1px solid var(--line); }
+
+  .subgroup{ margin-top:16px; }
+  .subgroup h3{ font-family:'Inter',sans-serif; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--petroleo); margin:0 0 8px; }
+  .art-tag{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink-soft); background:var(--paper-dark); border:1px solid var(--line); border-radius:5px; padding:1px 6px; margin-left:6px; }
+
+  ul.checklist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+  ul.checklist li{ display:flex; align-items:flex-start; gap:10px; padding:7px 8px; border-radius:6px; }
+  ul.checklist li:hover{ background:var(--paper-dark); }
+  ul.checklist input[type="checkbox"]{
+    appearance:none; width:18px; height:18px; margin:1px 0 0; flex:none; border-radius:4px;
+    border:1.6px solid var(--line); background:#fffef9; cursor:pointer; position:relative;
+  }
+  ul.checklist input[type="checkbox"]:hover{ border-color:var(--dorado); }
+  ul.checklist input[type="checkbox"]:checked{ background:var(--ok); border-color:var(--ok); }
+  ul.checklist input[type="checkbox"]:checked::after{
+    content:""; position:absolute; left:5px; top:1px; width:5px; height:9px;
+    border:solid #fff; border-width:0 2px 2px 0; transform:rotate(40deg);
+  }
+  .item-text{ font-size:13.5px; color:var(--ink); }
+  .item-text .note{ display:block; font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  ul.checklist li:has(input:checked) .item-text{ color:#9c8a6b; text-decoration:line-through; text-decoration-color:var(--line); }
+
+  .timeline{ margin-top:8px; }
+  .tl-row{ display:grid; grid-template-columns:120px 1fr; gap:16px; padding:10px 0; border-top:1px solid var(--line); }
+  .tl-row:first-child{ border-top:none; }
+  .tl-date{ font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--petroleo-dark); }
+  .tl-desc{ font-size:13.5px; }
+  .tl-desc strong{ color:var(--petroleo-dark); }
+
+  footer.note{ max-width:1180px; margin:30px auto 0; padding:0 24px; font-size:11.5px; color:var(--ink-soft); }
+
+  @media print{
+    .toolbar, .btn-sm{ display:none; }
+    details.section{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">&#9998;</div>
+      <div>
+        <span class="empresa-nombre-fija">Residencia Senior Omar Wall</span>
+        <div class="subtitle">Cumplimiento normativo &middot; Decreto 20 (ELEAM)</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>Vigencias y plazos</h2>
+    <p class="card-sub">Ingresa las fechas reales para que la app calcule cu&aacute;ndo vence cada plazo. Si algo est&aacute; por vencer o vencido, aparece una alerta en la barra superior de toda la app.</p>
+    <div class="grid-form" id="vig-grid"></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-label" id="progressLabel">0 / 0</span>
+    <button class="secondary btn-sm" id="btnExpand" type="button">Expandir todo</button>
+  </div>
+
+  <!-- ============ 1. PERSONAL ============ -->
+  <details class="section" open>
+    <summary>
+      <span class="sec-num">1</span>
+      <span class="sec-title-wrap">Personal<span class="sec-ref">Dotaci&oacute;n m&iacute;nima, roles y capacitaci&oacute;n &mdash; Art. 14 a 21</span></span>
+      <span class="sec-chevron">&rsaquo;</span>
+    </summary>
+    <div class="sec-body">
+
+      <div class="subgroup">
+        <h3>Dotaci&oacute;n m&iacute;nima &mdash; residentes con dependencia<span class="art-tag">Art. 15</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="p1"><span class="item-text">Un(a) auxiliar o t&eacute;cnico de enfermer&iacute;a con 12 horas diurnas de permanencia, m&aacute;s uno(a) de llamada en la noche.</span></li>
+          <li><input type="checkbox" data-id="p2"><span class="item-text">Cuidadores turno diurno: 1 cada 8 residentes; 2 cuidadores si hay 9&ndash;16 residentes; 3 si hay 17&ndash;24.<span class="note">Se suma 1 cuidador m&aacute;s cada 8 residentes adicionales.</span></span></li>
+          <li><input type="checkbox" data-id="p3"><span class="item-text">Cuidadores turno nocturno: 1 cada 12 residentes; 2 cuidadores si hay 13&ndash;24 residentes; 3 si hay 25&ndash;36.<span class="note">Se suma 1 cuidador m&aacute;s cada 12 residentes adicionales.</span></span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Dotaci&oacute;n m&iacute;nima &mdash; residentes autovalentes<span class="art-tag">Art. 16</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="p4"><span class="item-text">1 cuidador(a) cada 20 residentes en turno diurno (12 h de permanencia).</span></li>
+          <li><input type="checkbox" data-id="p5"><span class="item-text">1 cuidador(a) cada 20 residentes en turno nocturno.</span></li>
+          <li><input type="checkbox" data-id="p6"><span class="item-text">1 auxiliar o t&eacute;cnico de enfermer&iacute;a de llamada durante las 24 horas del d&iacute;a.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Regla que nunca se puede bajar<span class="art-tag">Art. 17</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="p7"><span class="item-text">M&iacute;nimo absoluto en horario nocturno: al menos <strong>2 cuidadores</strong> presentes, sin importar el n&uacute;mero de residentes ni su nivel de dependencia.</span></li>
+          <li><input type="checkbox" data-id="p8"><span class="item-text">Recalcular la dotaci&oacute;n cada vez que cambie el n&uacute;mero de residentes o su nivel de dependencia.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Direcci&oacute;n t&eacute;cnica<span class="art-tag">Art. 12&ndash;13</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="p9"><span class="item-text">T&iacute;tulo profesional del &aacute;rea salud y/o social, de 8 o m&aacute;s semestres, habilitado(a) para ejercer.</span></li>
+          <li><input type="checkbox" data-id="p10"><span class="item-text">Diplomado o post&iacute;tulo en geriatr&iacute;a/gerontolog&iacute;a, o experiencia m&iacute;nima de 1 a&ntilde;o en un Eleam u otro establecimiento de cuidado de mayores.</span></li>
+          <li><input type="checkbox" data-id="p11"><span class="item-text">Permanencia m&iacute;nima: 4 h semanales si hay hasta 15 residentes; 5 h semanales si hay m&aacute;s.</span></li>
+          <li><input type="checkbox" data-id="p12"><span class="item-text">Designar un responsable que lo(la) reemplace cuando no est&eacute; presente, disponible al menos telef&oacute;nicamente.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Direcci&oacute;n administrativa<span class="art-tag">Art. 11</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="p13"><span class="item-text">Director(a) administrativo(a) con experiencia laboral en gesti&oacute;n &mdash; puede ser la misma persona que el director t&eacute;cnico si cumple ambos requisitos.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Roles de atenci&oacute;n directa<span class="art-tag">Art. 18&ndash;20</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="p14"><span class="item-text">Funciones del auxiliar/t&eacute;cnico de enfermer&iacute;a por escrito: alimentaci&oacute;n por sonda, aseo y confort, prevenci&oacute;n de &uacute;lceras, administraci&oacute;n de medicamentos oral/t&oacute;pica, registro en carpeta.</span></li>
+          <li><input type="checkbox" data-id="p15"><span class="item-text">Certificado de entrenamiento exigido para quien administre heparina o insulina subcut&aacute;nea.</span></li>
+          <li><input type="checkbox" data-id="p16"><span class="item-text">Funciones de los cuidadores por escrito: AVD, movilizaci&oacute;n, ba&ntilde;o, vestimenta, alimentaci&oacute;n, acompa&ntilde;amiento a controles, soporte vital b&aacute;sico.</span></li>
+          <li><input type="checkbox" data-id="p17"><span class="item-text">Certificado de entrenamiento exigido antes de que un cuidador administre alimentaci&oacute;n por sonda o medicamentos (solo en horarios sin t&eacute;cnico de enfermer&iacute;a presente).</span></li>
+          <li><input type="checkbox" data-id="p18"><span class="item-text">El personal cuidador se dedica &uacute;nica y exclusivamente al cuidado directo de los residentes.</span></li>
+          <li><input type="checkbox" data-id="p19"><span class="item-text">Manipuladores de alimentos propios o externalizados, cumpliendo el Reglamento Sanitario de los Alimentos.</span></li>
+          <li><input type="checkbox" data-id="p20"><span class="item-text">Auxiliares de aseo y lavander&iacute;a en n&uacute;mero suficiente.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Capacitaci&oacute;n<span class="art-tag">Art. 5p / 25</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="p21"><span class="item-text">Plan de inducci&oacute;n y capacitaci&oacute;n anual para todo el personal, con objetivos, contenidos y evaluaci&oacute;n.</span></li>
+          <li><input type="checkbox" data-id="p22"><span class="item-text">Duraci&oacute;n m&iacute;nima: 22 horas al a&ntilde;o.</span></li>
+          <li><input type="checkbox" data-id="p23"><span class="item-text">Certificado de competencias emitido a cada trabajador(a) capacitado(a).</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Cuando cambia el personal<span class="art-tag">Art. 7</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="p24"><span class="item-text">Notificar a la Seremi cambios en personal, jornada, turnos o dotaci&oacute;n dentro de 5 d&iacute;as h&aacute;biles desde el hecho.</span></li>
+          <li><input type="checkbox" data-id="p25"><span class="item-text">Notificar cambio de director t&eacute;cnico dentro de 5 d&iacute;as h&aacute;biles, adjuntando los documentos que acrediten el cumplimiento de requisitos.</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ============ 2. INGRESO ============ -->
+  <details class="section" open>
+    <summary>
+      <span class="sec-num">2</span>
+      <span class="sec-title-wrap">Ingreso de residentes<span class="sec-ref">Requisitos, documentos e inducci&oacute;n &mdash; Art. 5m, 12b, 23 a 25</span></span>
+      <span class="sec-chevron">&rsaquo;</span>
+    </summary>
+    <div class="sec-body">
+
+      <div class="subgroup">
+        <h3>Antes de aceptar el ingreso<span class="art-tag">Art. 12b, 23</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="i1"><span class="item-text">Confirmar la voluntad libre y expresa de la persona mayor de ingresar (o de su representante legal si ella no puede manifestarla).</span></li>
+          <li><input type="checkbox" data-id="i2"><span class="item-text">Verificar que NO presente una condici&oacute;n de salud grave que requiera asistencia m&eacute;dica continua u hospitalizaci&oacute;n.<span class="note">Si la presenta, no puede ingresar a un Eleam.</span></span></li>
+          <li><input type="checkbox" data-id="i3"><span class="item-text">Evaluar el nivel de dependencia funcional, cognitiva y nutricional con instrumentos de valoraci&oacute;n geri&aacute;trica, seg&uacute;n las orientaciones t&eacute;cnicas del Ministerio de Salud.</span></li>
+          <li><input type="checkbox" data-id="i4"><span class="item-text">Si aportan un certificado externo de dependencia, comprobar que tenga como m&aacute;ximo 15 d&iacute;as de antig&uuml;edad al ingreso e indique los instrumentos usados.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Documentos que se firman y entregan<span class="art-tag">Art. 27&ndash;28</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="i5"><span class="item-text">Firmar el consentimiento voluntario de ingreso (por escrito) &mdash; se archiva en la carpeta personal del residente.</span></li>
+          <li><input type="checkbox" data-id="i6"><span class="item-text">Firmar el contrato de residencia, que debe incluir: derechos y deberes de ambas partes, causales de exclusi&oacute;n, inventario de bienes personales, y contacto de emergencia (nombre, tel&eacute;fono, correo, domicilio).</span></li>
+          <li><input type="checkbox" data-id="i7"><span class="item-text">Si hay cobro delegado de pensiones u otros ingresos, el contrato debe obligar a rendir cuenta de los gastos &mdash; al menos una vez al a&ntilde;o y al t&eacute;rmino del contrato.</span></li>
+          <li><input type="checkbox" data-id="i8"><span class="item-text">Verificar que el contrato NO condicione la firma a poderes especiales o generales a favor del establecimiento, su director o alg&uacute;n trabajador.<span class="note">Est&aacute; expresamente prohibido por el reglamento.</span></span></li>
+          <li><input type="checkbox" data-id="i9"><span class="item-text">Entregar copia del Reglamento Interno al residente y a su familiar o persona significativa que lo acompa&ntilde;e, dejando registro de la entrega.</span></li>
+          <li><input type="checkbox" data-id="i10"><span class="item-text">Entregar por escrito la Carta de Derechos y Deberes de los Residentes, consign&aacute;ndolo en el consentimiento de ingreso.</span></li>
+          <li><input type="checkbox" data-id="i11"><span class="item-text">Si el residente no puede leer estos documentos, explic&aacute;rselos verbalmente procurando su comprensi&oacute;n.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Inducci&oacute;n<span class="art-tag">Art. 5m, 25</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="i12"><span class="item-text">Entregar informaci&oacute;n sobre los servicios y prestaciones disponibles.</span></li>
+          <li><input type="checkbox" data-id="i13"><span class="item-text">Presentar al equipo profesional, t&eacute;cnico y auxiliar de atenci&oacute;n directa.</span></li>
+          <li><input type="checkbox" data-id="i14"><span class="item-text">Presentar a los dem&aacute;s residentes.</span></li>
+          <li><input type="checkbox" data-id="i15"><span class="item-text">Informar la distribuci&oacute;n de personal durante los turnos.</span></li>
+          <li><input type="checkbox" data-id="i16"><span class="item-text">Explicar desde el ingreso las situaciones o condiciones bajo las cuales podr&iacute;a producirse el egreso.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Al abrir la ficha del residente<span class="art-tag">Art. 12e, 29</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="i17"><span class="item-text">Verificar el sistema previsional de salud del residente; si no tiene, gestionar su incorporaci&oacute;n.</span></li>
+          <li><input type="checkbox" data-id="i18"><span class="item-text">Abrir carpeta personal: sistema de salud, historial de salud y social, registro de medicamentos &mdash; acceso restringido seg&uacute;n Ley 20.584 y Ley 21.098.</span></li>
+          <li><input type="checkbox" data-id="i19"><span class="item-text">Elaborar el inventario simple de los bienes personales con que ingresa.</span></li>
+          <li><input type="checkbox" data-id="i20"><span class="item-text">Solicitar al centro de salud de origen un informe de salud con orientaciones para el plan de cuidado.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Durante la estad&iacute;a &mdash; cu&aacute;ndo puede quedarse o debe trasladarse<span class="art-tag">Art. 24</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="i21"><span class="item-text">Ante una enfermedad aguda o reagudizaci&oacute;n cr&oacute;nica, solo puede continuar en el establecimiento si hay indicaci&oacute;n m&eacute;dica escrita, Y el establecimiento cuenta con personal/equipamiento de apoyo cl&iacute;nico adecuado, Y no representa riesgo para &eacute;l/ella ni para otros residentes.</span></li>
+          <li><input type="checkbox" data-id="i22"><span class="item-text">Si no se cumplen esas tres condiciones, trasladarlo a un establecimiento con capacidad resolutiva, previo consentimiento informado.</span></li>
+          <li><input type="checkbox" data-id="i23"><span class="item-text">En caso de riesgo vital, trasladar a un servicio de urgencia seg&uacute;n el protocolo de urgencias m&eacute;dicas del establecimiento.</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ============ 3. AUTORIZACIÓN SANITARIA ============ -->
+  <details class="section">
+    <summary>
+      <span class="sec-num">3</span>
+      <span class="sec-title-wrap">Autorizaci&oacute;n sanitaria<span class="sec-ref">Solicitud, antecedentes y vigencia &mdash; Art. 5 a 7</span></span>
+      <span class="sec-chevron">&rsaquo;</span>
+    </summary>
+    <div class="sec-body">
+
+      <div class="subgroup">
+        <h3>Antecedentes de la solicitud (Seremi de Salud del territorio)<span class="art-tag">Art. 5</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="a1"><span class="item-text">Identificaci&oacute;n del solicitante o representante legal (documentaci&oacute;n de representaci&oacute;n si es persona jur&iacute;dica; declaraci&oacute;n de capital inicial).</span></li>
+          <li><input type="checkbox" data-id="a2"><span class="item-text">Identificaci&oacute;n del establecimiento: nombre, correo electr&oacute;nico, tel&eacute;fono, direcci&oacute;n.</span></li>
+          <li><input type="checkbox" data-id="a3"><span class="item-text">Documentos que acrediten el dominio o los derechos de uso y goce del inmueble.</span></li>
+          <li><input type="checkbox" data-id="a4"><span class="item-text">Plano o croquis a escala con todas las &aacute;reas &mdash; dormitorios con distribuci&oacute;n de camas, zona de alimentos con instalaciones sanitarias.</span></li>
+          <li><input type="checkbox" data-id="a5"><span class="item-text">Certificado de recepci&oacute;n final de la propiedad (Direcci&oacute;n de Obras Municipales).</span></li>
+          <li><input type="checkbox" data-id="a6"><span class="item-text">Certificado de instalaciones de agua potable y alcantarillado/desag&uuml;es.</span></li>
+          <li><input type="checkbox" data-id="a7"><span class="item-text">Certificado de un experto en prevenci&oacute;n de riesgos o de Bomberos sobre protecci&oacute;n contra incendios.</span></li>
+          <li><input type="checkbox" data-id="a8"><span class="item-text">Certificaci&oacute;n de instalaciones el&eacute;ctricas y de gas por instalador autorizado.</span></li>
+          <li><input type="checkbox" data-id="a9"><span class="item-text">Identificaci&oacute;n del director t&eacute;cnico: copia de t&iacute;tulo, carta de aceptaci&oacute;n del cargo, jornada.</span></li>
+          <li><input type="checkbox" data-id="a10"><span class="item-text">Planta del personal, jornada y sistema de turnos.</span></li>
+          <li><input type="checkbox" data-id="a11"><span class="item-text">Reglamento interno de Orden, Higiene y Seguridad.</span></li>
+          <li><input type="checkbox" data-id="a12"><span class="item-text">Plan de emergencias (incendios, sismos, cortes de agua/luz, robos) con protocolos y responsables.</span></li>
+          <li><input type="checkbox" data-id="a13"><span class="item-text">Protocolo de ingreso y egreso.</span></li>
+          <li><input type="checkbox" data-id="a14"><span class="item-text">Programa de atenci&oacute;n integral usuaria, diferenciado por nivel de dependencia.</span></li>
+          <li><input type="checkbox" data-id="a15"><span class="item-text">Plan de integraci&oacute;n socio comunitaria.</span></li>
+          <li><input type="checkbox" data-id="a16"><span class="item-text">Plan de inducci&oacute;n y capacitaci&oacute;n anual del personal.</span></li>
+          <li><input type="checkbox" data-id="a17"><span class="item-text">Protocolo de acci&oacute;n ante urgencias m&eacute;dicas.</span></li>
+          <li><input type="checkbox" data-id="a18"><span class="item-text">Protocolo de acci&oacute;n ante fallecimiento de residentes.</span></li>
+          <li><input type="checkbox" data-id="a19"><span class="item-text">Sistema de registro de sugerencias o reclamos.</span></li>
+          <li><input type="checkbox" data-id="a20"><span class="item-text">Carta de derechos y deberes de los residentes (elaborada por Senama).</span></li>
+          <li><input type="checkbox" data-id="a21"><span class="item-text">Comprobante de pago del arancel de acciones de protecci&oacute;n de la salud.</span></li>
+          <li><input type="checkbox" data-id="a22"><span class="item-text">Indicar sexo, g&eacute;nero y nivel de dependencia de los residentes, y el n&uacute;mero de cupos a atender.</span></li>
+          <li><input type="checkbox" data-id="a23"><span class="item-text">Indicar si el establecimiento recibe beneficios de alg&uacute;n programa social del Estado.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Vigencia y modificaciones<span class="art-tag">Art. 6&ndash;7</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="a24"><span class="item-text">La autorizaci&oacute;n dura 3 a&ntilde;os y se renueva autom&aacute;ticamente salvo que sea dejada sin efecto.</span></li>
+          <li><input type="checkbox" data-id="a25"><span class="item-text">Notificar a la Seremi el cierre transitorio o definitivo del establecimiento.</span></li>
+          <li><input type="checkbox" data-id="a26"><span class="item-text">Solicitar modificaci&oacute;n por cambio de propietario o cambios en la planta f&iacute;sica dentro de 20 d&iacute;as h&aacute;biles.</span></li>
+          <li><input type="checkbox" data-id="a27"><span class="item-text">Solicitar modificaci&oacute;n por cambio de director t&eacute;cnico dentro de 5 d&iacute;as h&aacute;biles.</span></li>
+          <li><input type="checkbox" data-id="a28"><span class="item-text">Solicitar modificaci&oacute;n por cambio de personal, turnos o dotaci&oacute;n dentro de 5 d&iacute;as h&aacute;biles.</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ============ 4. INFRAESTRUCTURA ============ -->
+  <details class="section">
+    <summary>
+      <span class="sec-num">4</span>
+      <span class="sec-title-wrap">Infraestructura, instalaciones y equipamiento<span class="sec-ref">Edificio, habitaciones, ba&ntilde;os, cocina, medicamentos &mdash; Art. 8 a 10</span></span>
+      <span class="sec-chevron">&rsaquo;</span>
+    </summary>
+    <div class="sec-body">
+
+      <div class="subgroup">
+        <h3>Edificio y ubicaci&oacute;n<span class="art-tag">Art. 8&ndash;9</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="e1"><span class="item-text">Muros en buen estado; pisos antideslizantes lavables sin desniveles.</span></li>
+          <li><input type="checkbox" data-id="e2"><span class="item-text">Instalaciones sanitarias en buen estado, limpias y sin malos olores.</span></li>
+          <li><input type="checkbox" data-id="e3"><span class="item-text">Iluminaci&oacute;n natural y artificial en todos los espacios.</span></li>
+          <li><input type="checkbox" data-id="e4"><span class="item-text">Climatizaci&oacute;n segura para todas las estaciones del a&ntilde;o.</span></li>
+          <li><input type="checkbox" data-id="e5"><span class="item-text">Procedimiento de rutina de aseo y desinfecci&oacute;n, seg&uacute;n protocolos del Minsal.</span></li>
+          <li><input type="checkbox" data-id="e6"><span class="item-text">V&iacute;as de evacuaci&oacute;n y se&ntilde;al&eacute;tica visible (salones, comedor, dormitorios, ba&ntilde;os).</span></li>
+          <li><input type="checkbox" data-id="e7"><span class="item-text">Ubicaci&oacute;n a al menos 500 metros de vertederos, plantas de residuos o fuentes de ruido/gases molestos.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Recepci&oacute;n, circulaci&oacute;n y espacios comunes<span class="art-tag">Art. 10 a&ndash;i</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="e8"><span class="item-text">Letrero de al menos 40&times;40 cm (letras de 2 cm) con N&deg; y fecha de la resoluci&oacute;n de autorizaci&oacute;n, en el frontis.</span></li>
+          <li><input type="checkbox" data-id="e9"><span class="item-text">Oficina o sala de recepci&oacute;n habilitada para entrevistas privadas.</span></li>
+          <li><input type="checkbox" data-id="e10"><span class="item-text">Pasillos iluminados sin desniveles, con rampas y pasamanos a ambos lados.</span></li>
+          <li><input type="checkbox" data-id="e11"><span class="item-text">Ascensores si el establecimiento tiene m&aacute;s de un piso (seg&uacute;n Ordenanza General de Urbanismo).</span></li>
+          <li><input type="checkbox" data-id="e12"><span class="item-text">Sala(s) de estar con iluminaci&oacute;n natural, ventilaci&oacute;n y mobiliario seg&uacute;n el nivel de dependencia.</span></li>
+          <li><input type="checkbox" data-id="e13"><span class="item-text">Acceso a tel&eacute;fono/internet para todos los residentes, con silla y mesa que resguarden su privacidad.</span></li>
+          <li><input type="checkbox" data-id="e14"><span class="item-text">Elementos de recreaci&oacute;n actualizados (m&uacute;sica, juegos, revistas, diarios).</span></li>
+          <li><input type="checkbox" data-id="e15"><span class="item-text">Zonas exteriores de recreaci&oacute;n (patio, terraza o jard&iacute;n) accesibles.</span></li>
+          <li><input type="checkbox" data-id="e16"><span class="item-text">Comedor(es) con capacidad para al menos el 50% de los residentes simult&aacute;neamente.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Habitaciones<span class="art-tag">Art. 10 j</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="e17"><span class="item-text">M&aacute;ximo 4 camas por habitaci&oacute;n, con 90 cm de espacio de circulaci&oacute;n entre camas.</span></li>
+          <li><input type="checkbox" data-id="e18"><span class="item-text">Espacio individual con cerradura, etiquetado con el nombre de cada residente.</span></li>
+          <li><input type="checkbox" data-id="e19"><span class="item-text">Una mesa de noche por cada cama.</span></li>
+          <li><input type="checkbox" data-id="e20"><span class="item-text">Sistema de llamado (timbre u otro dispositivo) por dormitorio.</span></li>
+          <li><input type="checkbox" data-id="e21"><span class="item-text">Catre cl&iacute;nico con sistema de llamado individual para residentes con dependencia funcional severa.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Seguridad y evacuaci&oacute;n<span class="art-tag">Art. 10 k&ndash;m</span><span class="art-tag">plazo 5 a&ntilde;os</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="e22"><span class="item-text">Cumplir las condiciones de seguridad contra incendios de la Ley General de Urbanismo y Construcci&oacute;n.</span></li>
+          <li><input type="checkbox" data-id="e23"><span class="item-text">V&iacute;as de evacuaci&oacute;n con iluminaci&oacute;n aut&oacute;noma y plano de evacuaci&oacute;n visible en recepci&oacute;n y comedor.</span></li>
+          <li><input type="checkbox" data-id="e24"><span class="item-text">Puertas de salida sin abrir contra el sentido de evacuaci&oacute;n, se&ntilde;alizadas y sin obstrucciones.</span></li>
+          <li><input type="checkbox" data-id="e25"><span class="item-text">Extintores de incendio seg&uacute;n el DS 594/1999.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Ba&ntilde;os<span class="art-tag">Art. 10 n</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="e26"><span class="item-text">Al menos 1 ba&ntilde;o cada 5 residentes, en la misma planta de los dormitorios.</span></li>
+          <li><input type="checkbox" data-id="e27"><span class="item-text">Cada ba&ntilde;o con: inodoro, lavamanos, ducha tel&eacute;fono apta para silla de ruedas, piso antideslizante, agua fr&iacute;a/caliente, barras de apoyo, iluminaci&oacute;n, se&ntilde;alizaci&oacute;n externa, timbre, pisos y muros lavables.</span></li>
+          <li><input type="checkbox" data-id="e28"><span class="item-text">Al menos un ba&ntilde;o por planta con recept&aacute;culo para ba&ntilde;o asistido en cama o silla de ruedas.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Cocina y sala de salud<span class="art-tag">Art. 10 o&ndash;q</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="e29"><span class="item-text">Cocina o zona de producci&oacute;n de alimentos con equipamiento y vajilla suficiente, con autorizaci&oacute;n de funcionamiento propia (Reglamento Sanitario de los Alimentos).</span></li>
+          <li><input type="checkbox" data-id="e30"><span class="item-text">Sala de atenci&oacute;n de salud o Equipo m&oacute;vil con: esfigmoman&oacute;metro, fonendoscopio, term&oacute;metro, medidor de glicemia capilar, satur&oacute;metro, y estanter&iacute;a para las carpetas personales.</span></li>
+          <li><input type="checkbox" data-id="e31"><span class="item-text">Insumos m&iacute;nimos de primeros auxilios: tintura de yodo, algod&oacute;n, gasa esterilizada, alcohol, tela adhesiva, vendas, guantes de procedimiento, suero fisiol&oacute;gico, parches curita.</span></li>
+          <li><input type="checkbox" data-id="e32"><span class="item-text">Sala de almacenamiento de medicamentos: ventilada, bajo 25&deg;C, acceso restringido, gavetas individualizadas y etiquetadas por residente.</span></li>
+          <li><input type="checkbox" data-id="e33"><span class="item-text">Frigobar de uso exclusivo para medicamentos que requieran cadena de fr&iacute;o.</span></li>
+          <li><input type="checkbox" data-id="e34"><span class="item-text">Registro de recepci&oacute;n y uso de medicamentos (nombre, medicamento, dosis, hora y v&iacute;a).</span></li>
+          <li><input type="checkbox" data-id="e35"><span class="item-text">Estanter&iacute;a con llave para estupefacientes o psicotr&oacute;picos.</span></li>
+          <li><input type="checkbox" data-id="e36"><span class="item-text">Responsable designado del almacenamiento de medicamentos.</span></li>
+          <li><input type="checkbox" data-id="e37"><span class="item-text">Autorizaci&oacute;n de botiqu&iacute;n si el establecimiento mantiene medicamentos propios adem&aacute;s de los de los residentes.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Aseo, lavander&iacute;a y residuos<span class="art-tag">Art. 10 r&ndash;v</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="e38"><span class="item-text">Espacio de aseo con recept&aacute;culo para lavado de &uacute;tiles y lugar exclusivo para el lavado de chatas.</span></li>
+          <li><input type="checkbox" data-id="e39"><span class="item-text">Lavander&iacute;a con zonas separadas para ropa sucia y limpia, sin cruces entre ambas.</span></li>
+          <li><input type="checkbox" data-id="e40"><span class="item-text">Lugar de acopio de residuos alejado de la circulaci&oacute;n, con retiro diario o al completarse 3/4 de su capacidad.</span></li>
+          <li><input type="checkbox" data-id="e41"><span class="item-text">Servicio telef&oacute;nico que cubra el funcionamiento normal y las emergencias.</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ============ 5. PROTOCOLOS ============ -->
+  <details class="section">
+    <summary>
+      <span class="sec-num">5</span>
+      <span class="sec-title-wrap">Protocolos, planes y programas<span class="sec-ref">Deben mantenerse vigentes y actualizados &mdash; Art. 25</span></span>
+      <span class="sec-chevron">&rsaquo;</span>
+    </summary>
+    <div class="sec-body">
+      <div class="subgroup">
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="pr1"><span class="item-text">Protocolo de ingreso y egreso.</span></li>
+          <li><input type="checkbox" data-id="pr2"><span class="item-text">Plan de inducci&oacute;n y capacitaci&oacute;n anual del personal (m&iacute;nimo 22 horas).</span></li>
+          <li><input type="checkbox" data-id="pr3"><span class="item-text">Plan de emergencias en caso de desastres.</span></li>
+          <li><input type="checkbox" data-id="pr4"><span class="item-text">Protocolo de acci&oacute;n ante urgencias m&eacute;dicas.</span></li>
+          <li><input type="checkbox" data-id="pr5"><span class="item-text">Protocolo de acci&oacute;n ante fallecimiento de residentes.</span></li>
+          <li><input type="checkbox" data-id="pr6"><span class="item-text">Programa de atenci&oacute;n integral usuaria, evaluado peri&oacute;dicamente por el director t&eacute;cnico.</span></li>
+          <li><input type="checkbox" data-id="pr7"><span class="item-text">Plan de integraci&oacute;n socio comunitaria.</span></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+  <!-- ============ 6. REGLAMENTO, CONTRATO Y REGISTROS ============ -->
+  <details class="section">
+    <summary>
+      <span class="sec-num">6</span>
+      <span class="sec-title-wrap">Reglamento interno, contrato y registros<span class="sec-ref">Documentaci&oacute;n permanente del establecimiento &mdash; Art. 27 a 30</span></span>
+      <span class="sec-chevron">&rsaquo;</span>
+    </summary>
+    <div class="sec-body">
+
+      <div class="subgroup">
+        <h3>Reglamento interno<span class="art-tag">Art. 27</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="r1"><span class="item-text">Declara el respeto irrestricto a los derechos y la autonom&iacute;a de los residentes.</span></li>
+          <li><input type="checkbox" data-id="r2"><span class="item-text">Incluye procedimiento de reclamos y reglas de uso de espacios comunes.</span></li>
+          <li><input type="checkbox" data-id="r3"><span class="item-text">Copia visible en el establecimiento para personal, residentes y familiares.</span></li>
+          <li><input type="checkbox" data-id="r4"><span class="item-text">Registro de recepci&oacute;n conforme del reglamento por cada trabajador(a).</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Registros espec&iacute;ficos que debe mantener el Eleam<span class="art-tag">Art. 29</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="r5"><span class="item-text">Planta del personal, con horario de trabajo y detalle del sistema de turnos.</span></li>
+          <li><input type="checkbox" data-id="r6"><span class="item-text">Sistema de registro de sugerencias o reclamos &mdash; libro foliado o digital, visible y disponible.</span></li>
+          <li><input type="checkbox" data-id="r7"><span class="item-text">Consentimiento voluntario de ingreso de cada residente, archivado en su carpeta personal.</span></li>
+          <li><input type="checkbox" data-id="r8"><span class="item-text">Carta de Derechos y Deberes, visible en un lugar de uso com&uacute;n y entregada por escrito al ingreso.</span></li>
+          <li><input type="checkbox" data-id="r9"><span class="item-text">Carpetas personales actualizadas (sistema de salud, historial de salud y social, registro de medicamentos) con acceso restringido.</span></li>
+        </ul>
+      </div>
+
+      <div class="subgroup">
+        <h3>Datos sensibles<span class="art-tag">Art. 30</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="r10"><span class="item-text">Todo el personal con acceso a datos personales sensibles de los residentes mantiene reserva, conforme a la Ley 19.628.</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ============ 7. RED DE SALUD ============ -->
+  <details class="section">
+    <summary>
+      <span class="sec-num">7</span>
+      <span class="sec-title-wrap">Vinculaci&oacute;n con la red de salud<span class="sec-ref">Art. 26</span></span>
+      <span class="sec-chevron">&rsaquo;</span>
+    </summary>
+    <div class="sec-body">
+      <div class="subgroup">
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="s1"><span class="item-text">Vincular a los residentes con la atenci&oacute;n primaria de salud o un centro privado, seg&uacute;n corresponda.</span></li>
+          <li><input type="checkbox" data-id="s2"><span class="item-text">Permitir el acceso de los funcionarios de salud al establecimiento.</span></li>
+          <li><input type="checkbox" data-id="s3"><span class="item-text">Si no hay acceso oportuno a la red p&uacute;blica, comprar servicios de salud privados &mdash; preferentemente m&eacute;dico geriatra, ne&uacute;rologo o m&eacute;dico de familia.</span></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+  <!-- ============ 8. FISCALIZACIÓN Y PLAZOS ============ -->
+  <details class="section">
+    <summary>
+      <span class="sec-num">8</span>
+      <span class="sec-title-wrap">Fiscalizaci&oacute;n, sanciones y plazos<span class="sec-ref">Art. 31 a 33 y disposiciones transitorias</span></span>
+      <span class="sec-chevron">&rsaquo;</span>
+    </summary>
+    <div class="sec-body">
+      <div class="subgroup">
+        <h3>L&iacute;nea de tiempo</h3>
+        <div class="timeline">
+          <div class="tl-row">
+            <div class="tl-date">01&middot;oct&middot;2025</div>
+            <div class="tl-desc"><strong>Entra en vigencia</strong> el texto actual del reglamento (Decreto 20, con las modificaciones del Decreto 6).</div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-date">Hasta 2028</div>
+            <div class="tl-desc">Establecimientos que ya estaban en funcionamiento deben cumplir <strong>todo</strong> el reglamento dentro de <strong>3 a&ntilde;os</strong> desde la entrada en vigencia &mdash; someti&eacute;ndose mientras tanto al programa de fiscalizaci&oacute;n anual de la Seremi.</div>
+          </div>
+          <div class="tl-row">
+            <div class="tl-date">Hasta 2030</div>
+            <div class="tl-desc">Excepci&oacute;n: las condiciones de seguridad contra incendios (Art. 10 letra k) tienen un plazo especial de <strong>5 a&ntilde;os</strong>.</div>
+          </div>
+        </div>
+      </div>
+      <div class="subgroup">
+        <h3>Qu&eacute; esperar de una fiscalizaci&oacute;n<span class="art-tag">Art. 31</span></h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-id="f1"><span class="item-text">Fiscaliza la Seremi de Salud del territorio, con una pauta que publica y mantiene actualizada en su sitio web institucional.</span></li>
+          <li><input type="checkbox" data-id="f2"><span class="item-text">Las infracciones se sancionan seg&uacute;n el Libro X del C&oacute;digo Sanitario &mdash; la primera infracci&oacute;n se rige por el art&iacute;culo 177.</span></li>
+          <li><input type="checkbox" data-id="f3"><span class="item-text">Mantener a mano toda la documentaci&oacute;n de las secciones anteriores: es lo primero que pedir&aacute; una visita inspectiva.</span></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+  <footer class="note">Fuente: Decreto 20, Ministerio de Salud (2021) &mdash; texto vigente al 01&middot;oct&middot;2025, Biblioteca del Congreso Nacional de Chile. Gu&iacute;a operativa, no asesor&iacute;a legal.</footer>
+
+</div>
+
+<script src="assets/backup.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  if(!window.storage){
+    window.storage = {
+      get:function(key, def){
+        try{
+          var raw = localStorage.getItem('rha_'+key);
+          return raw===null ? def : JSON.parse(raw);
+        }catch(e){ return def; }
+      },
+      set:function(key, value){
+        try{ localStorage.setItem('rha_'+key, JSON.stringify(value)); }catch(e){}
+      }
+    };
+  }
+
+  function fmtCLP(n){ n = Math.round(Number(n)||0); return '$ ' + n.toLocaleString('es-CL'); }
+
+  // ---------- VIGENCIAS Y PLAZOS ----------
+  var vigencias = window.storage.get('vigencias_eleam', {});
+
+  var VIG_DEFS = [
+    {
+      id: 'autorizacion',
+      titulo: 'Autorización sanitaria — fecha de otorgamiento',
+      hint: 'Fecha de la resolución que autorizó el funcionamiento (Art. 6).',
+      periodoDias: 365*3,
+      urgente: false,
+      nota: function(dias){
+        return dias === null
+          ? 'Se renueva automáticamente cada 3 años mientras no sea dejada sin efecto — sin costo si no cambia nada.'
+          : 'Próxima marca de 3 años: revisa que todo siga cumpliendo. Se renueva sola, no requiere trámite si nada cambió.';
+      }
+    },
+    {
+      id: 'capacitacion',
+      titulo: 'Última capacitación anual del personal (22 h)',
+      hint: 'Fecha en que se completó el plan de inducción y capacitación anual (Art. 5p, 25).',
+      periodoDias: 365,
+      urgente: true,
+      nota: function(dias){
+        return 'Costo: $0 si la dicta el propio director técnico (permitido por el reglamento) — referencial ' + fmtCLP(400000) + ' si se contrata capacitación externa.';
+      }
+    },
+    {
+      id: 'reporteSenama',
+      titulo: 'Último reporte trimestral a Senama',
+      hint: 'El director técnico debe reportar información administrativa al menos cada 3 meses (Art. 12t).',
+      periodoDias: 90,
+      urgente: true,
+      nota: function(dias){
+        return 'Es un reporte administrativo — sin costo asociado.';
+      }
+    }
+  ];
+
+  function diasEntre(a, b){ return Math.round((b - a) / 86400000); }
+
+  function calcularEstado(def){
+    var fechaStr = vigencias[def.id];
+    if(!fechaStr) return { estado:'sin-dato', diasRestantes:null };
+    var base = new Date(fechaStr + 'T00:00:00');
+    var vence = new Date(base.getTime() + def.periodoDias*86400000);
+    var hoy = new Date(); hoy.setHours(0,0,0,0);
+    var diasRestantes = diasEntre(hoy, vence);
+    var estado;
+    if(diasRestantes < 0) estado = 'vencido';
+    else if(diasRestantes <= 30) estado = 'proximo';
+    else estado = 'ok';
+    return { estado: estado, diasRestantes: diasRestantes, fechaVence: vence };
+  }
+  window.RhaCumplimientoEleam = { calcularEstado: calcularEstado, VIG_DEFS: VIG_DEFS, fmtCLP: fmtCLP };
+
+  function pillFor(info, def){
+    if(info.estado === 'sin-dato') return { cls:'pill-info', texto:'Sin fecha registrada' };
+    if(info.estado === 'vencido') return { cls: def.urgente ? 'pill-danger' : 'pill-warn', texto:'Vencido hace ' + Math.abs(info.diasRestantes) + ' día(s)' };
+    if(info.estado === 'proximo') return { cls: def.urgente ? 'pill-warn' : 'pill-info', texto:'Vence en ' + info.diasRestantes + ' día(s)' };
+    return { cls:'pill-ok', texto:'Al día — vence en ' + info.diasRestantes + ' día(s)' };
+  }
+
+  function renderVigencias(){
+    var grid = document.getElementById('vig-grid');
+    grid.innerHTML = VIG_DEFS.map(function(def){
+      var info = calcularEstado(def);
+      var pill = pillFor(info, def);
+      var fechaVal = vigencias[def.id] || '';
+      return '<div class="vig-item">' +
+        '<div class="vig-title">' + def.titulo + '</div>' +
+        '<label for="vig-' + def.id + '">Fecha</label>' +
+        '<input type="date" id="vig-' + def.id + '" data-vigid="' + def.id + '" value="' + fechaVal + '">' +
+        '<div class="vig-status"><span class="pill ' + pill.cls + '">' + pill.texto + '</span></div>' +
+        '<div class="field-hint">' + def.hint + '</div>' +
+        '<div class="vig-note">' + def.nota(info.diasRestantes) + '</div>' +
+      '</div>';
+    }).join('');
+    grid.querySelectorAll('input[type="date"]').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        vigencias[inp.getAttribute('data-vigid')] = inp.value;
+        window.storage.set('vigencias_eleam', vigencias);
+        renderVigencias();
+      });
+    });
+  }
+  renderVigencias();
+
+  // ---------- CHECKLIST: progreso + persistencia ----------
+  var checkboxes = Array.prototype.slice.call(document.querySelectorAll('.checklist input[type="checkbox"]'));
+  var checklistState = window.storage.get('checklist_eleam', {});
+
+  function updateProgress(){
+    var total = checkboxes.length;
+    var done = checkboxes.filter(function(c){ return c.checked; }).length;
+    var pct = total ? Math.round((done/total)*100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = done + ' / ' + total;
+  }
+  checkboxes.forEach(function(cb){
+    var id = cb.getAttribute('data-id');
+    if(checklistState[id]) cb.checked = true;
+    cb.addEventListener('change', function(){
+      checklistState[id] = cb.checked;
+      window.storage.set('checklist_eleam', checklistState);
+      updateProgress();
+    });
+  });
+  updateProgress();
+
+  var allDetails = Array.prototype.slice.call(document.querySelectorAll('details.section'));
+  var btnExpand = document.getElementById('btnExpand');
+  btnExpand.addEventListener('click', function(){
+    var anyClosed = allDetails.some(function(d){ return !d.open; });
+    allDetails.forEach(function(d){ d.open = anyClosed; });
+    btnExpand.textContent = anyClosed ? 'Colapsar todo' : 'Expandir todo';
+  });
+})();
+</script>
+</body>
+</html>

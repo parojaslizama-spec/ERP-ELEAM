@@ -650,8 +650,20 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
   }
 
   function emptyMonth() {
-    return { ingresosExtra: [], gastos: [], servicios: [] };
+    return { ingresosExtra: [], gastos: [], servicios: [], gastosInversion: [] };
   }
+
+  // Ítems de inversión ligados al cumplimiento del Decreto 20 (ELEAM) — ver pestaña Cumplimiento ELEAM.
+  // Son de una sola vez, no recurrentes: "Cargar dotación mínima" los agrega al mes actual bajo demanda,
+  // nunca se copian solos a meses nuevos ni se proyectan a futuro (a diferencia de gastos/servicios).
+  var REF_GASTOS_INVERSION = [
+    { concepto: "Arancel autorización sanitaria (Seremi de Salud) — monto no fijado en el Decreto 20, confirmar valor vigente", monto: 0 },
+    { concepto: "Certificado de prevención de riesgos / Bomberos (referencial, cotizar)", monto: 150000 },
+    { concepto: "Certificación instalación eléctrica — instalador autorizado (referencial, cotizar)", monto: 120000 },
+    { concepto: "Certificación instalación de gas (referencial, cotizar)", monto: 100000 },
+    { concepto: "Adecuaciones de infraestructura — señalética, barras de apoyo, antideslizante (referencial, muy variable)", monto: 300000 },
+    { concepto: "Extintores adicionales si faltan (referencial, cotizar)", monto: 150000 }
+  ];
 
   function defaultParams() {
     return {
@@ -843,16 +855,17 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var gastos = gastosBreakdown(totGastosNeto, params);
     var totServicios = sum(month.servicios);
     var servicios = serviciosBreakdown(totServicios, params);
+    var totGastosInversion = sum(month.gastosInversion);
     var tributacion = tributacionBreakdown(ivaResidentes.iva, gastos.iva + servicios.iva);
     var sueldoAdmin = sueldoAdminPara(monthKey, params);
-    var totEgresos = payroll.costoTotal + gastos.conIva + totServicios + tributacion.ivaAPagar + sueldoAdmin;
+    var totEgresos = payroll.costoTotal + gastos.conIva + totServicios + totGastosInversion + tributacion.ivaAPagar + sueldoAdmin;
     return {
       totIngresos: totIngresos,
       ingresosAutoRows: ingresosAutoRows, totIngresosResidentes: totIngresosResidentes,
       ivaResidentes: ivaResidentes,
       autoRows: autoRows,
       totPersonalLiquido: totPersonalLiquido, totGratificacion: totGratificacion, totImpuestoUnico: totImpuestoUnico, payroll: payroll,
-      gastos: gastos, totServicios: totServicios, servicios: servicios,
+      gastos: gastos, totServicios: totServicios, servicios: servicios, totGastosInversion: totGastosInversion,
       tributacion: tributacion,
       sueldoAdmin: sueldoAdmin,
       totEgresos: totEgresos, margen: totIngresos - totEgresos
@@ -1093,6 +1106,10 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     lines.push(["Subtotal servicios", totals.totServicios].map(csvEscape).join(","));
     lines.push(["IVA incluido (crédito fiscal)", totals.servicios.iva].map(csvEscape).join(","));
     lines.push([]);
+    lines.push(["GASTOS DE INVERSIÓN — CUMPLIMIENTO ELEAM", "Monto"].map(csvEscape).join(","));
+    month.gastosInversion.forEach(function (r) { lines.push([r.concepto, r.monto].map(csvEscape).join(",")); });
+    lines.push(["Subtotal gastos de inversión", totals.totGastosInversion].map(csvEscape).join(","));
+    lines.push([]);
     lines.push(["Total egresos", totals.totEgresos].map(csvEscape).join(","));
     lines.push(["Margen neto", totals.margen].map(csvEscape).join(","));
     lines.push([]);
@@ -1267,6 +1284,11 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
             total: { label: "Total servicios", valor: money(t.totServicios), color: "critical" }
           },
           {
+            titulo: "Gastos de inversión — cumplimiento ELEAM",
+            filas: month.gastosInversion.map(function (r) { return { label: r.concepto, valor: money(r.monto) }; }),
+            total: { label: "Total gastos de inversión", valor: money(t.totGastosInversion), color: "critical" }
+          },
+          {
             titulo: "IVA a pagar al SII — gasto de empresa (Formulario 29)",
             sub: "El IVA de las cuotas de los residentes (débito fiscal) es un gasto de empresa que se debe declarar y pagar al SII, calculado de los ingresos de los residentes. La ley permite descontar el IVA ya pagado en gastos y servicios (crédito fiscal, recuperable) — al SII se paga solo la diferencia.",
             filas: [
@@ -1334,6 +1356,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       ["ingresosExtra", "gastos", "servicios"].forEach(function (cat) {
         cloned[cat].forEach(function (r) { r.id = uid(); r.monto = 0; });
       });
+      // Los gastos de inversión son de una sola vez: nunca se arrastran a un mes nuevo.
+      cloned.gastosInversion = [];
       stateRef.current.months[nextKey] = cloned;
       persist();
       setCurrentKey(nextKey);
@@ -1357,6 +1381,14 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       persist();
       setCurrentKey(Object.keys(fresh.months).sort().slice(-1)[0]);
       setExportStatus("✓ Gastos reiniciado.");
+    }
+
+    function handleCargarInversionEleam() {
+      if (!window.confirm("Esto agrega " + REF_GASTOS_INVERSION.length + " ítem(s) de inversión de cumplimiento ELEAM (Decreto 20) al mes actual, con montos referenciales editables. ¿Continuar?")) return;
+      var rows = REF_GASTOS_INVERSION.map(function (r) { return { id: uid(), concepto: r.concepto, monto: r.monto }; });
+      stateRef.current.months[currentKey].gastosInversion = stateRef.current.months[currentKey].gastosInversion.concat(rows);
+      persist();
+      setExportStatus("✓ Ítems de inversión ELEAM agregados — revisa y ajusta los montos referenciales.");
     }
 
     function handleDeleteMonth() {
@@ -1541,6 +1573,21 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           onAdd: function () { addRow("servicios", currentKey, "concepto", "Nuevo ítem"); },
           onUpdate: function (id, f, v) { updateRow("servicios", currentKey, id, f, v); },
           onDelete: function (id) { deleteRow("servicios", currentKey, id); }
+        })
+      ),
+
+      h("div", { className: "card" },
+        h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "8px" } },
+          h("h2", null, "Gastos de inversión — cumplimiento ELEAM"),
+          h("button", { className: "btn-ghost-sm", type: "button", onClick: handleCargarInversionEleam }, "Cargar ítems de cumplimiento ELEAM")
+        ),
+        h("p", { className: "sub" }, "Trámites y adecuaciones del Decreto 20 (ver pestaña Cumplimiento ELEAM) — de una sola vez, no se repiten cada mes. Los montos con \"(referencial, cotizar)\" son estimaciones propias: ajústalos con la cotización real."),
+        h(EditableTable, {
+          rows: month.gastosInversion, labelField: "concepto", labelHeader: "Concepto", labelPlaceholder: "Ej. Certificación eléctrica",
+          emptyText: "Sin ítems de inversión registrados este mes.", addText: "Agregar ítem",
+          onAdd: function () { addRow("gastosInversion", currentKey, "concepto", "Nuevo ítem de inversión"); },
+          onUpdate: function (id, f, v) { updateRow("gastosInversion", currentKey, id, f, v); },
+          onDelete: function (id) { deleteRow("gastosInversion", currentKey, id); }
         }),
         h("div", { className: "total-row" }, h("span", null, "Total egresos"), h("span", { className: "total-amount egreso" }, money(totals.totEgresos)))
       ),
