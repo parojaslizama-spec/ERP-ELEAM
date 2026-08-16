@@ -127,6 +127,25 @@ table.data-table tfoot tr.extra-row .col-label { font-family: var(--sans); }
 .kpi-value.ingreso { color: var(--good); }
 .kpi-value.egreso { color: var(--critical); }
 
+.gastos-tabs { display: flex; gap: 8px; margin: 4px 0 20px; flex-wrap: wrap; }
+.gastos-tab {
+  font-family: var(--sans); font-size: 13px; font-weight: 600; cursor: pointer;
+  padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink-soft);
+}
+.gastos-tab.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.gastos-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+.checklist-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.checklist-table th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.checklist-table th.num, .checklist-table td.num { text-align: right; }
+.checklist-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+.checklist-table td.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.checklist-row td:last-child { color: var(--warn); font-weight: 600; font-size: 12.5px; }
+.checklist-row.pagado td:last-child { color: var(--good); }
+.checklist-row.pagado td { color: var(--ink-faint); }
+.checklist-row.pagado td.mono { text-decoration: line-through; }
+
 .export-card .export-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
 .export-status { margin: 12px 0 0; font-size: 13px; color: var(--ink); background: var(--surface-2); border-radius: 6px; padding: 8px 12px; }
 .btn-primary {
@@ -565,7 +584,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       baseImponible: baseImponible,
       descInasistencia: descInasistencia,
       afp: afpMonto, salud: saludMonto, cesantia: cesantiaMonto, afcEmpresa: afcEmpresaMonto,
-      gratificacion: f.gratificacion || 0,
+      gratificacion: f.gratificacion || 0, impuesto: f.impuesto || 0,
       bonos: (f.bonos || 0) + (f.bonoAsistencia || 0) + (f.bonoPuntualidad || 0),
       bonoAsistencia: f.bonoAsistencia || 0, bonoPuntualidad: f.bonoPuntualidad || 0, bonosOtros: f.bonos || 0
     };
@@ -590,7 +609,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         costoBase: detalle.totalHaberes - detalle.descInasistencia,
         baseImponible: detalle.baseImponible,
         afp: detalle.afp, salud: detalle.salud, cesantia: detalle.cesantia, afcEmpresa: detalle.afcEmpresa,
-        gratificacion: detalle.gratificacion, bonos: detalle.bonos,
+        gratificacion: detalle.gratificacion, bonos: detalle.bonos, impuesto: detalle.impuesto,
         origen: saved ? "Liquidación de " + monthLabel(monthKey) : "Estimado (sueldo base)"
       };
     });
@@ -662,7 +681,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 
     var agosto = JSON.parse(JSON.stringify(julio));
 
-    var data = { months: {}, params: defaultParams() };
+    var data = { months: {}, params: defaultParams(), checklist: {} };
     data.months["2026-07"] = julio;
     data.months["2026-08"] = agosto;
     return data;
@@ -703,6 +722,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       if (raw) {
         var parsed = JSON.parse(raw);
         if (!parsed.params) parsed.params = defaultParams();
+        if (!parsed.checklist) parsed.checklist = {};
         if (parsed.params.sueldoAdminBase === undefined) parsed.params.sueldoAdminBase = 700000;
         if (parsed.params.sueldoAdminAnioBase === undefined) parsed.params.sueldoAdminAnioBase = new Date().getFullYear();
         // Migración única: las tasas de SIS (1,49%) y mutual (0,93%) eran el valor por defecto de una
@@ -827,6 +847,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var totPersonalLiquido = sumAuto(autoRows);
     var totGratificacion = autoRows.reduce(function (a, r) { return a + (r.gratificacion || 0); }, 0);
     var totBonos = autoRows.reduce(function (a, r) { return a + (r.bonos || 0); }, 0);
+    var totImpuestoUnico = autoRows.reduce(function (a, r) { return a + (r.impuesto || 0); }, 0);
     var payroll = payrollBreakdown(autoRows, params);
     var totGastosNeto = sum(month.gastos);
     var gastos = gastosBreakdown(totGastosNeto, params);
@@ -839,7 +860,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       ingresosAutoRows: ingresosAutoRows, totIngresosResidentes: totIngresosResidentes,
       ivaResidentes: ivaResidentes,
       autoRows: autoRows,
-      totPersonalLiquido: totPersonalLiquido, totGratificacion: totGratificacion, totBonos: totBonos, payroll: payroll,
+      totPersonalLiquido: totPersonalLiquido, totGratificacion: totGratificacion, totBonos: totBonos, totImpuestoUnico: totImpuestoUnico, payroll: payroll,
       gastos: gastos, totServicios: totServicios,
       tributacion: tributacion,
       sueldoAdmin: sueldoAdmin,
@@ -1101,6 +1122,60 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     URL.revokeObjectURL(url);
   }
 
+  // ---------------- ChecklistOperacional ----------------
+  // Cosas importantes para la operación, para chequear cada mes — cada monto se trae solo desde los
+  // mismos cálculos de Gastos (no se vuelve a ingresar nada aquí), solo se marca si ya se pagó.
+  var CHECKLIST_ITEMS = [
+    { key: "pagosLegales", label: "Pagos legales de empresa (SIS + cesantía empresa + mutual)", getMonto: function (t) { return t.payroll.empresa.total; } },
+    { key: "afp", label: "AFP (retenida a trabajadores — remitir vía Previred)", getMonto: function (t) { return t.payroll.trabajador.afp; } },
+    { key: "salud", label: "Salud (retenida a trabajadores — remitir vía Previred)", getMonto: function (t) { return t.payroll.trabajador.salud; } },
+    { key: "impuestoUnico", label: "Impuesto único (retenido a trabajadores — declarar en F29)", getMonto: function (t) { return t.totImpuestoUnico; } },
+    { key: "ivaSii", label: "IVA a pagar al SII (Formulario 29)", getMonto: function (t) { return t.tributacion.ivaAPagar; } },
+    { key: "servicios", label: "Servicios (luz, agua, gas, etc.)", getMonto: function (t) { return t.totServicios; } }
+  ];
+
+  function ChecklistOperacional(props) {
+    var monthKey = props.currentKey;
+    var totals = props.totals;
+    var checklistMes = (props.data.checklist && props.data.checklist[monthKey]) || {};
+
+    function toggle(itemKey) {
+      if (!props.data.checklist) props.data.checklist = {};
+      if (!props.data.checklist[monthKey]) props.data.checklist[monthKey] = {};
+      var actual = props.data.checklist[monthKey][itemKey] || { pagado: false, fecha: null };
+      var nuevoPagado = !actual.pagado;
+      props.data.checklist[monthKey][itemKey] = { pagado: nuevoPagado, fecha: nuevoPagado ? new Date().toISOString().slice(0, 10) : null };
+      props.persist();
+    }
+
+    var totalPendiente = CHECKLIST_ITEMS.reduce(function (a, item) {
+      var estado = checklistMes[item.key];
+      var pagado = estado && estado.pagado;
+      return a + (pagado ? 0 : (item.getMonto(totals) || 0));
+    }, 0);
+
+    return h("div", { className: "card" },
+      h("h2", null, "Lista de chequeo — " + monthLabel(monthKey)),
+      h("p", { className: "sub" }, "Pagos y obligaciones importantes para la operación este mes — los montos se traen solos desde los cálculos de Gastos, aquí solo marcas si ya los pagaste."),
+      h("table", { className: "checklist-table" },
+        h("thead", null, h("tr", null, h("th", null, "Pagado"), h("th", null, "Concepto"), h("th", { className: "num" }, "Monto"), h("th", null, "Estado"))),
+        h("tbody", null,
+          CHECKLIST_ITEMS.map(function (item) {
+            var estado = checklistMes[item.key] || { pagado: false, fecha: null };
+            var monto = item.getMonto(totals) || 0;
+            return h("tr", { key: item.key, className: "checklist-row" + (estado.pagado ? " pagado" : "") },
+              h("td", null, h("input", { type: "checkbox", checked: !!estado.pagado, onChange: function () { toggle(item.key); } })),
+              h("td", null, item.label),
+              h("td", { className: "num mono" }, money(monto)),
+              h("td", null, estado.pagado ? ("Pagado el " + estado.fecha) : "Pendiente")
+            );
+          })
+        )
+      ),
+      h("div", { className: "total-row" }, h("span", null, "Total pendiente de pago este mes"), h("span", { className: "total-amount egreso" }, money(totalPendiente)))
+    );
+  }
+
   // ---------------- App ----------------
   function App() {
     var initial = loadData();
@@ -1109,6 +1184,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var _a = React.useState(0), tick = _a[0], setTick = _a[1];
     var _b = React.useState(sortedInitial[sortedInitial.length - 1] || "2026-08"), currentKey = _b[0], setCurrentKey = _b[1];
     var _c = React.useState(""), exportStatus = _c[0], setExportStatus = _c[1];
+    var _d = React.useState("resumen"), activeTab = _d[0], setActiveTab = _d[1];
 
     React.useEffect(function () {
       function onStorage(e) {
@@ -1319,6 +1395,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         })
       ),
 
+      h("div", { className: "gastos-tabs" },
+        h("button", { className: "gastos-tab" + (activeTab === "resumen" ? " active" : ""), type: "button", onClick: function () { setActiveTab("resumen"); } }, "Resumen"),
+        h("button", { className: "gastos-tab" + (activeTab === "checklist" ? " active" : ""), type: "button", onClick: function () { setActiveTab("checklist"); } }, "Lista de chequeo")
+      ),
+
+      activeTab !== "resumen" ? null : h(React.Fragment, null,
       h(Dashboard, { totals: totals, currentKey: currentKey, resumenMensual: data.resumenMensual }),
       h(ComparisonChart, { data: data, sortedKeys: sortedKeys }),
 
@@ -1462,7 +1544,10 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           h("button", { className: "btn-ghost", type: "button", onClick: handlePrint }, "Imprimir")
         ),
         exportStatus ? h("p", { className: "export-status" }, exportStatus) : null
+      )
       ),
+
+      activeTab !== "checklist" ? null : h(ChecklistOperacional, { totals: totals, currentKey: currentKey, data: data, persist: persist }),
 
       h("footer", { className: "note" }, "Los datos se guardan solo en este navegador (localStorage) — no se envían a ningún servidor. Si limpias los datos del navegador, se pierden; exporta a CSV regularmente como respaldo.")
     );
