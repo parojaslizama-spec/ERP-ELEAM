@@ -1772,13 +1772,33 @@
     if(e.target.tagName === 'INPUT' && !e.target.disabled) recomputeLiquidacion();
   });
 
+  // Cesantía (AFC) de cargo del empleador: 2,4% para contrato indefinido, 3,0% para plazo fijo u
+  // obra/faena (Ley 19.728) — depende del contrato de cada trabajador.
+  function afcEmpresaPctPara(trab){ return trab.contratoTipo === 'indefinido' ? 2.4 : 3.0; }
+
+  // Guarda, junto con las cifras que se ingresan a mano, el resultado YA CALCULADO de la liquidación
+  // (AFP, salud, cesantía, líquido, costo, etc.) — así la liquidación guardada es la ÚNICA fuente que
+  // necesita leer Gastos: no vuelve a recalcular nada con las tasas del trabajador ni con la UF del día,
+  // evitando que los dos módulos diverjan si esos valores cambian después.
+  function snapshotComputado(trab, form){
+    var c = calcularLiquidacion(trab, form);
+    var afcEmpresaMonto = c.baseImponibleTopeCesantia * (afcEmpresaPctPara(trab) / 100);
+    return {
+      nombre: trab.nombre, cargo: trab.cargo || '', contratoTipo: trab.contratoTipo,
+      totalHaberes: c.totalHaberes, baseImponible: c.baseImponible, descInasistencia: c.descInasistencia,
+      afpMonto: c.afpMonto, saludMonto: c.saludMonto, cesantiaMonto: c.cesantiaMonto, afcEmpresaMonto: afcEmpresaMonto,
+      costoBase: c.totalHaberes - c.descInasistencia, liquido: c.liquido
+    };
+  }
+
   document.getElementById('btn-guardar-liq').addEventListener('click', function(){
     var trab = currentTrabajador(liqTrabSel);
     if(!trab) return;
     var year = parseInt(liqAnioInput.value,10);
     var month = parseInt(liqMesSel.value,10);
     var key = keyLiq(trab.id, year, month);
-    liquidaciones[key] = readLiqForm();
+    var form = readLiqForm();
+    liquidaciones[key] = Object.assign({}, form, snapshotComputado(trab, form));
     saveLiquidaciones();
     var flash = document.getElementById('liq-save-flash');
     flash.textContent = 'Guardado ✓';
@@ -1801,12 +1821,13 @@
     var rentaTributable = baseImponible - legal.afpMonto - legal.saludMonto - legal.cesantiaMonto;
     var impuesto = calcularImpuestoUnico(rentaTributable, utmVigente);
     var adelanto = Math.round((trab.sueldoBase / 2) / 100) * 100;
-    return {
+    var form = {
       sueldoBase: trab.sueldoBase, gratificacion: gratificacion, bonos: 0,
       bonoAsistencia: bonoAsistencia, bonoPuntualidad: bonoPuntualidad,
       heCantidad: 0, heValor: heValorDefault, diasFalta: 0,
       impuesto: impuesto, otros: 0, adelanto: adelanto
     };
+    return Object.assign({}, form, snapshotComputado(trab, form));
   }
   document.getElementById('btn-proyectar-liq').addEventListener('click', function(){
     var activos = trabajadoresActivos();
@@ -1815,6 +1836,12 @@
     var generadas = 0;
     activos.forEach(function(trab){
       PROYECCION_MESES.forEach(function(m){
+        // No proyectar sueldo para meses fuera del período real de contrato (antes de ingresar o
+        // después de un término ya registrado) — mismo criterio de fechas que usa Gastos.
+        var inicioMes = m.year + '-' + String(m.month).padStart(2,'0') + '-01';
+        var finMes = m.year + '-' + String(m.month).padStart(2,'0') + '-31';
+        if(trab.fechaIngreso && trab.fechaIngreso > finMes) return;
+        if(trab.fechaTermino && trab.fechaTermino < inicioMes) return;
         var key = keyLiq(trab.id, m.year, m.month);
         if(liquidaciones[key]) return;
         liquidaciones[key] = liquidacionProyectada(trab);

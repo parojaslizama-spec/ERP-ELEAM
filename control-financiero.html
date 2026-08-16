@@ -49,6 +49,7 @@ h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(20
 .btn-nav { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface-2); color: var(--ink-soft); cursor: pointer; font-size: 13px; line-height: 1; }
 .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
 .btn-ghost-sm { background: var(--accent-soft); color: var(--accent-soft-ink); border: none; border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-ghost-sm.danger { background: var(--critical-soft); color: var(--critical); }
 
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
 .card h2 { margin: 0 0 12px; font-family: var(--serif); font-weight: 500; font-size: 18px; }
@@ -551,46 +552,47 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     try { topeUF = JSON.parse(localStorage.getItem("rha_tope_imponible_cesantia_uf") || "135.2"); } catch (e) { topeUF = 135.2; }
     return getValorUFGlobal() * topeUF;
   }
-  // Gratificación legal Art. 50: 25% de lo devengado, con tope de 4,75 IMM al año (mensualizado) —
-  // misma fórmula que usa el formulario de liquidación en control-horas.html.
-  function gratificacionDefaultPara(trab) {
-    var topeMensual = (4.75 * getImmGlobal()) / 12;
-    return Math.round(Math.min((trab.sueldoBase || 0) * 0.25, topeMensual) / 100) * 100;
-  }
-  // Calcula el detalle completo de la liquidación de un trabajador — no solo el líquido, también
-  // el total de haberes, la base imponible y cada descuento, para que Gastos pueda sumar el costo
-  // real (horas extra, bonos, impuesto, otros descuentos, AFP/salud/cesantía individuales) sin perder nada.
+  // Lee el detalle de una liquidación GUARDADA — Gastos ya no recalcula AFP/salud/cesantía con las
+  // tasas del trabajador ni la UF del día: esa decisión (incluidos los bonos) se toma una sola vez,
+  // en la liquidación de Trabajadores, y Gastos solo la lee. Si no hay liquidación guardada para ese
+  // trabajador ese mes, no se estima nada — simplemente no aparece ese mes (devuelve null).
   function calcularDetalleTrabajador(trab, form) {
-    var f = form || { sueldoBase: trab.sueldoBase, gratificacion: gratificacionDefaultPara(trab), bonos: 0, bonoAsistencia: 0, bonoPuntualidad: 0, heCantidad: 0, heValor: 0, diasFalta: 0, impuesto: 0, otros: 0 };
+    if (!form) return null;
+    if (form.liquido !== undefined) {
+      // Liquidación guardada con el cálculo ya incluido (versión actual) — se usa tal cual.
+      return {
+        liquido: form.liquido, totalHaberes: form.totalHaberes, baseImponible: form.baseImponible,
+        costoBase: form.costoBase,
+        afp: form.afpMonto, salud: form.saludMonto, cesantia: form.cesantiaMonto, afcEmpresa: form.afcEmpresaMonto,
+        gratificacion: form.gratificacion || 0, impuesto: form.impuesto || 0,
+        bonos: (form.bonos || 0) + (form.bonoAsistencia || 0) + (form.bonoPuntualidad || 0),
+        bonoAsistencia: form.bonoAsistencia || 0, bonoPuntualidad: form.bonoPuntualidad || 0, bonosOtros: form.bonos || 0
+      };
+    }
+    // Liquidación guardada ANTES de este cambio (sin el cálculo incluido) — se deriva igual que antes
+    // a partir de sus montos guardados, solo para no perder datos reales ya cargados. Vuelve a guardar
+    // esa liquidación en Trabajadores para que quede con el cálculo incluido y deje de pasar por aquí.
+    var f = form;
     var montoHorasExtra = (f.heCantidad || 0) * (f.heValor || 0);
     var totalHaberes = (f.sueldoBase || 0) + (f.gratificacion || 0) + (f.bonos || 0) + (f.bonoAsistencia || 0) + (f.bonoPuntualidad || 0) + montoHorasExtra;
     var baseImponible = (f.sueldoBase || 0) + (f.gratificacion || 0) + montoHorasExtra + (f.bonoAsistencia || 0) + (f.bonoPuntualidad || 0);
-    // AFP y salud se calculan hasta el tope imponible de AFP/salud; cesantía usa su propio tope
-    // (más alto) — misma lógica que control-horas.html, para no divergir entre los dos módulos.
     var baseImponibleTope = Math.min(baseImponible, getTopeImponibleGlobal() || Infinity);
     var baseImponibleTopeCesantia = Math.min(baseImponible, getTopeImponibleCesantiaGlobal() || Infinity);
     var descInasistencia = ((f.sueldoBase || 0) / 30) * (f.diasFalta || 0);
     var afpMonto = baseImponibleTope * ((trab.afpPct || 0) / 100);
     var saludMonto = trab.saludTipo === "fonasa" ? baseImponibleTope * 0.07 : (trab.saludMonto || 0);
     var cesantiaMonto = baseImponibleTopeCesantia * ((trab.cesantiaPct || 0) / 100);
-    // Cesantía (AFC) de cargo del empleador: 2,4% para contrato indefinido, 3,0% para plazo fijo u
-    // obra/faena (Ley 19.728) — depende del contrato de CADA trabajador, no es una tasa única global.
     var afcEmpresaPctTrab = trab.contratoTipo === "indefinido" ? 2.4 : 3.0;
     var afcEmpresaMonto = baseImponibleTopeCesantia * (afcEmpresaPctTrab / 100);
     var totalDescuentos = afpMonto + saludMonto + cesantiaMonto + descInasistencia + (f.impuesto || 0) + (f.otros || 0);
     return {
-      liquido: totalHaberes - totalDescuentos,
-      totalHaberes: totalHaberes,
-      baseImponible: baseImponible,
-      descInasistencia: descInasistencia,
+      liquido: totalHaberes - totalDescuentos, totalHaberes: totalHaberes, baseImponible: baseImponible,
+      costoBase: totalHaberes - descInasistencia,
       afp: afpMonto, salud: saludMonto, cesantia: cesantiaMonto, afcEmpresa: afcEmpresaMonto,
       gratificacion: f.gratificacion || 0, impuesto: f.impuesto || 0,
       bonos: (f.bonos || 0) + (f.bonoAsistencia || 0) + (f.bonoPuntualidad || 0),
       bonoAsistencia: f.bonoAsistencia || 0, bonoPuntualidad: f.bonoPuntualidad || 0, bonosOtros: f.bonos || 0
     };
-  }
-  function calcularLiquidoTrabajador(trab, form) {
-    return calcularDetalleTrabajador(trab, form).liquido;
   }
   function personalAutoRows(monthKey) {
     var trabs = getTrabajadoresGlobal();
@@ -598,21 +600,30 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     var liqs = getLiquidacionesGlobal();
     var parts = monthKey.split("-");
     var year = parseInt(parts[0], 10), month = parseInt(parts[1], 10);
-    return trabs.map(function (t) {
+    var inicioMes = year + "-" + String(month).padStart(2, "0") + "-01";
+    var finMes = year + "-" + String(month).padStart(2, "0") + "-31";
+    return trabs.filter(function (t) {
+      // Solo cuenta el costo de un trabajador en los meses en que realmente estuvo contratado — mismo
+      // criterio de fechas que ya se usa con los residentes, para no dejar el margen negativo por error.
+      var ingresoOk = !t.fechaIngreso || t.fechaIngreso <= finMes;
+      var terminoOk = !t.fechaTermino || t.fechaTermino >= inicioMes;
+      return ingresoOk && terminoOk;
+    }).map(function (t) {
       var key = t.id + "_" + year + "_" + month;
       var saved = liqs[key];
       var detalle = calcularDetalleTrabajador(t, saved);
+      if (!detalle) return null;
       return {
         id: t.id,
         nombre: t.nombre + (t.cargo ? " — " + t.cargo : ""),
         monto: detalle.liquido,
-        costoBase: detalle.totalHaberes - detalle.descInasistencia,
+        costoBase: detalle.costoBase,
         baseImponible: detalle.baseImponible,
         afp: detalle.afp, salud: detalle.salud, cesantia: detalle.cesantia, afcEmpresa: detalle.afcEmpresa,
         gratificacion: detalle.gratificacion, bonos: detalle.bonos, impuesto: detalle.impuesto,
-        origen: saved ? "Liquidación de " + monthLabel(monthKey) : "Estimado (sueldo base)"
+        origen: "Liquidación de " + monthLabel(monthKey)
       };
-    });
+    }).filter(Boolean);
   }
   function sumAuto(rows) { return (rows || []).reduce(function (a, r) { return a + (r.monto || 0); }, 0); }
 
@@ -979,7 +990,8 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       }, keys.map(function (k) { return h("option", { key: k, value: k }, monthLabel(k)); })),
       h("button", { className: "btn-nav", type: "button", onClick: function () { props.onNavigate(1); } }, "→"),
       h("button", { className: "btn-ghost-sm", type: "button", onClick: props.onNewMonth }, "+ Nuevo mes"),
-      h("button", { className: "btn-ghost-sm", type: "button", onClick: props.onProyectar }, "Proyectar gastos hasta diciembre 2026")
+      h("button", { className: "btn-ghost-sm", type: "button", onClick: props.onProyectar }, "Proyectar gastos hasta diciembre 2026"),
+      h("button", { className: "btn-ghost-sm danger", type: "button", onClick: props.onDeleteMonth }, "Eliminar este mes")
     );
   }
 
@@ -1354,6 +1366,33 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       if (newIdx >= 0 && newIdx < keys.length) setCurrentKey(keys[newIdx]);
     }
 
+    function handleReiniciarGastos() {
+      var totalMeses = Object.keys(stateRef.current.months).length;
+      if (!window.confirm("Esto borra los " + totalMeses + " mes(es) cargados, todos los gastos, servicios, ingresos extra y la lista de chequeo — vuelve todo a cero. No se puede deshacer. ¿Seguro que quieres reiniciar?")) return;
+      if (!window.confirm("Última confirmación: se perderá todo lo cargado en Gastos. ¿Continuar de todos modos?")) return;
+      var fresh = defaultData();
+      fresh.refGastosMigrado = true;
+      stateRef.current.months = fresh.months;
+      stateRef.current.checklist = {};
+      persist();
+      setCurrentKey(Object.keys(fresh.months).sort().slice(-1)[0]);
+      setExportStatus("✓ Gastos reiniciado.");
+    }
+
+    function handleDeleteMonth() {
+      var keys = Object.keys(stateRef.current.months).sort();
+      if (keys.length <= 1) { window.alert("No puedes eliminar el único mes que queda — crea otro primero si quieres reemplazarlo."); return; }
+      if (!window.confirm("Esto elimina todos los gastos, servicios, ingresos extra y la lista de chequeo de " + monthLabel(currentKey) + ". No se puede deshacer. ¿Continuar?")) return;
+      delete stateRef.current.months[currentKey];
+      if (stateRef.current.checklist) delete stateRef.current.checklist[currentKey];
+      var restantes = Object.keys(stateRef.current.months).sort();
+      var idxPrevio = keys.indexOf(currentKey);
+      var siguiente = restantes[Math.min(idxPrevio, restantes.length - 1)] || restantes[restantes.length - 1];
+      persist();
+      setCurrentKey(siguiente);
+      setExportStatus("✓ " + monthLabel(currentKey) + " eliminado.");
+    }
+
     // Proyección: replica los gastos y servicios recurrentes del último mes cargado (con sus montos
     // reales, no en cero) hacia cada mes que falte hasta diciembre 2026 — los ingresos extra (no
     // recurrentes) y los residentes/personal sincronizados no se tocan, se siguen calculando solos.
@@ -1391,7 +1430,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
         ),
         h(MonthSelector, {
           monthKeys: sortedKeys, currentKey: currentKey,
-          onSelect: setCurrentKey, onNavigate: handleNavigate, onNewMonth: handleNewMonth, onProyectar: handleProyectarGastos
+          onSelect: setCurrentKey, onNavigate: handleNavigate, onNewMonth: handleNewMonth, onProyectar: handleProyectarGastos, onDeleteMonth: handleDeleteMonth
         })
       ),
 
@@ -1434,9 +1473,11 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           h("a", { className: "btn-ghost-sm", href: "control-horas.html" }, "Ir al módulo de Trabajadores →")
         ),
         totals.autoRows.length === 0
-          ? h("p", { className: "sub" }, "Aún no hay trabajadores registrados en el módulo de Trabajadores y Liquidaciones. Regístralos allí y el costo de personal se completará solo aquí, mes a mes.")
+          ? h("p", { className: "sub" }, getTrabajadoresGlobal().length === 0
+              ? "Aún no hay trabajadores registrados en el módulo de Trabajadores y Liquidaciones. Regístralos allí y el costo de personal se completará solo aquí, mes a mes."
+              : "Hay trabajadores registrados, pero ninguno tiene una liquidación guardada para " + monthLabel(currentKey) + " en Trabajadores. Guárdalas allí y aparecerán aquí solas.")
           : h("div", null,
-              h("p", { className: "sub" }, "El líquido de cada trabajador se calcula solo desde su liquidación guardada en " + monthLabel(currentKey) + "; si no hay liquidación guardada para el mes, se estima con su sueldo base."),
+              h("p", { className: "sub" }, "El líquido de cada trabajador se lee directo de su liquidación guardada en " + monthLabel(currentKey) + " — ahí se decide si tuvo bonos. Si un trabajador activo no aparece, es porque no le has guardado una liquidación para este mes en Trabajadores."),
               h(LegalBreakdown, {
                 title: "Trabajador",
                 rows: totals.autoRows.map(function (r) { return { label: r.nombre + " — " + r.origen, amount: r.monto }; }),
@@ -1544,6 +1585,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           h("button", { className: "btn-ghost", type: "button", onClick: handlePrint }, "Imprimir")
         ),
         exportStatus ? h("p", { className: "export-status" }, exportStatus) : null
+      ),
+
+      h("div", { className: "card" },
+        h("h2", null, "Zona de riesgo"),
+        h("p", { className: "sub" }, "Borra todos los meses, gastos, servicios y la lista de chequeo, y vuelve a empezar desde cero. Exporta un respaldo antes si no estás seguro."),
+        h("button", { className: "btn-ghost-sm danger", type: "button", onClick: handleReiniciarGastos }, "Reiniciar todos los gastos")
       )
       ),
 
