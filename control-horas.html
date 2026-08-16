@@ -320,6 +320,11 @@
             <input id="trab-sueldo" type="number" min="0" step="1000" required>
           </div>
           <div>
+            <label for="trab-cargas">Cargas familiares acreditadas</label>
+            <input id="trab-cargas" type="number" min="0" step="1" value="0">
+            <p class="field-hint">Hijos/cónyuge u otros dependientes acreditados ante Previred. Cada carga da derecho a asignación familiar — el monto por carga depende del tramo de ingreso del trabajador, se calcula solo en la liquidación.</p>
+          </div>
+          <div>
             <label for="trab-horas" id="trab-horas-label">Horas jornada diaria</label>
             <input id="trab-horas" type="number" min="1" max="24" step="0.5" value="8">
             <p class="field-hint" id="trab-jornada-legal-hint"></p>
@@ -496,8 +501,8 @@
           <input id="liq-anio" type="number" min="2015" max="2100">
         </div>
         <div class="field small">
-          <label for="liq-imm">IMM vigente (CLP) — autom&aacute;tico por ley</label>
-          <input id="liq-imm" type="number" min="0" step="1000">
+          <label for="liq-imm">IMM vigente (CLP) — fijo por ley, no editable</label>
+          <input id="liq-imm" type="text" disabled class="mono">
         </div>
         <div class="field small">
           <label for="liq-utm">UTM del mes (CLP)</label>
@@ -546,6 +551,8 @@
               <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5" disabled class="mono"></div>
               <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100" disabled class="mono"></div>
               <div><label>Total valor hora extra</label><input id="liq-he-total" type="text" disabled class="mono"></div>
+              <div><label>Asignaci&oacute;n familiar (no imponible)</label><input id="liq-asignacion-familiar" type="text" disabled class="mono"></div>
+              <div style="grid-column:1/-1;"><p class="field-hint" id="liq-asignacion-familiar-hint"></p></div>
               <div style="grid-column:1/-1;"><p class="field-hint" id="liq-gratificacion-hint"></p></div>
               <div style="grid-column:1/-1;"><p class="field-hint" id="liq-asistencia-hint"></p></div>
             </div>
@@ -790,14 +797,14 @@
     var hace4DiasStr = fechaISO(hace4Dias);
     function cuidador(n, ciclo){
       return { nombre:'Cuidador(a) '+n, rut:'', cargo:'Cuidador(a)', fechaIngreso: hoyStr, tipo:'esencial', cicloInicio: ciclo,
-        sueldoBase: immVigente, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        sueldoBase: immVigente, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
         horasJornada:12, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} };
     }
     var nuevos = [
       cuidador(1, hoyStr), cuidador(2, hoyStr),
       cuidador(3, hace4DiasStr), cuidador(4, hace4DiasStr),
       { nombre:'Auxiliar de Aseo', rut:'', cargo:'Aseo', fechaIngreso: hoyStr, tipo:'soporte', cicloInicio:'',
-        sueldoBase: immVigente, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        sueldoBase: immVigente, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
         horasJornada:8, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} }
     ];
     nuevos.forEach(function(n){ n.id = uid(); n.activo = true; trabajadores.push(n); });
@@ -824,6 +831,7 @@
       tipo: tipoSel.value,
       cicloInicio: tipoSel.value === 'esencial' ? document.getElementById('trab-ciclo-inicio').value : '',
       sueldoBase: num(document.getElementById('trab-sueldo').value),
+      cargasFamiliares: num(document.getElementById('trab-cargas').value),
       afpPct: num(document.getElementById('trab-afp').value),
       saludTipo: saludTipoSel.value,
       saludMonto: num(document.getElementById('trab-salud-monto').value),
@@ -868,6 +876,7 @@
     document.getElementById('trab-salud-monto').value = t.saludMonto || 0;
     document.getElementById('trab-contrato').value = t.contratoTipo || 'indefinido';
     document.getElementById('trab-sueldo').value = t.sueldoBase;
+    document.getElementById('trab-cargas').value = t.cargasFamiliares || 0;
     document.getElementById('trab-liquido').value = '';
     document.getElementById('trab-horas').value = t.horasJornada;
     document.getElementById('trab-hora-entrada').value = t.horaEntrada || '08:00';
@@ -1200,7 +1209,7 @@
   fillMesSelect(liqMesSel); liqMesSel.value = today.getMonth()+1;
   asisAnioInput.value = today.getFullYear();
   liqAnioInput.value = today.getFullYear();
-  liqImmInput.value = immVigente;
+  liqImmInput.value = fmtCLP(immVigente);
   liqUtmInput.value = utmVigente;
   liqUFInput.value = valorUF;
   liqTopeUFInput.value = topeImponibleUF;
@@ -1216,11 +1225,8 @@
 
   [asisTrabSel, asisMesSel, asisAnioInput].forEach(function(el){ el.addEventListener('change', renderCalendar); });
   [liqTrabSel, liqMesSel, liqAnioInput].forEach(function(el){ el.addEventListener('change', loadLiquidacion); });
-  liqImmInput.addEventListener('input', function(){
-    immVigente = num(liqImmInput.value) || immLegalVigente(new Date());
-    loadLiquidacion();
-    updateDotacionMinimaHint();
-  });
+  // El IMM ya NO es editable a mano: siempre viene del calendario legal (IMM_SCHEDULE) según la fecha
+  // de hoy — así el tope de la gratificación nunca queda desalineado con lo que dice la ley vigente.
   liqUtmInput.addEventListener('input', function(){
     utmVigente = num(liqUtmInput.value) || 71649;
     saveUtm();
@@ -1613,6 +1619,22 @@
     return Math.max(0, Math.round((impuestoEnUtm * utm) / 100) * 100);
   }
 
+  // Asignación Familiar y Maternal — monto por carga acreditada según el tramo de ingreso mensual del
+  // trabajador (Ley N°21.830, vigente desde el 1-may-2026). No es imponible ni tributable: no cuenta
+  // para AFP/salud/cesantía, gratificación ni Impuesto Único — se paga íntegro sobre el líquido.
+  var ASIGNACION_FAMILIAR_TRAMOS = [
+    { hasta: 649039,   monto: 22601 },
+    { hasta: 947990,   monto: 13870 },
+    { hasta: 1478539,  monto: 4382 },
+    { hasta: Infinity, monto: 0 }
+  ];
+  function montoAsignacionFamiliarPorCarga(ingresoMensual){
+    for(var i=0;i<ASIGNACION_FAMILIAR_TRAMOS.length;i++){
+      if(ingresoMensual <= ASIGNACION_FAMILIAR_TRAMOS[i].hasta) return ASIGNACION_FAMILIAR_TRAMOS[i].monto;
+    }
+    return 0;
+  }
+
   // Ley N°21.561 ("Ley de 40 horas"): reduce gradualmente la jornada ordinaria máxima semanal en 3 etapas
   // desde su publicación (26-04-2023). Devuelve el máximo legal vigente para una fecha dada.
   function jornadaMaximaSemanalLegal(fecha){
@@ -1734,8 +1756,11 @@
 
   function calcularLiquidacion(trab, form){
     var montoHorasExtra = form.heCantidad * form.heValor;
-    var totalHaberes = form.sueldoBase + form.gratificacion + form.bonos + (form.bonoAsistencia||0) + (form.bonoPuntualidad||0) + montoHorasExtra;
     var baseImponible = form.sueldoBase + form.gratificacion + montoHorasExtra + (form.bonoAsistencia||0) + (form.bonoPuntualidad||0);
+    // Asignación familiar: no imponible ni tributable — se suma DESPUÉS de calcular la base imponible,
+    // para que no afecte AFP/salud/cesantía/impuesto (que ya se calculan sobre baseImponible más abajo).
+    var asignacionFamiliarMonto = (trab.cargasFamiliares || 0) * montoAsignacionFamiliarPorCarga(baseImponible);
+    var totalHaberes = form.sueldoBase + form.gratificacion + form.bonos + (form.bonoAsistencia||0) + (form.bonoPuntualidad||0) + montoHorasExtra + asignacionFamiliarMonto;
     var sueldoDiario = form.sueldoBase / 30;
     var descInasistencia = sueldoDiario * form.diasFalta;
     var legal = legalDeductions(trab, baseImponible);
@@ -1747,7 +1772,7 @@
     var liquido = totalHaberes - totalDescuentos;
     return {
       montoHorasExtra: montoHorasExtra, totalHaberes: totalHaberes, baseImponible: baseImponible, baseImponibleTope: legal.baseImponibleTope,
-      baseImponibleTopeCesantia: legal.baseImponibleTopeCesantia,
+      baseImponibleTopeCesantia: legal.baseImponibleTopeCesantia, asignacionFamiliarMonto: asignacionFamiliarMonto,
       sueldoDiario: sueldoDiario, descInasistencia: descInasistencia, afpMonto: afpMonto,
       saludMonto: saludMonto, cesantiaMonto: cesantiaMonto, adelanto: adelanto, totalDescuentos: totalDescuentos, liquido: liquido
     };
@@ -1763,6 +1788,11 @@
     liqEl('afp-monto').value = fmtCLP(c.afpMonto) + ' ('+trab.afpPct+'%' + (c.baseImponibleTope < c.baseImponible ? ', tope imponible aplicado' : '') + ')';
     liqEl('salud-monto').value = trab.saludTipo==='fonasa' ? fmtCLP(c.saludMonto)+' (Fonasa 7%)' : fmtCLP(c.saludMonto)+' (Isapre)';
     liqEl('cesantia-monto').value = fmtCLP(c.cesantiaMonto) + ' ('+trab.cesantiaPct+'%' + (c.baseImponibleTopeCesantia < c.baseImponible ? ', tope imponible cesantía aplicado' : '') + ')';
+    document.getElementById('liq-asignacion-familiar').value = fmtCLP(c.asignacionFamiliarMonto);
+    document.getElementById('liq-asignacion-familiar-hint').textContent =
+      (trab.cargasFamiliares || 0) === 0
+        ? 'Este trabajador no tiene cargas familiares registradas (edítalo en Trabajadores si corresponde).'
+        : (trab.cargasFamiliares) + ' carga(s) × ' + fmtCLP(montoAsignacionFamiliarPorCarga(c.baseImponible)) + ' según su tramo de ingreso (Ley 21.830). No es imponible ni tributable — no descuenta AFP/salud/cesantía ni Impuesto Único, y no es un costo real de la empresa (se reembolsa vía Previred).';
     document.getElementById('liq-total-haberes').textContent = fmtCLP(c.totalHaberes);
     document.getElementById('liq-total-descuentos').textContent = fmtCLP(c.totalDescuentos);
     document.getElementById('liq-liquido').textContent = fmtCLP(c.liquido);
@@ -1783,11 +1813,14 @@
   function snapshotComputado(trab, form){
     var c = calcularLiquidacion(trab, form);
     var afcEmpresaMonto = c.baseImponibleTopeCesantia * (afcEmpresaPctPara(trab) / 100);
+    // costoBase (el costo real que ve Gastos) EXCLUYE la asignación familiar: la empresa la adelanta al
+    // trabajador dentro del líquido, pero Previred se la reembolsa el mismo mes — no es un gasto neto.
     return {
       nombre: trab.nombre, cargo: trab.cargo || '', contratoTipo: trab.contratoTipo,
       totalHaberes: c.totalHaberes, baseImponible: c.baseImponible, descInasistencia: c.descInasistencia,
       afpMonto: c.afpMonto, saludMonto: c.saludMonto, cesantiaMonto: c.cesantiaMonto, afcEmpresaMonto: afcEmpresaMonto,
-      costoBase: c.totalHaberes - c.descInasistencia, liquido: c.liquido
+      asignacionFamiliarMonto: c.asignacionFamiliarMonto,
+      costoBase: c.totalHaberes - c.descInasistencia - c.asignacionFamiliarMonto, liquido: c.liquido
     };
   }
 
@@ -1887,6 +1920,7 @@
           '<tr><td>Bono asistencia</td><td class="num">'+fmtCLP(form.bonoAsistencia||0)+'</td></tr>'+
           '<tr><td>Bono puntualidad</td><td class="num">'+fmtCLP(form.bonoPuntualidad||0)+'</td></tr>'+
           '<tr><td>Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')</td><td class="num">'+fmtCLP(c.montoHorasExtra)+'</td></tr>'+
+          '<tr><td>Asignación familiar ('+(trab.cargasFamiliares||0)+' carga(s), no imponible)</td><td class="num">'+fmtCLP(c.asignacionFamiliarMonto)+'</td></tr>'+
         '</tbody></table>'+
         '<div class="slip-total"><span>Total haberes</span><span>'+fmtCLP(c.totalHaberes)+'</span></div>'+
         '<table class="slip-table" style="margin-top:14px;"><thead><tr><th>Descuentos</th><th class="num" style="text-align:right;">Monto</th></tr></thead><tbody>'+
@@ -2113,7 +2147,8 @@
               { label:'Bonos', valor: fmtCLP(form.bonos) },
               { label:'Bono asistencia', valor: fmtCLP(form.bonoAsistencia||0) },
               { label:'Bono puntualidad', valor: fmtCLP(form.bonoPuntualidad||0) },
-              { label:'Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')', valor: fmtCLP(c.montoHorasExtra) }
+              { label:'Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')', valor: fmtCLP(c.montoHorasExtra) },
+              { label:'Asignación familiar ('+(trab.cargasFamiliares||0)+' carga(s), no imponible)', valor: fmtCLP(c.asignacionFamiliarMonto) }
             ],
             total: { label:'Total haberes', valor: fmtCLP(c.totalHaberes) }
           },
