@@ -532,10 +532,10 @@
       <p class="field-hint">El Ingreso M&iacute;nimo Mensual (IMM) se usa para el tope legal de la gratificaci&oacute;n (4,75 IMM al a&ntilde;o) y como sueldo predeterminado al agregar un trabajador nuevo — se actualiza solo seg&uacute;n el calendario legal (avisa cuando la ley lo reajuste para agregarlo). La UTM (Unidad Tributaria Mensual) se usa para calcular el Impuesto &Uacute;nico y cambia cada mes: actual&iacute;zala aqu&iacute; (ver sii.cl). El tope imponible de AFP/salud se calcula multiplicando el <b>valor de la UF de hoy</b> (actual&iacute;zalo aqu&iacute; desde la fuente oficial — sii.cl o Banco Central) por el <b>tope legal en UF</b> vigente (Superintendencia de Pensiones, reajustado normalmente cada febrero) — as&iacute; el monto en pesos se recalcula solo. El seguro de cesant&iacute;a (AFC) tiene un tope legal distinto y m&aacute;s alto — no es el mismo que el de AFP/salud — por eso tiene su propio campo en UF arriba.</p>
 
       <div class="actions-row">
-        <button id="btn-proyectar-liq" class="gold" type="button">Proyectar liquidaciones hasta diciembre 2026 (bonos completos)</button>
+        <button id="btn-proyectar-liq" class="gold" type="button">Proyectar liquidaciones hasta diciembre 2026</button>
         <span id="proyeccion-liq-flash" class="save-flash"></span>
       </div>
-      <p class="field-hint">Genera, para cada trabajador activo, una liquidaci&oacute;n en cada mes desde septiembre hasta diciembre de 2026 (sueldo base + gratificaci&oacute;n legal + los bonos a los que ese trabajador tiene derecho, asumiendo asistencia y puntualidad perfectas). No sobreescribe liquidaciones que ya hayas guardado a mano para esos meses.</p>
+      <p class="field-hint">Genera, para cada trabajador activo, una liquidaci&oacute;n en cada mes desde septiembre hasta diciembre de 2026 (sueldo base + gratificaci&oacute;n legal). No sobreescribe liquidaciones que ya hayas guardado a mano para esos meses.</p>
 
       <div id="liq-content" style="display:none;">
         <div class="liq-columns">
@@ -545,16 +545,12 @@
             <div class="grid-form" style="grid-template-columns:1fr 1fr;">
               <div><label for="liq-sueldo-base">Sueldo base</label><input id="liq-sueldo-base" type="number" min="0" step="1000" disabled class="mono"></div>
               <div><label for="liq-gratificacion">Gratificaci&oacute;n legal mensual (25%, tope 4,75 IMM/12, pagada en 2 cuotas quincenales)</label><input id="liq-gratificacion" type="number" min="0" step="1000" disabled class="mono"></div>
-              <div><label for="liq-bonos">Bonos</label><input id="liq-bonos" type="number" min="0" step="1000" disabled class="mono"></div>
-              <div><label for="liq-bono-asistencia">Bono asistencia ($50.000 fijo, 100% asistencia y sin ausencias &middot; solo esencial)</label><input id="liq-bono-asistencia" type="number" min="0" step="1000" disabled class="mono"></div>
-              <div><label for="liq-bono-puntualidad">Bono puntualidad ($20.000 fijo, 100% puntualidad y sin ausencias)</label><input id="liq-bono-puntualidad" type="number" min="0" step="1000" disabled class="mono"></div>
               <div><label for="liq-he-cantidad">Horas extra (cantidad)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5" disabled class="mono"></div>
               <div><label for="liq-he-valor">Valor hora extra</label><input id="liq-he-valor" type="number" min="0" step="100" disabled class="mono"></div>
               <div><label>Total valor hora extra</label><input id="liq-he-total" type="text" disabled class="mono"></div>
               <div><label>Asignaci&oacute;n familiar (no imponible)</label><input id="liq-asignacion-familiar" type="text" disabled class="mono"></div>
               <div style="grid-column:1/-1;"><p class="field-hint" id="liq-asignacion-familiar-hint"></p></div>
               <div style="grid-column:1/-1;"><p class="field-hint" id="liq-gratificacion-hint"></p></div>
-              <div style="grid-column:1/-1;"><p class="field-hint" id="liq-asistencia-hint"></p></div>
             </div>
             <div class="liq-total-row"><span>Total haberes</span><span class="amt mono" id="liq-total-haberes">$ 0</span></div>
           </div>
@@ -1544,27 +1540,9 @@
   // ---------- LIQUIDACIONES ----------
   function keyLiq(trabId, year, month){ return trabId+'_'+year+'_'+month; }
 
-  var liqFields = ['sueldo-base','gratificacion','bonos','he-cantidad','he-valor','dias-falta','impuesto','otros'];
+  var liqFields = ['sueldo-base','gratificacion','he-cantidad','he-valor','dias-falta','impuesto','otros'];
   function liqEl(name){ return document.getElementById('liq-'+name); }
 
-  function attendancePct(resumen){
-    var esperados = resumen.diasTrabajados + resumen.faltaInjust + resumen.faltaJust;
-    if(esperados <= 0) return null;
-    return (resumen.diasTrabajados / esperados) * 100;
-  }
-  // Cualquier ausencia en el mes — con o sin justificación legal — anula ambos bonos. No hay tramos
-  // intermedios: es 100% asistencia/puntualidad o no hay bono.
-  function tuvoAusencias(resumen){
-    return (resumen.faltaInjust || 0) > 0 || (resumen.faltaJust || 0) > 0;
-  }
-  // Bono asistencia: monto fijo $50.000, solo personal esencial, solo si no hubo ninguna ausencia y
-  // asistió el 100% de los turnos programados.
-  function nivelBonoAsistencia(resumen, tipo){
-    if(tipo !== 'esencial') return 0;
-    if(tuvoAusencias(resumen)) return 0;
-    var pct = attendancePct(resumen);
-    return pct === 100 ? 50000 : 0;
-  }
   // Adelanto de sueldo (quincena): anticipo sugerido según los días efectivamente trabajados hasta el día 15 del mes.
   function computeAdelantoDefault(trab, year, month){
     var monthData = getMonthData(trab.id, year, month);
@@ -1575,13 +1553,6 @@
       if(info && ESTADOS_TRABAJADOS[info.estado]) total += sueldoDiario;
     }
     return Math.round(total / 100) * 100;
-  }
-  // Bono puntualidad: monto fijo $20.000, todos los tipos, solo si no hubo ninguna ausencia y llegó
-  // puntual el 100% de los días trabajados.
-  function nivelBonoPuntualidad(resumen){
-    if(tuvoAusencias(resumen)) return 0;
-    var pct = punctualityPct(resumen);
-    return pct === 100 ? 20000 : 0;
   }
 
   // AFP y salud se calculan sobre la base imponible hasta el tope imponible de AFP/salud; la cesantía
@@ -1667,32 +1638,25 @@
     var key = keyLiq(trab.id, year, month);
     var resumen = computeResumen(trab, year, month);
     var saved = liquidaciones[key];
-    var pctAsistencia = attendancePct(resumen);
-    var pctPuntualidad = punctualityPct(resumen);
-    var bonoAsistenciaDefault = nivelBonoAsistencia(resumen, trab.tipo);
-    var bonoPuntualidadDefault = nivelBonoPuntualidad(resumen);
     var heCantidadDefault = Math.round(resumen.horasExtra*10)/10;
     var heValorDefault = Math.round((trab.sueldoBase/30/trab.horasJornada)*1.5);
     var montoHorasExtraDefault = heCantidadDefault * heValorDefault;
-    // Gratificación legal Art. 50: 25% del sueldo imponible del mes (sueldo base + horas extra + bonos
-    // imponibles, sin incluir la propia gratificación), con tope de 4,75 IMM al año (mensualizado).
-    var imponibleParaGratificacion = trab.sueldoBase + montoHorasExtraDefault + bonoAsistenciaDefault + bonoPuntualidadDefault;
+    // Gratificación legal Art. 50: 25% del sueldo imponible del mes (sueldo base + horas extra, sin
+    // incluir la propia gratificación), con tope de 4,75 IMM al año (mensualizado).
+    var imponibleParaGratificacion = trab.sueldoBase + montoHorasExtraDefault;
     var topeGratificacionMensual = (4.75 * immVigente) / 12;
     var gratificacionDefault = Math.round(Math.min(imponibleParaGratificacion * 0.25, topeGratificacionMensual) / 100) * 100;
     var adelantoDefault = computeAdelantoDefault(trab, year, month);
     // Impuesto Único de Segunda Categoría: se calcula sobre la renta líquida tributable (base imponible
     // menos AFP, salud y cesantía), según la tabla progresiva del SII vigente.
-    var baseImponibleDefault = trab.sueldoBase + gratificacionDefault + montoHorasExtraDefault + bonoAsistenciaDefault + bonoPuntualidadDefault;
+    var baseImponibleDefault = trab.sueldoBase + gratificacionDefault + montoHorasExtraDefault;
     var legalDefault = legalDeductions(trab, baseImponibleDefault);
     var rentaTributableDefault = baseImponibleDefault - legalDefault.afpMonto - legalDefault.saludMonto - legalDefault.cesantiaMonto;
     var impuestoDefault = calcularImpuestoUnico(rentaTributableDefault, utmVigente);
 
-    var data = saved ? Object.assign({ bonoAsistencia: bonoAsistenciaDefault, bonoPuntualidad: bonoPuntualidadDefault, gratificacion: gratificacionDefault, adelanto: adelantoDefault, impuesto: impuestoDefault }, saved) : {
+    var data = saved ? Object.assign({ gratificacion: gratificacionDefault, adelanto: adelantoDefault, impuesto: impuestoDefault }, saved) : {
       sueldoBase: trab.sueldoBase,
       gratificacion: gratificacionDefault,
-      bonos: 0,
-      bonoAsistencia: bonoAsistenciaDefault,
-      bonoPuntualidad: bonoPuntualidadDefault,
       heCantidad: heCantidadDefault,
       heValor: heValorDefault,
       diasFalta: resumen.faltaInjust,
@@ -1703,9 +1667,6 @@
 
     liqEl('sueldo-base').value = data.sueldoBase;
     liqEl('gratificacion').value = data.gratificacion;
-    liqEl('bonos').value = data.bonos;
-    liqEl('bono-asistencia').value = data.bonoAsistencia || 0;
-    liqEl('bono-puntualidad').value = data.bonoPuntualidad || 0;
     liqEl('he-cantidad').value = data.heCantidad;
     liqEl('he-valor').value = data.heValor;
     liqEl('dias-falta').value = data.diasFalta;
@@ -1714,25 +1675,13 @@
     liqEl('adelanto').value = data.adelanto || 0;
 
     document.getElementById('liq-gratificacion-hint').textContent =
-      'Gratificación sugerida: 25% del sueldo imponible del mes (sueldo base + horas extra + bonos imponibles = ' + fmtCLP(imponibleParaGratificacion) + '), tope mensual 4,75 × IMM ÷ 12 = ' + fmtCLP(topeGratificacionMensual) +
+      'Gratificación sugerida: 25% del sueldo imponible del mes (sueldo base + horas extra = ' + fmtCLP(imponibleParaGratificacion) + '), tope mensual 4,75 × IMM ÷ 12 = ' + fmtCLP(topeGratificacionMensual) +
       '. Se paga en 2 cuotas quincenales de ' + fmtCLP(data.gratificacion / 2) + ' c/u (no como pago único anual). Editable si corresponde otro monto.';
     document.getElementById('liq-adelanto-hint').textContent =
       'Sugerido según los días trabajados hasta el 15 del mes (' + fmtCLP(adelantoDefault) + '). Es un anticipo ya entregado al trabajador: se descuenta del líquido de esta liquidación, no es un costo adicional. Editable si corresponde otro monto.';
     document.getElementById('liq-impuesto-hint').textContent =
       'Calculado según la tabla de Impuesto Único del SII sobre la renta tributable (' + fmtCLP(rentaTributableDefault) + ' = base imponible − AFP − salud − cesantía), con UTM = ' + fmtCLP(utmVigente) + '. ' +
       (impuestoDefault > 0 ? 'Este trabajador queda afecto a impuesto este mes.' : 'Bajo el tramo exento (13,5 UTM = ' + fmtCLP(13.5 * utmVigente) + '): no paga impuesto este mes.');
-
-    var huboAusencias = tuvoAusencias(resumen);
-    var asistenciaTxt = pctAsistencia === null ? 'Asistencia: sin datos registrados este mes.' : 'Asistencia: ' + pctAsistencia.toFixed(1) + '%';
-    if(trab.tipo !== 'esencial') asistenciaTxt += ' (personal de soporte no accede al bono de asistencia, solo al de puntualidad).';
-    else if(huboAusencias) asistenciaTxt += ' — hubo ausencia(s) este mes (con o sin justificación): sin bono.';
-    else if(pctAsistencia === 100) asistenciaTxt += ' — 100% y sin ausencias: bono $50.000.';
-    else if(pctAsistencia !== null) asistenciaTxt += ' — sin bono (se exige 100%).';
-    var puntualidadTxt = pctPuntualidad === null ? 'Puntualidad: sin datos registrados este mes.' : 'Puntualidad: ' + pctPuntualidad.toFixed(1) + '%';
-    if(huboAusencias) puntualidadTxt += ' — hubo ausencia(s) este mes: sin bono.';
-    else if(pctPuntualidad === 100) puntualidadTxt += ' — 100% y sin ausencias: bono $20.000.';
-    else if(pctPuntualidad !== null) puntualidadTxt += ' — sin bono (se exige 100%).';
-    document.getElementById('liq-asistencia-hint').textContent = asistenciaTxt + ' ' + puntualidadTxt + ' Ambos bonos son imponibles: descuentan AFP/salud/cesantía al trabajador y generan cargas legales para la empresa. Cualquier ausencia del mes — justificada o no — anula ambos bonos.';
 
     document.getElementById('liq-save-flash').textContent = '';
     recomputeLiquidacion();
@@ -1742,9 +1691,6 @@
     return {
       sueldoBase: num(liqEl('sueldo-base').value),
       gratificacion: num(liqEl('gratificacion').value),
-      bonos: num(liqEl('bonos').value),
-      bonoAsistencia: num(liqEl('bono-asistencia').value),
-      bonoPuntualidad: num(liqEl('bono-puntualidad').value),
       heCantidad: num(liqEl('he-cantidad').value),
       heValor: num(liqEl('he-valor').value),
       diasFalta: num(liqEl('dias-falta').value),
@@ -1756,11 +1702,11 @@
 
   function calcularLiquidacion(trab, form){
     var montoHorasExtra = form.heCantidad * form.heValor;
-    var baseImponible = form.sueldoBase + form.gratificacion + montoHorasExtra + (form.bonoAsistencia||0) + (form.bonoPuntualidad||0);
+    var baseImponible = form.sueldoBase + form.gratificacion + montoHorasExtra;
     // Asignación familiar: no imponible ni tributable — se suma DESPUÉS de calcular la base imponible,
     // para que no afecte AFP/salud/cesantía/impuesto (que ya se calculan sobre baseImponible más abajo).
     var asignacionFamiliarMonto = (trab.cargasFamiliares || 0) * montoAsignacionFamiliarPorCarga(baseImponible);
-    var totalHaberes = form.sueldoBase + form.gratificacion + form.bonos + (form.bonoAsistencia||0) + (form.bonoPuntualidad||0) + montoHorasExtra + asignacionFamiliarMonto;
+    var totalHaberes = form.sueldoBase + form.gratificacion + montoHorasExtra + asignacionFamiliarMonto;
     var sueldoDiario = form.sueldoBase / 30;
     var descInasistencia = sueldoDiario * form.diasFalta;
     var legal = legalDeductions(trab, baseImponible);
@@ -1838,25 +1784,21 @@
     setTimeout(function(){ flash.textContent=''; }, 2500);
   });
 
-  // Proyección: genera liquidaciones "como si todo hubiera salido perfecto" (sin ausencias, bonos
-  // completos según el tipo de trabajador) para los meses futuros hasta diciembre 2026, reutilizando
-  // exactamente la misma fórmula de gratificación/impuesto que usa una liquidación real.
+  // Proyección: genera liquidaciones "como si todo hubiera salido perfecto" (sin ausencias) para los
+  // meses futuros hasta diciembre 2026, reutilizando exactamente la misma fórmula de
+  // gratificación/impuesto que usa una liquidación real.
   var PROYECCION_MESES = [{ year: 2026, month: 9 }, { year: 2026, month: 10 }, { year: 2026, month: 11 }, { year: 2026, month: 12 }];
   function liquidacionProyectada(trab){
     var heValorDefault = Math.round((trab.sueldoBase / 30 / trab.horasJornada) * 1.5);
-    var bonoAsistencia = trab.tipo === 'esencial' ? 50000 : 0;
-    var bonoPuntualidad = 20000;
-    var imponibleParaGratificacion = trab.sueldoBase + bonoAsistencia + bonoPuntualidad;
     var topeGratificacionMensual = (4.75 * immVigente) / 12;
-    var gratificacion = Math.round(Math.min(imponibleParaGratificacion * 0.25, topeGratificacionMensual) / 100) * 100;
-    var baseImponible = trab.sueldoBase + gratificacion + bonoAsistencia + bonoPuntualidad;
+    var gratificacion = Math.round(Math.min(trab.sueldoBase * 0.25, topeGratificacionMensual) / 100) * 100;
+    var baseImponible = trab.sueldoBase + gratificacion;
     var legal = legalDeductions(trab, baseImponible);
     var rentaTributable = baseImponible - legal.afpMonto - legal.saludMonto - legal.cesantiaMonto;
     var impuesto = calcularImpuestoUnico(rentaTributable, utmVigente);
     var adelanto = Math.round((trab.sueldoBase / 2) / 100) * 100;
     var form = {
-      sueldoBase: trab.sueldoBase, gratificacion: gratificacion, bonos: 0,
-      bonoAsistencia: bonoAsistencia, bonoPuntualidad: bonoPuntualidad,
+      sueldoBase: trab.sueldoBase, gratificacion: gratificacion,
       heCantidad: 0, heValor: heValorDefault, diasFalta: 0,
       impuesto: impuesto, otros: 0, adelanto: adelanto
     };
@@ -1916,9 +1858,6 @@
         '<table class="slip-table"><thead><tr><th>Haberes</th><th class="num" style="text-align:right;">Monto</th></tr></thead><tbody>'+
           '<tr><td>Sueldo base</td><td class="num">'+fmtCLP(form.sueldoBase)+'</td></tr>'+
           '<tr><td>Gratificación legal (2 cuotas quincenales de '+fmtCLP(form.gratificacion/2)+')</td><td class="num">'+fmtCLP(form.gratificacion)+'</td></tr>'+
-          '<tr><td>Bonos</td><td class="num">'+fmtCLP(form.bonos)+'</td></tr>'+
-          '<tr><td>Bono asistencia</td><td class="num">'+fmtCLP(form.bonoAsistencia||0)+'</td></tr>'+
-          '<tr><td>Bono puntualidad</td><td class="num">'+fmtCLP(form.bonoPuntualidad||0)+'</td></tr>'+
           '<tr><td>Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')</td><td class="num">'+fmtCLP(c.montoHorasExtra)+'</td></tr>'+
           '<tr><td>Asignación familiar ('+(trab.cargasFamiliares||0)+' carga(s), no imponible)</td><td class="num">'+fmtCLP(c.asignacionFamiliarMonto)+'</td></tr>'+
         '</tbody></table>'+
@@ -2041,9 +1980,7 @@
 
       var remuneracion = 'El empleador pagará al trabajador un sueldo base mensual bruto de ' + fmtCLP(t.sueldoBase) +
         ', que conforme a los descuentos legales vigentes (AFP ' + t.afpPct + '%, salud ' + saludTxt + ', seguro de cesantía ' + t.cesantiaPct + '%) equivale referencialmente a un líquido aproximado de ' + fmtCLP(liquidoRef) +
-        '. El trabajador tendrá además derecho a: (i) gratificación legal mensual equivalente al 25% de lo devengado en el mes, con tope de 4,75 ingresos mínimos mensuales al año (artículo 50 del Código del Trabajo) — actualmente ' + fmtCLP(gratMensual) + ' mensuales, pagada en 2 cuotas quincenales de ' + fmtCLP(gratMensual/2) + ' cada una; (ii) un bono de cumplimiento de asistencia' +
-        (t.tipo === 'esencial' ? ' de $50.000 mensuales, pagadero solo si asiste al 100% de los turnos programados y no registra ninguna ausencia en el mes, con o sin justificación (cualquier ausencia anula el bono)' : ' — no aplicable a este cargo, reservado a personal esencial (cuidadores)') +
-        '; y (iii) un bono de puntualidad de $20.000 mensuales, pagadero solo si llega puntual al 100% de sus turnos y no registra ninguna ausencia en el mes, con o sin justificación (cualquier ausencia anula el bono), aplicable a todos los cargos. La gratificación y ambos bonos son imponibles y tributables. La remuneración se pagará por período mensual, dentro de los primeros cinco días hábiles del mes siguiente al trabajado, mediante depósito en la cuenta bancaria que indique el trabajador, previo descuento de las cotizaciones legales y demás descuentos procedentes.';
+        '. El trabajador tendrá además derecho a gratificación legal mensual equivalente al 25% de lo devengado en el mes, con tope de 4,75 ingresos mínimos mensuales al año (artículo 50 del Código del Trabajo) — actualmente ' + fmtCLP(gratMensual) + ' mensuales, pagada en 2 cuotas quincenales de ' + fmtCLP(gratMensual/2) + ' cada una. La gratificación es imponible y tributable. La remuneración se pagará por período mensual, dentro de los primeros cinco días hábiles del mes siguiente al trabajado, mediante depósito en la cuenta bancaria que indique el trabajador, previo descuento de las cotizaciones legales y demás descuentos procedentes.';
 
       var clauses = [
         { title: 'PRIMERO: Naturaleza de los servicios', body: cfg.primero + ' El trabajador se obliga además a cumplir las demás labores anexas y complementarias a las señaladas, propias de su cargo, que le sean encomendadas por el empleador o quien lo represente, en tanto sean compatibles con sus aptitudes e idoneidad y no importen menoscabo para el trabajador.' },
@@ -2144,9 +2081,6 @@
             filas: [
               { label:'Sueldo base', valor: fmtCLP(form.sueldoBase) },
               { label:'Gratificación legal', valor: fmtCLP(form.gratificacion), nota: '2 cuotas quincenales de '+fmtCLP(form.gratificacion/2)+' c/u' },
-              { label:'Bonos', valor: fmtCLP(form.bonos) },
-              { label:'Bono asistencia', valor: fmtCLP(form.bonoAsistencia||0) },
-              { label:'Bono puntualidad', valor: fmtCLP(form.bonoPuntualidad||0) },
               { label:'Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')', valor: fmtCLP(c.montoHorasExtra) },
               { label:'Asignación familiar ('+(trab.cargasFamiliares||0)+' carga(s), no imponible)', valor: fmtCLP(c.asignacionFamiliarMonto) }
             ],
