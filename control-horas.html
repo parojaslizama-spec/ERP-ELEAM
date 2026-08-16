@@ -156,7 +156,8 @@
   .selector-row .field.small{ min-width:110px; }
 
   /* Calendar */
-  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .cal-scroll{ overflow-x:auto; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; min-width:640px; }
   .cal-head{ font-family:'Lora',serif; font-weight:600; text-align:center; color:var(--petroleo); font-size:12.5px; padding-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
   .cal-cell{
     background:#fffef9; border:1px solid var(--line); border-radius:6px; padding:8px;
@@ -177,6 +178,22 @@
   .cal-tiempos{ display:flex; gap:4px; }
   .cal-tiempos input{ min-width:0; }
   .cal-cell.tarde .cal-hora-ingreso{ border-color:var(--danger); color:var(--danger); }
+
+  /* Vista celular/tablet del calendario: lista de días en vez de grilla de 7 columnas — la grilla
+     semanal no cabe legible en una pantalla angosta, así que bajo este ancho cada día pasa a ser
+     una fila horizontal compacta y se oculta el encabezado de días de la semana (ya no aplica). */
+  @media (max-width:760px){
+    #cal-head-row{ display:none; }
+    .cal-grid{ grid-template-columns:1fr; min-width:0; gap:8px; }
+    .cal-cell{
+      flex-direction:row; flex-wrap:wrap; align-items:center; min-height:auto; padding:9px 10px; gap:6px 10px;
+    }
+    .cal-cell.empty{ display:none; }
+    .cal-daynum{ flex:none; flex-direction:row; gap:5px; width:auto; font-size:12.5px; }
+    .cal-asistio-label{ flex:none; }
+    .cal-turno, .cal-motivo{ flex:1 1 130px; }
+    .cal-tiempos{ flex:1 1 130px; }
+  }
 
   .summary-cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-top:18px; }
   .stat{
@@ -257,13 +274,7 @@
             <select id="trab-tipo">
               <option value="soporte">Soporte (aseo, cocina, TENS) — 40 hrs/semana</option>
               <option value="esencial">Esencial (cuidadores) — turno 4&times;4 (LLNN/OOOO)</option>
-            </select>
-          </div>
-          <div id="trab-ciclo-wrap" style="display:none;">
-            <label for="trab-ciclo-tipo">Ciclo</label>
-            <select id="trab-ciclo-tipo">
-              <option value="4x4">4&times;4 (2 d&iacute;a + 2 noche + 4 descanso)</option>
-              <option value="2x2n">2&times;2 nocturno (solo turno noche)</option>
+              <option value="esencial_nocturno">Esencial nocturno (cuidadores) — turno 2&times;2 (solo noche)</option>
             </select>
           </div>
           <div id="trab-ciclo-inicio-wrap" style="display:none;">
@@ -438,8 +449,10 @@
         </div>
       </div>
       <p class="field-hint" id="asis-tipo-hint"></p>
-      <div id="cal-head-row" class="cal-grid" style="margin-bottom:4px;"></div>
-      <div id="calendar-grid" class="cal-grid"></div>
+      <div class="cal-scroll">
+        <div id="cal-head-row" class="cal-grid" style="margin-bottom:4px;"></div>
+        <div id="calendar-grid" class="cal-grid"></div>
+      </div>
       <div id="asis-resumen" class="summary-cards"></div>
     </div>
   </section>
@@ -649,22 +662,25 @@
   });
 
   var tipoSel = document.getElementById('trab-tipo');
-  var cicloWrap = document.getElementById('trab-ciclo-wrap');
   var cicloInicioWrap = document.getElementById('trab-ciclo-inicio-wrap');
   var cicloInicioLabel = document.getElementById('trab-ciclo-inicio-label');
-  var cicloTipoSel = document.getElementById('trab-ciclo-tipo');
   var horasInput = document.getElementById('trab-horas');
   var horasLabel = document.getElementById('trab-horas-label');
   var jornadaLegalHint = document.getElementById('trab-jornada-legal-hint');
+  // "esencial_nocturno" en el selector es solo una comodidad de UI: por dentro se guarda como
+  // tipo:'esencial' + cicloTipo:'2x2n', para que todo el resto de la app (que ya sabe leer
+  // tipo==='esencial') siga funcionando sin cambios.
+  function esEsencial(){ return tipoSel.value === 'esencial' || tipoSel.value === 'esencial_nocturno'; }
+  function esNocturno2x2(){ return tipoSel.value === 'esencial_nocturno'; }
   function updateJornadaLegalHint(){
-    var esencial = tipoSel.value === 'esencial';
+    var esencial = esEsencial();
     var maxLegal = jornadaMaximaSemanalLegal();
     if(!esencial){
       jornadaLegalHint.textContent = 'Máximo legal vigente: ' + maxLegal + ' horas semanales (Ley N°21.561, "Ley de 40 horas").';
       jornadaLegalHint.className = 'field-hint';
       return;
     }
-    var nocturno = cicloTipoSel.value === '2x2n';
+    var nocturno = esNocturno2x2();
     var horas = num(horasInput.value) || 12;
     var promedio = promedioSemanalEsencial(horas);
     var excede = promedio > maxLegal;
@@ -673,18 +689,14 @@
     jornadaLegalHint.className = 'field-hint' + (excede ? ' warn-text' : '');
   }
   function applyTipoUI(){
-    var esencial = tipoSel.value === 'esencial';
-    cicloWrap.style.display = esencial ? 'block' : 'none';
+    var esencial = esEsencial();
+    var nocturno = esNocturno2x2();
     cicloInicioWrap.style.display = esencial ? 'block' : 'none';
-    cicloInicioLabel.textContent = cicloTipoSel.value === '2x2n' ? 'Inicio del ciclo (1ª noche del bloque)' : 'Inicio del ciclo (1° turno día)';
+    cicloInicioLabel.textContent = nocturno ? 'Inicio del ciclo (1ª noche del bloque)' : 'Inicio del ciclo (1° turno día)';
     horasLabel.textContent = esencial ? 'Horas por turno (día/noche)' : 'Horas jornada diaria';
     horasInput.value = esencial ? 12 : 8;
     updateJornadaLegalHint();
   }
-  cicloTipoSel.addEventListener('change', function(){
-    applyTipoUI();
-    if(editandoTrabajadorId === null) sueldoBaseInput.value = cicloTipoSel.value === '2x2n' ? immVigente : SUELDO_BASE_ESENCIAL;
-  });
   tipoSel.addEventListener('change', function(){
     applyTipoUI();
     // Solo autocompleta el sueldo sugerido cuando se está agregando un trabajador nuevo (no editando uno existente),
@@ -795,9 +807,9 @@
       rut: rut,
       cargo: document.getElementById('trab-cargo').value.trim(),
       fechaIngreso: fechaIngreso,
-      tipo: tipoSel.value,
-      cicloTipo: tipoSel.value === 'esencial' ? cicloTipoSel.value : '4x4',
-      cicloInicio: tipoSel.value === 'esencial' ? document.getElementById('trab-ciclo-inicio').value : '',
+      tipo: esEsencial() ? 'esencial' : 'soporte',
+      cicloTipo: esNocturno2x2() ? '2x2n' : '4x4',
+      cicloInicio: esEsencial() ? document.getElementById('trab-ciclo-inicio').value : '',
       sueldoBase: num(document.getElementById('trab-sueldo').value),
       cargasFamiliares: num(document.getElementById('trab-cargas').value),
       afpPct: num(document.getElementById('trab-afp').value),
@@ -835,8 +847,7 @@
     document.getElementById('trab-rut').value = t.rut;
     document.getElementById('trab-cargo').value = t.cargo || '';
     document.getElementById('trab-fecha-ingreso').value = t.fechaIngreso || '';
-    tipoSel.value = t.tipo || 'soporte';
-    cicloTipoSel.value = t.cicloTipo || '4x4';
+    tipoSel.value = (t.tipo === 'esencial' && t.cicloTipo === '2x2n') ? 'esencial_nocturno' : (t.tipo || 'soporte');
     applyTipoUI();
     document.getElementById('trab-ciclo-inicio').value = t.cicloInicio || '';
     document.getElementById('trab-afp').value = t.afpPct;
