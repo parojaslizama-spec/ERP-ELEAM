@@ -31,6 +31,8 @@
     --danger-bg:#f4d9cc;
     --ok:#4f7a4a;
     --weekend-bg:#efe4cd;
+    --info:#4a6b8a;
+    --info-bg:#dbe6ee;
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
@@ -194,6 +196,51 @@
     .cal-turno, .cal-motivo{ flex:1 1 130px; }
     .cal-tiempos{ flex:1 1 130px; }
   }
+
+  /* Vista general (todo el equipo): una fila por trabajador, una columna por día del mes — pensada
+     para verlo todo de un vistazo, con la columna de nombres fija mientras se hace scroll horizontal
+     por los días. */
+  .view-toggle{ display:flex; gap:8px; margin-bottom:16px; }
+  .view-toggle-btn{
+    background:transparent; border:1px solid var(--line); color:var(--ink-soft);
+    border-radius:999px; padding:7px 16px; font-size:12.5px; font-weight:600; font-family:'Inter',sans-serif;
+  }
+  .view-toggle-btn:hover{ border-color:var(--dorado); color:var(--petroleo-dark); }
+  .view-toggle-btn.active{ background:var(--petroleo); border-color:var(--petroleo); color:#fff; }
+
+  .roster-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:6px; }
+  table.team-roster{ width:auto; min-width:100%; border-collapse:separate; border-spacing:0; margin-top:0; }
+  table.team-roster th, table.team-roster td{ border-bottom:1px solid var(--line); padding:0; }
+  table.team-roster thead th{
+    background:var(--paper-dark); color:var(--petroleo-dark); font-family:'JetBrains Mono',monospace;
+    font-size:11px; font-weight:700; text-align:center; padding:6px 3px; border-bottom:2px solid var(--petroleo);
+  }
+  table.team-roster thead th span{ display:block; font-family:'Inter',sans-serif; font-weight:500; font-size:9px; text-transform:uppercase; color:var(--ink-soft); }
+  table.team-roster th.roster-day-col.weekend, table.team-roster td.roster-day-col.weekend{ background:var(--weekend-bg); }
+  .roster-name-col{
+    position:sticky; left:0; z-index:2; background:var(--card); text-align:left;
+    padding:8px 12px !important; font-size:12.5px; font-weight:600; color:var(--ink);
+    min-width:150px; max-width:220px; border-right:2px solid var(--line); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  thead .roster-name-col{ background:var(--paper-dark); z-index:3; }
+  .roster-cargo{ display:block; font-weight:400; font-size:10.5px; color:var(--ink-soft); }
+  td.roster-cell{
+    width:30px; min-width:30px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700;
+    color:var(--ink-soft);
+  }
+  td.roster-cell.rc-dia{ background:var(--dorado-soft); color:#5c4315; }
+  td.roster-cell.rc-noche{ background:var(--petroleo-dark); color:#fff; }
+  td.roster-cell.rc-descanso{ background:transparent; }
+  td.roster-cell.rc-fi{ background:var(--danger); color:#fff; }
+  td.roster-cell.rc-fj{ background:var(--danger-bg); color:var(--danger); }
+  td.roster-cell.rc-lic{ background:var(--info-bg); color:var(--info); }
+  td.roster-cell.rc-vac{ background:var(--ok); color:#fff; }
+  td.roster-cell.rc-fuera{ background:repeating-linear-gradient(45deg, #eee7d4, #eee7d4 4px, #e4dabf 4px, #e4dabf 8px); }
+  tbody tr:hover .roster-name-col{ background:#fbf7ea; }
+
+  .roster-legend{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:14px; font-size:11.5px; color:var(--ink-soft); }
+  .roster-legend .chip{ display:inline-flex; align-items:center; gap:6px; }
+  .roster-legend .swatch{ width:14px; height:14px; border-radius:4px; display:inline-block; border:1px solid var(--line); }
 
   .summary-cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-top:18px; }
   .stat{
@@ -430,8 +477,12 @@
   <section id="tab-asistencia" class="tab-panel">
     <div class="card">
       <h2>Asistencia y horas</h2>
+      <div class="view-toggle">
+        <button type="button" class="view-toggle-btn active" data-view="individual">Por trabajador</button>
+        <button type="button" class="view-toggle-btn" data-view="general">Vista general (todo el equipo)</button>
+      </div>
       <div class="selector-row">
-        <div class="field">
+        <div class="field" id="asis-trabajador-wrap">
           <label for="asis-trabajador">Trabajador</label>
           <select id="asis-trabajador"></select>
         </div>
@@ -443,17 +494,26 @@
           <label for="asis-anio">A&ntilde;o</label>
           <input id="asis-anio" type="number" min="2015" max="2100">
         </div>
-        <div>
+        <div id="asis-autofill-wrap">
           <button id="btn-autofill" class="gold" type="button">Rellenar mes como "Trabajado"</button>
           <button id="btn-autofill-4x4" class="gold" type="button" style="display:none;">Generar turno 4&times;4 (LLNN/OOOO)</button>
         </div>
       </div>
-      <p class="field-hint" id="asis-tipo-hint"></p>
-      <div class="cal-scroll">
-        <div id="cal-head-row" class="cal-grid" style="margin-bottom:4px;"></div>
-        <div id="calendar-grid" class="cal-grid"></div>
+      <div id="asis-vista-individual">
+        <p class="field-hint" id="asis-tipo-hint"></p>
+        <div class="cal-scroll">
+          <div id="cal-head-row" class="cal-grid" style="margin-bottom:4px;"></div>
+          <div id="calendar-grid" class="cal-grid"></div>
+        </div>
+        <div id="asis-resumen" class="summary-cards"></div>
       </div>
-      <div id="asis-resumen" class="summary-cards"></div>
+      <div id="asis-vista-general" style="display:none;">
+        <p class="field-hint">Un vistazo a todo el equipo activo para el mes seleccionado — qui&eacute;n trabaja, en qu&eacute; turno, y qui&eacute;n est&aacute; de descanso, falta, licencia o vacaciones. Solo lectura: para editar un d&iacute;a, vuelve a "Por trabajador".</p>
+        <div class="roster-scroll">
+          <table class="team-roster" id="team-roster-table"></table>
+        </div>
+        <div class="roster-legend" id="roster-legend"></div>
+      </div>
     </div>
   </section>
 
@@ -648,7 +708,7 @@
       btn.classList.add('active');
       Object.keys(tabPanels).forEach(function(k){ tabPanels[k].classList.remove('active'); });
       tabPanels[btn.dataset.tab].classList.add('active');
-      if(btn.dataset.tab === 'asistencia') renderCalendar();
+      if(btn.dataset.tab === 'asistencia') renderAsistenciaActiveView();
       if(btn.dataset.tab === 'vacaciones') renderVacaciones();
       if(btn.dataset.tab === 'liquidaciones') loadLiquidacion();
     });
@@ -1196,7 +1256,27 @@
   }
   refreshSelectors();
 
-  [asisTrabSel, asisMesSel, asisAnioInput].forEach(function(el){ el.addEventListener('change', renderCalendar); });
+  var asisViewMode = 'individual';
+  function renderAsistenciaActiveView(){
+    if(asisViewMode === 'general') renderVistaGeneral();
+    else renderCalendar();
+  }
+  document.querySelectorAll('.view-toggle-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.view-toggle-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      asisViewMode = btn.dataset.view;
+      var individual = asisViewMode === 'individual';
+      document.getElementById('asis-vista-individual').style.display = individual ? '' : 'none';
+      document.getElementById('asis-vista-general').style.display = individual ? 'none' : '';
+      document.getElementById('asis-trabajador-wrap').style.display = individual ? '' : 'none';
+      document.getElementById('asis-autofill-wrap').style.display = individual ? '' : 'none';
+      renderAsistenciaActiveView();
+    });
+  });
+
+  asisTrabSel.addEventListener('change', renderCalendar);
+  [asisMesSel, asisAnioInput].forEach(function(el){ el.addEventListener('change', renderAsistenciaActiveView); });
   [liqTrabSel, liqMesSel, liqAnioInput].forEach(function(el){ el.addEventListener('change', loadLiquidacion); });
   // El IMM ya NO es editable a mano: siempre viene del calendario legal (IMM_SCHEDULE) según la fecha
   // de hoy — así el tope de la gratificación nunca queda desalineado con lo que dice la ley vigente.
@@ -1292,6 +1372,69 @@
     if(isWeekend) return {estado:'no_aplica', horas:0, horaIngreso:'', horaSalida:''};
     var hi = trab.horaEntrada || '08:00';
     return {estado:'trabajado', horas: trab.horasJornada, horaIngreso: hi, horaSalida: sumarHoras(hi, trab.horasJornada)};
+  }
+
+  // Igual que defaultDayInfo, pero de solo lectura: no escribe en monthData ni en localStorage. Se usa
+  // en la Vista general para mostrar el turno esperado de un día que el usuario nunca abrió a mano
+  // (el calendario por trabajador recién guarda un día la primera vez que se visualiza/edita).
+  function resolveDayInfo(trab, year, month, d){
+    var monthData = getMonthData(trab.id, year, month);
+    if(monthData[d]) return monthData[d];
+    var wd = (new Date(year, month-1, d).getDay()+6)%7;
+    return defaultDayInfo(trab, year, month, d, wd===5||wd===6);
+  }
+
+  var ESTADO_ROSTER = {
+    turno_dia:           { label:'D',   cls:'rc-dia',      nombre:'Turno día' },
+    turno_noche:         { label:'N',   cls:'rc-noche',    nombre:'Turno noche' },
+    trabajado:           { label:'T',   cls:'rc-dia',      nombre:'Trabajado' },
+    descanso_turno:      { label:'',    cls:'rc-descanso', nombre:'Descanso (turno)' },
+    no_aplica:           { label:'',    cls:'rc-descanso', nombre:'Fin de semana (no aplica)' },
+    falta_injustificada: { label:'FI',  cls:'rc-fi',       nombre:'Falta injustificada' },
+    falta_justificada:   { label:'FJ',  cls:'rc-fj',       nombre:'Falta justificada' },
+    licencia:            { label:'LIC', cls:'rc-lic',      nombre:'Licencia médica' },
+    vacaciones:          { label:'VAC', cls:'rc-vac',      nombre:'Vacaciones' },
+    fuera_contrato:      { label:'',    cls:'rc-fuera',    nombre:'Fuera de contrato' }
+  };
+  var ROSTER_LEGEND = [
+    ['rc-dia','Turno día / trabajado'], ['rc-noche','Turno noche'], ['rc-descanso','Descanso / fin de semana'],
+    ['rc-fi','Falta injustificada'], ['rc-fj','Falta justificada'], ['rc-lic','Licencia médica'],
+    ['rc-vac','Vacaciones'], ['rc-fuera','Fuera de contrato']
+  ];
+
+  function renderVistaGeneral(){
+    var year = parseInt(asisAnioInput.value,10) || today.getFullYear();
+    var month = parseInt(asisMesSel.value,10) || (today.getMonth()+1);
+    var activos = trabajadores.filter(function(t){ return t.activo !== false; });
+    var table = document.getElementById('team-roster-table');
+    var legendEl = document.getElementById('roster-legend');
+    if(activos.length === 0){
+      table.innerHTML = '<tr><td class="field-hint" style="padding:16px;">Sin trabajadores activos.</td></tr>';
+      legendEl.innerHTML = '';
+      return;
+    }
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var headCells = '<th class="roster-name-col">Trabajador</th>';
+    for(var d=1; d<=daysInMonth; d++){
+      var wdHead = (new Date(year, month-1, d).getDay()+6)%7;
+      var weekendCls = (wdHead===5 || wdHead===6) ? ' weekend' : '';
+      headCells += '<th class="roster-day-col'+weekendCls+'">'+d+'<span>'+DIAS[wdHead]+'</span></th>';
+    }
+    var rowsHtml = activos.map(function(t){
+      var cells = '<td class="roster-name-col" title="'+esc(t.nombre)+'">'+esc(t.nombre)+(t.cargo ? '<span class="roster-cargo">'+esc(t.cargo)+'</span>' : '')+'</td>';
+      for(var d=1; d<=daysInMonth; d++){
+        var info = resolveDayInfo(t, year, month, d);
+        var meta = ESTADO_ROSTER[info.estado] || { label:'?', cls:'', nombre:info.estado };
+        var wd = (new Date(year, month-1, d).getDay()+6)%7;
+        var weekendCellCls = (wd===5 || wd===6) ? ' weekend' : '';
+        cells += '<td class="roster-cell roster-day-col'+weekendCellCls+' '+meta.cls+'" title="'+esc(meta.nombre)+' — '+d+' de '+MESES[month-1]+'">'+meta.label+'</td>';
+      }
+      return '<tr>'+cells+'</tr>';
+    }).join('');
+    table.innerHTML = '<thead><tr>'+headCells+'</tr></thead><tbody>'+rowsHtml+'</tbody>';
+    legendEl.innerHTML = ROSTER_LEGEND.map(function(pair){
+      return '<span class="chip"><span class="swatch '+pair[0]+'"></span>'+pair[1]+'</span>';
+    }).join('');
   }
 
   function renderCalendar(){
