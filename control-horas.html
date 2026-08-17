@@ -2036,9 +2036,40 @@
       (async function(){
         var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('contrato-'+t.nombre)+'.pdf');
         flash('nomina-save-flash', res.mensaje, 6000);
+        // El Reglamento Interno (Art. 27) exige que cada trabajador firme un registro de recepción, y el
+        // manejo de datos sensibles de los residentes exige un compromiso de confidencialidad (Art. 30,
+        // Ley 19.628) — se generan automáticamente junto con el contrato, en un solo click, para que no
+        // quede pendiente un documento de firma obligatoria al momento de la contratación.
+        generarDocumentosReglamentoTrabajador(t);
       })();
     }catch(e){
       flash('nomina-save-flash', '✗ '+e.message, 6000);
+    }
+  }
+
+  function generarDocumentosReglamentoTrabajador(t){
+    try{
+      var clauses = [
+        { title: 'I. RECEPCIÓN DEL REGLAMENTO INTERNO', body: 'El trabajador o trabajadora declara haber recibido, al momento de su contratación, una copia del Reglamento Interno de la Residencia Senior Omar Wall. Dicho reglamento declara el respeto irrestricto a los derechos y la autonomía de las personas mayores residentes, incluye el procedimiento de reclamos y las reglas de uso de los espacios comunes, y se mantiene en copia visible y accesible para el personal, los residentes y sus familiares. El trabajador o trabajadora se compromete a cumplirlo en el ejercicio de sus funciones.', note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 27.' },
+        { title: 'II. COMPROMISO DE CONFIDENCIALIDAD Y MANEJO DE DATOS SENSIBLES', body: 'El trabajador o trabajadora declara conocer que, en el ejercicio de sus funciones, tendrá acceso a datos personales sensibles de los residentes (información de salud, situación socioeconómica, entre otros), en los términos de la Ley N°19.628 sobre Protección de la Vida Privada. Se compromete a mantener estricta reserva y confidencialidad respecto de dicha información, a no divulgarla a terceros sin autorización expresa salvo en los casos que la ley exija o autorice, y a acceder solo a la información estrictamente necesaria para el desempeño de sus funciones. Este compromiso se mantiene vigente incluso después de terminada la relación laboral con la residencia, y su incumplimiento puede acarrear responsabilidad civil, administrativa y/o penal, según corresponda.', note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 30; Ley N°19.628.' }
+      ];
+      var doc = ReportPDF.buildContractDoc({
+        titulo: 'DOCUMENTOS DE CONTRATACIÓN',
+        subtitulo: 'Anexos al Reglamento Interno — ' + t.nombre + ' · RUT ' + t.rut,
+        disclaimer: 'Estos documentos se entregan y firman junto con el contrato de trabajo, conforme al Reglamento Interno de la Residencia Senior Omar Wall y al Decreto Supremo N°20/2021 del Ministerio de Salud. No reemplazan al Reglamento Interno completo, que debe mantenerse disponible para consulta del trabajador en todo momento.',
+        clauses: clauses,
+        closing: 'En señal de conformidad con lo declarado en los documentos precedentes, firman:',
+        firmas: [
+          { label: 'TRABAJADOR(A)', sub: t.nombre + ' · RUT ' + t.rut },
+          { label: 'DIRECTOR/A TÉCNICO/A', sub: '[COMPLETAR nombre]' }
+        ]
+      });
+      (async function(){
+        var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('reglamento-'+t.nombre)+'.pdf');
+        flash('nomina-save-flash', res.mensaje, 6000);
+      })();
+    }catch(e){
+      flash('nomina-save-flash', '✗ No se pudo generar el anexo de Reglamento Interno: '+e.message, 6000);
     }
   }
 

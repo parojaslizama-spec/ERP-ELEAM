@@ -706,10 +706,46 @@
       });
       var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('ingreso-'+r.nombre)+'.pdf');
       flash('ficha-save-flash', res.mensaje, 6000);
+      // La Carta de Derechos y Deberes y el Consentimiento Voluntario de Ingreso son documentos de firma
+      // obligatoria al ingreso de cada residente (Decreto 20, Art. 29) — se generan automáticamente junto
+      // con la ficha de ingreso, en un solo click, para que no quede pendiente ninguno de los dos.
+      generarDocumentosIngresoResidente(r);
     }catch(e){
       flash('ficha-save-flash', '✗ '+e.message, 6000);
     }
   });
+
+  function generarDocumentosIngresoResidente(r){
+    try{
+      var clauses = [
+        { title: 'I. DERECHOS DE LA PERSONA MAYOR RESIDENTE', body:
+          'A ser tratada con dignidad, respeto y buen trato, sin discriminación de ningún tipo; a la privacidad y confidencialidad de su información personal y de salud; a recibir información clara sobre su estado de salud, cuidados y tratamiento; a participar en las decisiones sobre su propio cuidado, en la medida de sus capacidades; a mantener sus vínculos familiares y sociales, y su libertad de culto; a recibir atención oportuna en caso de urgencia médica; a un entorno seguro, limpio y adecuado a sus necesidades; a presentar reclamos o sugerencias sin temor a represalias; a conocer el Reglamento Interno del establecimiento; y a decidir voluntariamente su ingreso y, en las condiciones que la ley permita, su egreso del establecimiento.',
+          note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 29.' },
+        { title: 'II. DEBERES DE LA PERSONA MAYOR RESIDENTE', body:
+          'Respetar la convivencia y los derechos de los demás residentes y del personal; cumplir con el Reglamento Interno del establecimiento; informar oportunamente cambios relevantes en su situación de salud, cuando sea posible; mantener al día el pago de la cuota de permanencia acordada; y comunicar oportunamente cualquier decisión de traslado o egreso del establecimiento.' },
+        { title: 'III. CONSENTIMIENTO VOLUNTARIO DE INGRESO', body:
+          'Quien suscribe declara: haber recibido información clara y suficiente sobre los servicios, las condiciones de ingreso y el funcionamiento de la Residencia Senior Omar Wall; haber tomado conocimiento del Reglamento Interno y de la Carta de Derechos y Deberes del establecimiento; consentir voluntariamente el ingreso de ' + r.nombre + (r.rut ? ', RUT ' + r.rut : '') + ' a la residencia, en las condiciones informadas; y haber sido informado/a de que el ingreso es voluntario y que puede solicitar el egreso en cualquier momento, sujeto a las condiciones del contrato de prestación de servicios.',
+          note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 12 letra b) y 29. Fecha de ingreso: ' + fmtDate(r.fechaIngreso) + '.' }
+      ];
+      var doc = ReportPDF.buildContractDoc({
+        titulo: 'DOCUMENTOS DE INGRESO',
+        subtitulo: r.nombre + (r.rut ? ' · RUT ' + r.rut : ''),
+        disclaimer: 'Estos documentos se entregan al residente o a su representante legal al momento del ingreso a la Residencia Senior Omar Wall, conforme al Decreto Supremo N°20/2021 del Ministerio de Salud. La Carta de Derechos y Deberes debe entregarse además por escrito y mantenerse exhibida en un lugar visible del establecimiento.',
+        clauses: clauses,
+        closing: 'En señal de conformidad con lo declarado en los documentos precedentes, firman:',
+        firmas: [
+          { label: 'RESIDENTE (o representante legal)', sub: r.nombre },
+          { label: 'DIRECTOR/A TÉCNICO/A', sub: '[COMPLETAR nombre]' }
+        ]
+      });
+      (async function(){
+        var res2 = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('documentos-ingreso-'+r.nombre)+'.pdf');
+        flash('ficha-save-flash', res2.mensaje, 6000);
+      })();
+    }catch(e){
+      flash('ficha-save-flash', '✗ No se pudieron generar los documentos de ingreso: '+e.message, 6000);
+    }
+  }
 
   // ---------- INIT ----------
   renderResidentes();

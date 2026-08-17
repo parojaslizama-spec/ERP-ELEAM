@@ -4,7 +4,7 @@
 
   // Número de versión visible en toda la app — súbelo con cada tanda de cambios notables
   // (sobre todo de diseño/paleta) para poder referirse a "la versión X" al dar feedback.
-  var APP_VERSION = "3.14";
+  var APP_VERSION = "3.15";
 
   var STEPS = [
     { file: "control-residentes.html", num: "1", label: "Ingreso de residentes" },
