@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script src="assets/auth.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ingreso de residentes — Residencia Senior Omar Wall</title>
+<title>Residentes — Residencia Senior Omar Wall</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#8a6a35">
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
@@ -17,62 +17,31 @@
 <link rel="stylesheet" href="assets/theme.css">
 <style>
   :root{
-    --paper:#F7F1E2;
-    --paper-dark:#efe2c4;
-    --ink:#3a2b1c;
-    --ink-soft:#6b5842;
-    --petroleo:#8a6a35;
-    --petroleo-dark:#6b4f24;
-    --dorado:#c79a3f;
-    --dorado-soft:#ecd9ad;
-    --line:#e2d0a8;
-    --card:#fffcf5;
-    --danger:#a4452f;
-    --danger-bg:#f4d9cc;
-    --ok:#4f7a4a;
-    --weekend-bg:#efe4cd;
-    --rose:#b07a68;
-    --rose-soft:#f3ddd2;
+    --paper:#F7F1E2; --paper-dark:#efe2c4; --ink:#3a2b1c; --ink-soft:#6b5842;
+    --petroleo:#8a6a35; --petroleo-dark:#6b4f24; --dorado:#c79a3f; --dorado-soft:#ecd9ad;
+    --line:#e2d0a8; --card:#fffcf5; --danger:#a4452f; --danger-bg:#f4d9cc; --ok:#4f7a4a;
+    --rose:#b07a68; --rose-soft:#f3ddd2; --sky:#6f8fa6; --sky-soft:#dde6ec;
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
   body{
-    background:
-      repeating-linear-gradient(#F7F1E2 0px, #F7F1E2 27px, #ede0c1 28px),
-      var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    font-size:14px;
-    line-height:1.45;
-    padding-bottom:60px;
+    background: repeating-linear-gradient(#F7F1E2 0px, #F7F1E2 27px, #ede0c1 28px), var(--paper);
+    color:var(--ink); font-family:'Inter',sans-serif; font-size:14px; line-height:1.45; padding-bottom:60px;
   }
   h1,h2,h3{ font-family:'Lora',serif; font-weight:600; color:var(--petroleo-dark); margin:0 0 6px; }
   .mono{ font-family:'JetBrains Mono',monospace; }
   label{ font-weight:600; font-size:12.5px; color:var(--ink-soft); display:block; margin-bottom:4px; }
   input, select, textarea{
-    font-family:'JetBrains Mono',monospace;
-    font-size:13.5px;
-    padding:7px 9px;
-    border:1px solid var(--line);
-    border-radius:4px;
-    background:#fffef9;
-    color:var(--ink);
-    width:100%;
+    font-family:'JetBrains Mono',monospace; font-size:13.5px; padding:7px 9px; border:1px solid var(--line);
+    border-radius:4px; background:#fffef9; color:var(--ink); width:100%;
   }
   textarea{ font-family:'Inter',sans-serif; resize:vertical; min-height:56px; }
   select{ font-family:'Inter',sans-serif; }
   input:focus, select:focus, textarea:focus{ outline:2px solid var(--dorado-soft); border-color:var(--dorado); }
+  input:disabled{ background:#eee7d4; color:#a89e88; }
   button{
-    font-family:'Inter',sans-serif;
-    font-weight:600;
-    font-size:13px;
-    cursor:pointer;
-    border:1px solid var(--petroleo);
-    background:var(--petroleo);
-    color:#fff;
-    padding:9px 16px;
-    border-radius:5px;
-    transition:background .15s, transform .05s;
+    font-family:'Inter',sans-serif; font-weight:600; font-size:13px; cursor:pointer; border:1px solid var(--petroleo);
+    background:var(--petroleo); color:#fff; padding:9px 16px; border-radius:5px; transition:background .15s, transform .05s;
   }
   button:hover{ background:var(--petroleo-dark); }
   button:active{ transform:translateY(1px); }
@@ -80,15 +49,15 @@
   button.secondary:hover{ background:var(--paper-dark); }
   button.gold{ background:var(--dorado); border-color:var(--dorado); }
   button.gold:hover{ background:#9c7325; }
+  button.sky{ background:var(--sky); border-color:var(--sky); }
+  button.sky:hover{ background:#587c8f; }
   button.danger{ background:transparent; border-color:var(--danger); color:var(--danger); padding:5px 10px; font-size:12px; }
   button.danger:hover{ background:var(--danger-bg); }
   button.small{ padding:5px 10px; font-size:12px; }
 
   .top-header{
-    background:linear-gradient(180deg, var(--petroleo) 0%, var(--petroleo-dark) 100%);
-    color:#f3ead3;
-    padding:18px 28px;
-    border-bottom:4px solid var(--dorado);
+    background:linear-gradient(180deg, var(--petroleo) 0%, var(--petroleo-dark) 100%); color:#f3ead3;
+    padding:18px 28px; border-bottom:4px solid var(--dorado);
   }
   .top-header .header-inner{ max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
   .brand{ display:flex; align-items:center; gap:14px; }
@@ -96,49 +65,34 @@
   .empresa-fields{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
   .empresa-nombre-fija{ font-family:'Lora',serif; font-size:15px; font-weight:600; color:#f6f2e7; }
   .empresa-fields input{
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.25);
-    color:#f6f2e7;
-    font-family:'Lora',serif;
-    font-size:14px;
-    min-width:220px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.25); color:#f6f2e7;
+    font-family:'Lora',serif; font-size:14px; min-width:220px;
   }
   .empresa-fields input::placeholder{ color:#cdd8d3; }
   .empresa-fields input:focus{ outline:2px solid var(--dorado); }
   .subtitle{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--dorado-soft); margin-top:2px; }
   .confidential-note{
     background:var(--rose-soft); color:#6d332c; border:1px solid #e0b8b0; border-radius:6px;
-    padding:8px 14px; font-size:12px; margin:14px 24px 0; max-width:1132px; margin-left:auto; margin-right:auto;
+    padding:8px 14px; font-size:12px; margin:14px auto 0; max-width:1132px;
   }
 
   .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
 
   .tabbar{ display:flex; gap:4px; margin:22px 0 18px; border-bottom:2px solid var(--line); flex-wrap:wrap; }
   .tab-btn{
-    background:transparent; border:1px solid transparent; border-bottom:none;
-    color:var(--ink-soft); font-family:'Lora',serif; font-size:15px; font-weight:600;
-    padding:10px 20px; border-radius:6px 6px 0 0;
+    background:transparent; border:1px solid transparent; border-bottom:none; color:var(--ink-soft);
+    font-family:'Lora',serif; font-size:15px; font-weight:600; padding:10px 20px; border-radius:6px 6px 0 0;
   }
   .tab-btn:hover{ background:var(--paper-dark); color:var(--petroleo-dark); }
   .tab-btn.active{
-    background:var(--card); color:var(--petroleo-dark);
-    border-color:var(--line);
-    box-shadow:0 -2px 0 var(--dorado) inset;
-    margin-bottom:-2px;
-    border-bottom:2px solid var(--card);
+    background:var(--card); color:var(--petroleo-dark); border-color:var(--line);
+    box-shadow:0 -2px 0 var(--dorado) inset; margin-bottom:-2px; border-bottom:2px solid var(--card);
   }
   .tab-panel{ display:none; }
   .tab-panel.active{ display:block; animation:fade .15s ease; }
   @keyframes fade{ from{opacity:0} to{opacity:1} }
 
-  .card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:20px 22px;
-    margin-bottom:20px;
-    box-shadow:0 1px 3px rgba(30,25,10,.06);
-  }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:8px; padding:20px 22px; margin-bottom:20px; box-shadow:0 1px 3px rgba(30,25,10,.06); }
   .card h2{ font-size:18px; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:16px; }
   .card h3{ font-size:15px; margin-top:0; }
 
@@ -153,24 +107,72 @@
   }
   td{ padding:8px 10px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:middle; }
   tbody tr:hover{ background:#fbf7ea; }
-  td.num, th.num{ font-family:'JetBrains Mono',monospace; text-align:right; }
   .empty-row td{ text-align:center; color:var(--ink-soft); padding:24px; font-style:italic; }
 
   .selector-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:end; margin-bottom:18px; }
-  .selector-row .field{ min-width:180px; }
+  .selector-row .field{ min-width:200px; }
+  .selector-row .field.small{ min-width:110px; }
 
   .badge{ display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; background:var(--dorado-soft); color:#5c4315; }
+  .badge.sky{ background:var(--sky-soft); color:#324a5c; }
   .badge.rose{ background:var(--rose-soft); color:#6d332c; }
   .badge.ok{ background:#e2eedf; color:#2f4a33; }
   .badge.off{ background:var(--paper-dark); color:var(--ink-soft); }
+  .badge.medicamento{ background:var(--dorado-soft); color:#5c4315; }
+  .badge.bano{ background:var(--sky-soft); color:#324a5c; }
+  .badge.cambio_posicion{ background:var(--rose-soft); color:#6d332c; }
+  .badge.alimentacion{ background:var(--paper-dark); color:var(--petroleo-dark); }
+
+  .diag-block{ background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:14px; }
+  .diag-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; }
+  .diag-head h4{ margin:0; font-family:'Lora',serif; font-weight:600; color:var(--petroleo-dark); font-size:15.5px; }
+  .med-row{ display:grid; grid-template-columns:1.4fr 1fr 1fr 1.4fr auto; gap:8px; align-items:center; padding:6px 0; border-top:1px dashed var(--line); font-size:12.5px; }
+  .med-row:first-of-type{ border-top:none; }
+  .med-row .lbl{ font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; display:none; }
+  @media (max-width:760px){ .med-row{ grid-template-columns:1fr 1fr; } .med-row .lbl{ display:block; } }
 
   .subtable{ background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:12px 14px; margin-top:10px; }
   .subtable-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:8px; align-items:end; }
   .subtable-add{ margin-top:10px; }
   .mini-label{ font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin-bottom:2px; }
 
+  .care-row{ border:1px solid var(--line); border-radius:8px; background:#fffef9; margin-bottom:10px; padding:12px 14px; }
+  .care-row.checked{ background:#eaf3e9; border-color:var(--ok); }
+  .care-top{ display:flex; align-items:center; gap:12px; }
+  .care-top input[type="checkbox"]{ width:20px; height:20px; accent-color:var(--ok); flex:none; }
+  .care-info{ flex:1; }
+  .care-cat{ display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:1px 7px; border-radius:8px; margin-right:6px; }
+  .care-cat.medicamento{ background:var(--dorado-soft); color:#5c4315; }
+  .care-cat.bano{ background:var(--sky-soft); color:#324a5c; }
+  .care-cat.cambio_posicion{ background:var(--rose-soft); color:#6d332c; }
+  .care-cat.otro{ background:var(--paper-dark); color:var(--ink-soft); }
+  .care-name{ font-weight:700; color:var(--petroleo-dark); font-family:'Lora',serif; }
+  .care-detail{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .care-execute{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); }
+  .care-execute .full{ grid-column:1/-1; }
+
+  .day-nav{ display:flex; align-items:center; gap:10px; }
+  .day-nav button{ padding:6px 12px; }
+
+  .compliance-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:12px; }
+  .compliance-stat{ background:var(--paper-dark); border:1px solid var(--line); border-left:4px solid var(--petroleo); border-radius:6px; padding:12px 14px; }
+  .compliance-stat.warn{ border-left-color:var(--danger); }
+  .compliance-stat .stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); font-weight:600; }
+  .compliance-stat .stat-value{ font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--petroleo-dark); margin-top:4px; }
+
   .liq-actions{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; align-items:center; }
   .save-flash{ font-size:12.5px; color:var(--ok); font-weight:600; margin-left:6px; }
+  .empty-hint{ font-size:12.5px; color:var(--ink-soft); font-style:italic; padding:14px 0; }
+
+  .info-card{
+    background:var(--sky-soft); border:1px solid #b9cbd7; border-radius:8px; padding:14px 16px; margin-bottom:16px;
+    display:flex; flex-wrap:wrap; gap:18px;
+  }
+  .info-card .info-block{ min-width:160px; }
+  .info-card .info-label{ font-size:10px; text-transform:uppercase; letter-spacing:.04em; font-weight:700; color:#324a5c; margin-bottom:3px; }
+  .info-card .info-value{ font-size:13px; color:var(--ink); font-weight:600; }
+  .info-card .contact-item{ font-size:12.5px; margin-top:2px; }
+  .info-card .contact-item b{ color:#324a5c; }
 
   footer.note{ max-width:1180px; margin:30px auto 0; padding:0 24px; font-size:11.5px; color:var(--ink-soft); }
 </style>
@@ -186,25 +188,38 @@
           <span class="empresa-nombre-fija">Residencia Senior Omar Wall</span>
           <input id="empresa-rut" placeholder="RUT empresa (ej. 76.123.456-7)">
         </div>
-        <div class="subtitle">Ingreso de residentes &middot; datos personales, contacto y cuota</div>
+        <div class="subtitle">Residentes &middot; ficha, cuidados y documentos de ingreso</div>
       </div>
     </div>
   </div>
 </header>
-<p class="confidential-note">&#128274; Informaci&oacute;n confidencial: datos personales, de contacto y la cuota de incorporaci&oacute;n. Solo debe conocerla quien registra el ingreso. La ficha m&eacute;dica y el control de medicamentos y cuidados viven en un m&oacute;dulo aparte y no muestran esta informaci&oacute;n. Este es el &uacute;nico m&oacute;dulo donde se puede eliminar a un residente.</p>
+<p class="confidential-note">&#128274; M&oacute;dulo confidencial: datos personales, m&eacute;dicos y de contacto de los residentes. La n&oacute;mina con la cuota mensual de cada residente vive en el m&oacute;dulo de Administraci&oacute;n. Este es el &uacute;nico m&oacute;dulo donde se puede eliminar a un residente.</p>
 
 <div class="wrap">
   <nav class="tabbar">
-    <button class="tab-btn active" data-tab="residentes">Residentes</button>
-    <button class="tab-btn" data-tab="contactos">Datos de contacto</button>
+    <button class="tab-btn active" data-tab="residente">Residente</button>
+    <button class="tab-btn" data-tab="aceptacion">Aceptación de informe médico</button>
+    <button class="tab-btn" data-tab="diagnosticos">Diagnósticos y cuidados</button>
+    <button class="tab-btn" data-tab="control">Control diario</button>
   </nav>
 
-  <!-- TAB 1: RESIDENTES -->
-  <section id="tab-residentes" class="tab-panel active">
+  <!-- TAB 1: RESIDENTE (perfil + datos médicos generales) -->
+  <section id="tab-residente" class="tab-panel active">
     <div class="card">
-      <h2 id="form-residente-titulo">Agregar residente</h2>
+      <div class="selector-row">
+        <div class="field">
+          <label for="res-selector">Residente</label>
+          <select id="res-selector"></select>
+        </div>
+        <div>
+          <button type="button" id="btn-nuevo-residente" class="secondary">+ Nuevo residente</button>
+        </div>
+      </div>
+
+      <h2 id="form-residente-titulo">Nuevo residente</h2>
       <form id="form-residente">
         <div class="grid-form">
+          <div class="full" style="border-bottom:1px dashed var(--line); padding-bottom:2px; margin-bottom:2px;"><h3 style="margin:0;">Identificación</h3></div>
           <div>
             <label for="res-nombre">Nombre completo</label>
             <input id="res-nombre" required style="font-family:'Inter',sans-serif;">
@@ -214,11 +229,52 @@
             <input id="res-rut" placeholder="12.345.678-9">
           </div>
           <div>
+            <label for="res-fecha-nacimiento">Fecha de nacimiento</label>
+            <input id="res-fecha-nacimiento" type="date">
+          </div>
+          <div>
+            <label>Edad</label>
+            <input id="res-edad" type="text" disabled class="mono">
+          </div>
+          <div>
             <label for="res-ingreso">Fecha de ingreso</label>
             <input id="res-ingreso" type="date" required>
           </div>
           <div>
-            <label for="res-egreso">Fecha de egreso (si aplica)</label>
+            <label for="res-habitacion">N&uacute;mero de habitaci&oacute;n</label>
+            <input id="res-habitacion" placeholder="Ej. 12">
+          </div>
+          <div>
+            <label for="res-piso">Piso</label>
+            <input id="res-piso" placeholder="Ej. 2">
+          </div>
+
+          <div class="full" style="border-bottom:1px dashed var(--line); padding-bottom:2px; margin-bottom:2px; margin-top:8px;"><h3 style="margin:0;">Estado y preferencias</h3></div>
+          <div>
+            <label for="res-estado">Estado</label>
+            <select id="res-estado">
+              <option value="valente">Valente</option>
+              <option value="semivalente">Semivalente</option>
+              <option value="postrado">Postrado</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div id="res-estado-otro-wrap" style="display:none;">
+            <label for="res-estado-otro">Especifica el estado</label>
+            <input id="res-estado-otro" placeholder="Ej. Silla de ruedas parcial">
+          </div>
+          <div class="full">
+            <label for="res-patologia">Patolog&iacute;a principal</label>
+            <input id="res-patologia" style="font-family:'Inter',sans-serif;" placeholder="Ej. Diabetes tipo 2, Hipertensión — resumen breve; el detalle va en Diagnósticos y cuidados">
+          </div>
+          <div class="full">
+            <label for="res-gustos">Gustos y mimos sugeridos</label>
+            <textarea id="res-gustos" placeholder="Ej. Le gusta el café con leche por la tarde, música de radio antigua, que le llamen por su apodo..."></textarea>
+          </div>
+
+          <div class="full" style="border-bottom:1px dashed var(--line); padding-bottom:2px; margin-bottom:2px; margin-top:8px;"><h3 style="margin:0;">Egreso (si aplica)</h3></div>
+          <div>
+            <label for="res-egreso">Fecha de egreso</label>
             <input id="res-egreso" type="date">
           </div>
           <div id="res-motivo-egreso-wrap" style="display:none;">
@@ -236,51 +292,32 @@
             <label for="res-detalle-egreso">Detalle (opcional)</label>
             <input id="res-detalle-egreso" style="font-family:'Inter',sans-serif;" placeholder="Ej. nombre del nuevo establecimiento">
           </div>
-          <div>
-            <label for="res-cuota">Cuota de incorporaci&oacute;n (mensual, CLP)</label>
-            <input id="res-cuota" type="number" min="0" step="1000" required>
-          </div>
-          <div class="full" style="display:flex; gap:10px;">
+
+          <div class="full" style="display:flex; gap:10px; margin-top:8px;">
             <button type="submit" id="btn-guardar-residente">Agregar residente</button>
             <button type="button" id="btn-cancelar-residente" class="secondary" style="display:none;">Cancelar edici&oacute;n</button>
+            <button type="button" id="btn-eliminar-residente" class="danger" style="display:none; margin-left:auto;">Eliminar residente</button>
           </div>
         </div>
       </form>
-    </div>
-
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-        <h2 style="border:none; padding:0; margin:0;">N&oacute;mina de residentes</h2>
-        <div>
-          <button id="btn-pdf-residentes" class="gold" type="button">Generar reporte PDF de residentes</button>
-          <span id="residentes-save-flash" class="save-flash"></span>
-        </div>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th><th>RUT</th><th>Ingreso</th><th>Egreso</th><th>Estado</th>
-            <th class="num">Cuota mensual</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="tabla-residentes"></tbody>
-      </table>
-      <p class="field-hint">La cuota de incorporaci&oacute;n de cada residente activo se suma sola en el m&oacute;dulo de Gastos, secci&oacute;n Ingresos. Eliminar un residente aqu&iacute; tambi&eacute;n elimina su ficha m&eacute;dica y su historial de cuidados en el otro m&oacute;dulo.</p>
+      <p class="field-hint">La cuota mensual y la n&oacute;mina completa de residentes se administran en el m&oacute;dulo de Administraci&oacute;n. Eliminar un residente aqu&iacute; tambi&eacute;n elimina su ficha m&eacute;dica, cuidados y checklist.</p>
     </div>
   </section>
 
-  <!-- TAB 2: DATOS DE CONTACTO -->
-  <section id="tab-contactos" class="tab-panel">
+  <!-- TAB 2: ACEPTACIÓN DE INFORME MÉDICO -->
+  <section id="tab-aceptacion" class="tab-panel">
     <div class="card">
-      <h2>Datos de contacto</h2>
+      <h2>Aceptación de informe médico</h2>
       <div class="selector-row">
         <div class="field">
-          <label for="contacto-residente">Residente</label>
-          <select id="contacto-residente"></select>
+          <label for="acep-residente">Residente</label>
+          <select id="acep-residente"></select>
         </div>
       </div>
 
-      <div id="contacto-content" style="display:none;">
+      <div id="acep-content" style="display:none;">
+        <div id="acep-info-card"></div>
+
         <h3>Contactos de emergencia / apoderado</h3>
         <p class="field-hint">Opcional — puedes agregar uno o m&aacute;s contactos.</p>
         <div id="contactos-list"></div>
@@ -299,12 +336,98 @@
           </div>
         </div>
 
+        <p class="field-hint" style="margin-top:16px;">Al generar los documentos, se incluye la patolog&iacute;a principal declarada en la pesta&ntilde;a Residente, junto con los datos de contacto, para la Carta de Derechos y Deberes y el Consentimiento Voluntario de Ingreso (Decreto 20, Art. 29).</p>
         <div class="liq-actions">
           <button id="btn-pdf-ficha" class="gold" type="button">Generar ficha de ingreso PDF</button>
+          <button id="btn-pdf-consentimiento" class="sky" type="button">Generar documentos de aceptación (derechos, deberes, consentimiento)</button>
           <span id="ficha-save-flash" class="save-flash"></span>
         </div>
       </div>
-      <div id="contacto-empty" class="field-hint">Selecciona un residente para ver y editar sus contactos.</div>
+      <div id="acep-empty" class="field-hint">Selecciona un residente para ver y editar su aceptaci&oacute;n de informe m&eacute;dico.</div>
+    </div>
+  </section>
+
+  <!-- TAB 3: DIAGNÓSTICOS Y CUIDADOS -->
+  <section id="tab-diagnosticos" class="tab-panel">
+    <div class="card">
+      <h2>Diagn&oacute;sticos y cuidados</h2>
+      <p class="field-hint">Informaci&oacute;n cl&iacute;nica funcional para armar el checklist diario — no reemplaza la ficha cl&iacute;nica oficial.</p>
+      <div class="selector-row">
+        <div class="field">
+          <label for="diag-residente">Residente</label>
+          <select id="diag-residente"></select>
+        </div>
+      </div>
+
+      <div id="diag-content" style="display:none;">
+        <h3>Diagn&oacute;sticos y medicamentos</h3>
+        <p class="field-hint">Cada diagn&oacute;stico puede tener uno o m&aacute;s medicamentos asociados (ej. Diabetes &rarr; Metformina; Hipertensi&oacute;n &rarr; Losart&aacute;n). Los horarios se separan por coma, ej. "08:00, 14:00, 20:00".</p>
+        <div id="diagnosticos-list"></div>
+        <div class="subtable subtable-add">
+          <div class="subtable-grid">
+            <div style="flex:1;"><div class="mini-label">Nuevo diagn&oacute;stico</div><input id="nuevo-diag-nombre" placeholder="Ej. Diabetes, Hipertensión..."></div>
+            <div><button type="button" id="btn-add-diag" class="secondary small">+ Agregar diagn&oacute;stico</button></div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:22px;">Cuidados generales</h3>
+        <p class="field-hint">Ba&ntilde;os, cambios de posici&oacute;n y otras tareas de cuidado que no son medicamentos.</p>
+        <div id="cuidados-list"></div>
+        <div class="subtable subtable-add">
+          <div class="subtable-grid">
+            <div><div class="mini-label">Tipo</div>
+              <select id="cui-tipo">
+                <option value="bano">Baño</option>
+                <option value="cambio_posicion">Cambio de posición</option>
+                <option value="alimentacion">Alimentación</option>
+                <option value="medicamento">Medicación</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div><div class="mini-label">Nombre / descripción</div><input id="cui-nombre" placeholder="Ej. Baño matinal"></div>
+            <div><div class="mini-label">Dosis (si es medicación)</div><input id="cui-dosis" placeholder="Ej. 1 comprimido"></div>
+            <div><div class="mini-label">Horarios</div><input id="cui-horarios" placeholder="09:00, 15:00"></div>
+            <div><div class="mini-label">Indicaciones (opcional)</div><input id="cui-indicaciones" placeholder="Ej. Alternar lado izq./der."></div>
+            <div><button type="button" id="btn-add-cuidado" class="secondary small">+ Agregar cuidado</button></div>
+          </div>
+        </div>
+
+        <div class="liq-actions">
+          <button id="btn-pdf-diag" class="gold" type="button">Generar ficha m&eacute;dica PDF</button>
+          <span id="diag-save-flash" class="save-flash"></span>
+        </div>
+      </div>
+      <div id="diag-empty" class="field-hint">Selecciona un residente para ver y editar sus diagn&oacute;sticos y cuidados.</div>
+    </div>
+  </section>
+
+  <!-- TAB 4: CONTROL DIARIO -->
+  <section id="tab-control" class="tab-panel">
+    <div class="card">
+      <h2>Control diario — ejecutar y verificar cuidados</h2>
+      <div class="selector-row">
+        <div class="field">
+          <label for="ctl-residente">Residente</label>
+          <select id="ctl-residente"></select>
+        </div>
+        <div class="field small">
+          <label for="ctl-fecha">Fecha</label>
+          <div class="day-nav">
+            <button type="button" id="btn-ctl-prev" class="secondary small">&larr;</button>
+            <input id="ctl-fecha" type="date">
+            <button type="button" id="btn-ctl-next" class="secondary small">&rarr;</button>
+          </div>
+        </div>
+        <div>
+          <button id="btn-pdf-control" class="sky" type="button">Generar PDF del d&iacute;a (para firmar)</button>
+          <span id="control-save-flash" class="save-flash"></span>
+        </div>
+      </div>
+
+      <div id="ctl-info-card"></div>
+      <div id="compliance-summary" style="margin-bottom:18px;"></div>
+      <p class="field-hint">Cada tarea marcada como realizada queda registrada digitalmente con qui&eacute;n la ejecut&oacute; y a qu&eacute; hora. El PDF del d&iacute;a incluye adem&aacute;s una l&iacute;nea de firma en papel para quien lo realiz&oacute;.</p>
+      <div id="control-content"></div>
     </div>
   </section>
 </div>
@@ -322,22 +445,54 @@
   if(!window.storage){
     window.storage = {
       get:function(key, def){
-        try{
-          var raw = localStorage.getItem('rha_'+key);
-          return raw===null ? def : JSON.parse(raw);
-        }catch(e){ return def; }
+        try{ var raw = localStorage.getItem('rha_'+key); return raw===null ? def : JSON.parse(raw); }catch(e){ return def; }
       },
-      set:function(key, value){
-        try{ localStorage.setItem('rha_'+key, JSON.stringify(value)); }catch(e){}
-      }
+      set:function(key, value){ try{ localStorage.setItem('rha_'+key, JSON.stringify(value)); }catch(e){} }
     };
   }
 
+  var TIPO_LABEL = { bano:'Baño', cambio_posicion:'Cambio de posición', alimentacion:'Alimentación', medicamento:'Medicación', otro:'Otro cuidado' };
+  var ESTADO_LABEL = { valente:'Valente', semivalente:'Semivalente', postrado:'Postrado', otro:'Otro' };
+  var MOTIVO_EGRESO_LABEL = {
+    fallecimiento: 'Fallecimiento', traslado: 'Traslado a otro establecimiento',
+    decision_familiar: 'Decisión familiar', alta_medica: 'Alta médica / mejoría', otro: 'Otro'
+  };
+
   var empresa = window.storage.get('empresa', {nombre:'', rut:''});
   var residentes = window.storage.get('residentes', []);
+  var fichas = window.storage.get('fichas', {});
+  var checklist = window.storage.get('cuidados_checklist', {});
 
-  // Asegura que la nómina entregada esté presente — agrega solo los nombres que todavía no existan (no duplica ni pisa datos ya cargados).
-  // También retira la lista anterior (reemplazada), pero solo las filas que nadie alcanzó a completar con fecha o contactos.
+  function saveEmpresa(){ window.storage.set('empresa', empresa); }
+  function saveResidentes(){ window.storage.set('residentes', residentes); }
+  function saveFichas(){ window.storage.set('fichas', fichas); }
+  function saveChecklist(){ window.storage.set('cuidados_checklist', checklist); }
+
+  function uid(){ return 'r_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+  function fmtCLP(n){ n = Math.round(Number(n)||0); return '$ '+n.toLocaleString('es-CL'); }
+  function num(v){ var n = parseFloat(v); return isNaN(n)?0:n; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function fmtDate(d){ if(!d) return '—'; var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function addDays(dateStr, delta){
+    var d = new Date(dateStr+'T00:00:00'); d.setDate(d.getDate()+delta);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function parseHorarios(str){ return String(str||'').split(',').map(function(s){ return s.trim(); }).filter(Boolean); }
+  function estadoResidente(r){ return (r.fechaEgreso && r.fechaEgreso <= todayStr()) ? 'egresado' : 'activo'; }
+  function calcularEdad(fechaNacimiento){
+    if(!fechaNacimiento) return null;
+    var partes = fechaNacimiento.split('-');
+    var nacimiento = new Date(parseInt(partes[0],10), parseInt(partes[1],10)-1, parseInt(partes[2],10));
+    var hoy = new Date();
+    var edad = hoy.getFullYear() - nacimiento.getFullYear();
+    var aunNoCumple = (hoy.getMonth() < nacimiento.getMonth()) || (hoy.getMonth() === nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate());
+    if(aunNoCumple) edad--;
+    return edad >= 0 ? edad : null;
+  }
+  function estadoLabel(ficha){ return ficha.estado === 'otro' ? (ficha.estadoOtro || 'Otro') : (ESTADO_LABEL[ficha.estado] || 'Valente'); }
+
+  // Asegura que la nómina entregada esté presente — agrega solo los nombres que todavía no existan.
   (function ensureResidentesBase(){
     var LISTA_BASE = [
       ['Monica Becerra', 1200000], ['Sra. Mila Elizas Olguín', 1038000], ['Silvia Oñate', 1198000],
@@ -367,40 +522,15 @@
     if(changed) window.storage.set('residentes', residentes);
   })();
 
-  function saveEmpresa(){ window.storage.set('empresa', empresa); }
-  function saveResidentes(){ window.storage.set('residentes', residentes); }
-
-  function uid(){ return 'r_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
-  function fmtCLP(n){ n = Math.round(Number(n)||0); return '$ '+n.toLocaleString('es-CL'); }
-  function num(v){ var n = parseFloat(v); return isNaN(n)?0:n; }
-  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-  function fmtDate(d){ if(!d) return '—'; var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
-  function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-
-  // ---------- MIGRACIÓN: mueve datos médicos antiguos guardados en el residente al módulo de Ficha médica ----------
-  (function migrateLegacyMedicalData(){
-    var changedResidentes = false;
-    var fichas = window.storage.get('fichas', {});
-    var changedFichas = false;
-    residentes.forEach(function(r){
-      if(r.diagnostico || r.indicaciones || (r.medicamentos && r.medicamentos.length)){
-        if(!fichas[r.id]) fichas[r.id] = { diagnosticos: [], cuidadosGenerales: [], indicacionesCuidado: '' };
-        if(r.indicaciones && !fichas[r.id].indicacionesCuidado) fichas[r.id].indicacionesCuidado = r.indicaciones;
-        if(r.medicamentos && r.medicamentos.length){
-          fichas[r.id].diagnosticos.push({ id: uid(), nombre: r.diagnostico || 'Diagnóstico general', medicamentos: r.medicamentos });
-        } else if(r.diagnostico){
-          fichas[r.id].diagnosticos.push({ id: uid(), nombre: r.diagnostico, medicamentos: [] });
-        }
-        delete r.diagnostico; delete r.indicaciones; delete r.medicamentos;
-        changedResidentes = true; changedFichas = true;
-      }
-    });
-    if(changedResidentes) saveResidentes();
-    if(changedFichas) window.storage.set('fichas', fichas);
-  })();
+  function getFicha(residenteId){
+    if(!fichas[residenteId]) fichas[residenteId] = { diagnosticos: [], cuidadosGenerales: [], indicacionesCuidado: '', habitacion:'', piso:'', estado:'valente', estadoOtro:'', fechaNacimiento:'', patologiaPrincipal:'', gustosYMimos:'' };
+    if(!fichas[residenteId].diagnosticos) fichas[residenteId].diagnosticos = [];
+    if(!fichas[residenteId].cuidadosGenerales) fichas[residenteId].cuidadosGenerales = [];
+    if(!fichas[residenteId].estado) fichas[residenteId].estado = 'valente';
+    return fichas[residenteId];
+  }
 
   // ---------- HEADER EMPRESA ----------
-  // El nombre ya está definido (Residencia Senior Omar Wall) — no hace falta pedirlo, solo el RUT.
   var elEmpresaRut = document.getElementById('empresa-rut');
   if (empresa.nombre !== 'Residencia Senior Omar Wall') { empresa.nombre = 'Residencia Senior Omar Wall'; saveEmpresa(); }
   elEmpresaRut.value = empresa.rut || '';
@@ -409,8 +539,10 @@
   // ---------- TABS ----------
   var tabBtns = document.querySelectorAll('.tab-btn');
   var tabPanels = {
-    residentes: document.getElementById('tab-residentes'),
-    contactos: document.getElementById('tab-contactos')
+    residente: document.getElementById('tab-residente'),
+    aceptacion: document.getElementById('tab-aceptacion'),
+    diagnosticos: document.getElementById('tab-diagnosticos'),
+    control: document.getElementById('tab-control')
   };
   tabBtns.forEach(function(btn){
     btn.addEventListener('click', function(){
@@ -418,19 +550,40 @@
       btn.classList.add('active');
       Object.keys(tabPanels).forEach(function(k){ tabPanels[k].classList.remove('active'); });
       tabPanels[btn.dataset.tab].classList.add('active');
-      if(btn.dataset.tab === 'contactos') loadContactos();
+      if(btn.dataset.tab === 'aceptacion') loadAceptacion();
+      if(btn.dataset.tab === 'diagnosticos') loadDiag();
+      if(btn.dataset.tab === 'control') renderControl();
     });
   });
 
-  // ---------- RESIDENTES: alta, edición y nómina ----------
+  // ---------- SELECTORES ----------
+  function fillResidenteSelect(sel){
+    var prev = sel.value;
+    var activos = residentes.filter(function(r){ return estadoResidente(r) === 'activo'; });
+    var lista = activos.concat(residentes.filter(function(r){ return estadoResidente(r) !== 'activo'; }));
+    if(lista.length===0){
+      sel.innerHTML = '<option value="">(sin residentes)</option>';
+      return;
+    }
+    sel.innerHTML = lista.map(function(r){
+      var estado = estadoResidente(r) === 'activo' ? '' : ' (egresado)';
+      return '<option value="'+r.id+'">'+esc(r.nombre)+estado+'</option>';
+    }).join('');
+    if(lista.some(function(r){ return r.id===prev; })) sel.value = prev;
+  }
+
+  var resSelector = document.getElementById('res-selector');
+  var acepSel = document.getElementById('acep-residente');
+  var diagSel = document.getElementById('diag-residente');
+  var ctlSel = document.getElementById('ctl-residente');
+
+  function refreshSelectors(){ [resSelector, acepSel, diagSel, ctlSel].forEach(fillResidenteSelect); }
+  refreshSelectors();
+
+  function currentResidente(sel){ return residentes.find(function(r){ return r.id===sel.value; }); }
+
+  // ---------- TAB 1: RESIDENTE (alta y edición de perfil) ----------
   var editandoResidenteId = null;
-  var MOTIVO_EGRESO_LABEL = {
-    fallecimiento: 'Fallecimiento',
-    traslado: 'Traslado a otro establecimiento',
-    decision_familiar: 'Decisión familiar',
-    alta_medica: 'Alta médica / mejoría',
-    otro: 'Otro'
-  };
 
   function actualizarVisibilidadEgreso(){
     var tieneFecha = !!document.getElementById('res-egreso').value;
@@ -439,16 +592,60 @@
   }
   document.getElementById('res-egreso').addEventListener('input', actualizarVisibilidadEgreso);
 
-  function cancelarEdicionResidente(){
+  document.getElementById('res-estado').addEventListener('change', function(){
+    document.getElementById('res-estado-otro-wrap').style.display = this.value === 'otro' ? 'block' : 'none';
+  });
+
+  document.getElementById('res-fecha-nacimiento').addEventListener('input', function(){
+    var edad = calcularEdad(this.value);
+    document.getElementById('res-edad').value = edad===null ? '' : edad+' años';
+  });
+
+  function limpiarFormResidente(){
     editandoResidenteId = null;
     document.getElementById('form-residente').reset();
+    document.getElementById('res-edad').value = '';
     actualizarVisibilidadEgreso();
-    document.getElementById('form-residente-titulo').textContent = 'Agregar residente';
+    document.getElementById('res-estado-otro-wrap').style.display = 'none';
+    document.getElementById('form-residente-titulo').textContent = 'Nuevo residente';
     document.getElementById('btn-guardar-residente').textContent = 'Agregar residente';
     document.getElementById('btn-cancelar-residente').style.display = 'none';
+    document.getElementById('btn-eliminar-residente').style.display = 'none';
+    resSelector.value = '';
   }
 
-  document.getElementById('btn-cancelar-residente').addEventListener('click', cancelarEdicionResidente);
+  function cargarResidenteEnForm(r){
+    editandoResidenteId = r.id;
+    document.getElementById('res-nombre').value = r.nombre;
+    document.getElementById('res-rut').value = r.rut || '';
+    document.getElementById('res-ingreso').value = r.fechaIngreso || '';
+    document.getElementById('res-egreso').value = r.fechaEgreso || '';
+    document.getElementById('res-motivo-egreso').value = r.motivoEgreso || '';
+    document.getElementById('res-detalle-egreso').value = r.detalleEgreso || '';
+    actualizarVisibilidadEgreso();
+    var ficha = getFicha(r.id);
+    document.getElementById('res-fecha-nacimiento').value = ficha.fechaNacimiento || '';
+    var edad = calcularEdad(ficha.fechaNacimiento);
+    document.getElementById('res-edad').value = edad===null ? '' : edad+' años';
+    document.getElementById('res-habitacion').value = ficha.habitacion || '';
+    document.getElementById('res-piso').value = ficha.piso || '';
+    document.getElementById('res-estado').value = ficha.estado || 'valente';
+    document.getElementById('res-estado-otro').value = ficha.estadoOtro || '';
+    document.getElementById('res-estado-otro-wrap').style.display = ficha.estado === 'otro' ? 'block' : 'none';
+    document.getElementById('res-patologia').value = ficha.patologiaPrincipal || '';
+    document.getElementById('res-gustos').value = ficha.gustosYMimos || '';
+    document.getElementById('form-residente-titulo').textContent = 'Editar residente — ' + r.nombre;
+    document.getElementById('btn-guardar-residente').textContent = 'Guardar cambios';
+    document.getElementById('btn-cancelar-residente').style.display = 'inline-block';
+    document.getElementById('btn-eliminar-residente').style.display = 'inline-block';
+  }
+
+  resSelector.addEventListener('change', function(){
+    var r = currentResidente(resSelector);
+    if(r) cargarResidenteEnForm(r); else limpiarFormResidente();
+  });
+  document.getElementById('btn-nuevo-residente').addEventListener('click', limpiarFormResidente);
+  document.getElementById('btn-cancelar-residente').addEventListener('click', limpiarFormResidente);
 
   document.getElementById('form-residente').addEventListener('submit', function(e){
     e.preventDefault();
@@ -467,129 +664,49 @@
       fechaIngreso: ingreso,
       fechaEgreso: fechaEgreso,
       motivoEgreso: fechaEgreso ? motivoEgreso : '',
-      detalleEgreso: fechaEgreso ? document.getElementById('res-detalle-egreso').value.trim() : '',
-      cuotaPermanencia: num(document.getElementById('res-cuota').value)
+      detalleEgreso: fechaEgreso ? document.getElementById('res-detalle-egreso').value.trim() : ''
     };
-    if(editandoResidenteId){
-      var existente = residentes.find(function(x){ return x.id === editandoResidenteId; });
+    var id = editandoResidenteId;
+    if(id){
+      var existente = residentes.find(function(x){ return x.id === id; });
       if(existente) Object.assign(existente, datos);
     } else {
-      datos.id = uid();
+      id = uid();
+      datos.id = id;
       datos.contactos = [];
+      datos.cuotaPermanencia = 0;
       residentes.push(datos);
     }
     saveResidentes();
-    cancelarEdicionResidente();
-    renderResidentes();
+    var ficha = getFicha(id);
+    ficha.fechaNacimiento = document.getElementById('res-fecha-nacimiento').value;
+    ficha.habitacion = document.getElementById('res-habitacion').value.trim();
+    ficha.piso = document.getElementById('res-piso').value.trim();
+    ficha.estado = document.getElementById('res-estado').value;
+    ficha.estadoOtro = document.getElementById('res-estado-otro').value.trim();
+    ficha.patologiaPrincipal = document.getElementById('res-patologia').value.trim();
+    ficha.gustosYMimos = document.getElementById('res-gustos').value.trim();
+    saveFichas();
+    limpiarFormResidente();
     refreshSelectors();
   });
 
-  function editarResidente(id){
-    var r = residentes.find(function(x){ return x.id === id; });
-    if(!r) return;
-    editandoResidenteId = id;
-    document.getElementById('res-nombre').value = r.nombre;
-    document.getElementById('res-rut').value = r.rut || '';
-    document.getElementById('res-ingreso').value = r.fechaIngreso || '';
-    document.getElementById('res-egreso').value = r.fechaEgreso || '';
-    document.getElementById('res-motivo-egreso').value = r.motivoEgreso || '';
-    document.getElementById('res-detalle-egreso').value = r.detalleEgreso || '';
-    actualizarVisibilidadEgreso();
-    document.getElementById('res-cuota').value = r.cuotaPermanencia;
-    document.getElementById('form-residente-titulo').textContent = 'Editar residente — ' + r.nombre;
-    document.getElementById('btn-guardar-residente').textContent = 'Guardar cambios';
-    document.getElementById('btn-cancelar-residente').style.display = 'inline-block';
-    document.getElementById('form-residente').scrollIntoView({ behavior:'smooth', block:'start' });
-  }
-
-  function estadoResidente(r){
-    if(r.fechaEgreso && r.fechaEgreso <= todayStr()) return 'egresado';
-    return 'activo';
-  }
-
-  function renderResidentes(){
-    var tbody = document.getElementById('tabla-residentes');
-    if(residentes.length === 0){
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">A&uacute;n no hay residentes registrados.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = residentes.map(function(r){
-      var estado = estadoResidente(r);
-      var motivoTxt = r.motivoEgreso ? (MOTIVO_EGRESO_LABEL[r.motivoEgreso] || r.motivoEgreso) : '';
-      var badge = estado === 'activo' ? '<span class="badge ok">Activo</span>' : '<span class="badge off" title="'+esc(motivoTxt)+'">Egresado' + (motivoTxt ? ' — '+esc(motivoTxt) : '') + '</span>';
-      return '<tr>'+
-        '<td>'+esc(r.nombre)+'</td>'+
-        '<td class="mono">'+esc(r.rut||'—')+'</td>'+
-        '<td class="mono">'+fmtDate(r.fechaIngreso)+'</td>'+
-        '<td class="mono">'+fmtDate(r.fechaEgreso)+'</td>'+
-        '<td>'+badge+'</td>'+
-        '<td class="num">'+fmtCLP(r.cuotaPermanencia)+'</td>'+
-        '<td style="white-space:nowrap;"><button class="secondary small" data-edit="'+r.id+'">Editar</button> <button class="danger" data-del="'+r.id+'">Eliminar</button></td>'+
-      '</tr>';
-    }).join('');
-  }
-  document.getElementById('tabla-residentes').addEventListener('click', function(e){
-    var editBtn = e.target.closest('[data-edit]');
-    if(editBtn){ editarResidente(editBtn.dataset.edit); return; }
-    var btn = e.target.closest('[data-del]');
-    if(!btn) return;
-    var id = btn.dataset.del;
+  document.getElementById('btn-eliminar-residente').addEventListener('click', function(){
+    var id = editandoResidenteId;
     var r = residentes.find(function(x){ return x.id===id; });
     if(!r) return;
-    if(!confirm('¿Eliminar a '+r.nombre+'? Esto también elimina su ficha médica, medicamentos, cuidados y checklist en el módulo de Ficha médica.')) return;
+    if(!confirm('¿Eliminar a '+r.nombre+'? Esto también elimina su ficha médica, cuidados y checklist.')) return;
     residentes = residentes.filter(function(x){ return x.id!==id; });
     saveResidentes();
-    // Limpieza en cascada de datos del módulo de Ficha médica.
-    var fichas = window.storage.get('fichas', {});
-    if(fichas[id]){ delete fichas[id]; window.storage.set('fichas', fichas); }
-    var checklistCuidados = window.storage.get('cuidados_checklist', {});
+    if(fichas[id]){ delete fichas[id]; saveFichas(); }
     var changed = false;
-    Object.keys(checklistCuidados).forEach(function(k){ if(k.indexOf(id+'_')===0){ delete checklistCuidados[k]; changed = true; } });
-    if(changed) window.storage.set('cuidados_checklist', checklistCuidados);
-    if(editandoResidenteId === id) cancelarEdicionResidente();
-    renderResidentes();
+    Object.keys(checklist).forEach(function(k){ if(k.indexOf(id+'_')===0){ delete checklist[k]; changed = true; } });
+    if(changed) saveChecklist();
+    limpiarFormResidente();
     refreshSelectors();
   });
 
-  // ---------- SELECTOR DE CONTACTOS ----------
-  function fillResidenteSelect(sel){
-    var prev = sel.value;
-    if(residentes.length===0){
-      sel.innerHTML = '<option value="">(sin residentes)</option>';
-      return;
-    }
-    sel.innerHTML = residentes.map(function(r){
-      var estado = estadoResidente(r) === 'activo' ? '' : ' (egresado)';
-      return '<option value="'+r.id+'">'+esc(r.nombre)+estado+'</option>';
-    }).join('');
-    if(residentes.some(function(r){ return r.id===prev; })) sel.value = prev;
-  }
-
-  var contactoSel = document.getElementById('contacto-residente');
-  function refreshSelectors(){ fillResidenteSelect(contactoSel); }
-  refreshSelectors();
-  contactoSel.addEventListener('change', loadContactos);
-
-  function currentResidente(sel){
-    var id = sel.value;
-    return residentes.find(function(r){ return r.id===id; });
-  }
-
-  function loadContactos(){
-    var r = currentResidente(contactoSel);
-    var contentEl = document.getElementById('contacto-content');
-    var emptyEl = document.getElementById('contacto-empty');
-    if(!r){
-      contentEl.style.display = 'none';
-      emptyEl.style.display = 'block';
-      return;
-    }
-    contentEl.style.display = 'block';
-    emptyEl.style.display = 'none';
-    renderContactos(r);
-    document.getElementById('ficha-save-flash').textContent = '';
-  }
-
+  // ---------- TAB 2: ACEPTACIÓN DE INFORME MÉDICO (contactos + documentos) ----------
   function renderContactos(r){
     var el = document.getElementById('contactos-list');
     if(r.contactos.length === 0){
@@ -610,14 +727,30 @@
     }).join('');
   }
 
+  function loadAceptacion(){
+    var r = currentResidente(acepSel);
+    var contentEl = document.getElementById('acep-content');
+    var emptyEl = document.getElementById('acep-empty');
+    if(!r){ contentEl.style.display='none'; emptyEl.style.display='block'; return; }
+    contentEl.style.display='block'; emptyEl.style.display='none';
+    var ficha = getFicha(r.id);
+    document.getElementById('acep-info-card').innerHTML = '<div class="info-card">'+
+      '<div class="info-block"><div class="info-label">Residente</div><div class="info-value">'+esc(r.nombre)+'</div></div>'+
+      '<div class="info-block"><div class="info-label">Patología principal</div><div class="info-value">'+esc(ficha.patologiaPrincipal||'—')+'</div></div>'+
+      '<div class="info-block"><div class="info-label">Estado</div><div class="info-value">'+esc(estadoLabel(ficha))+'</div></div>'+
+    '</div>';
+    renderContactos(r);
+    document.getElementById('ficha-save-flash').textContent = '';
+  }
+  acepSel.addEventListener('change', loadAceptacion);
+
   document.getElementById('btn-add-contacto').addEventListener('click', function(){
-    var r = currentResidente(contactoSel);
+    var r = currentResidente(acepSel);
     if(!r) return;
     var nombre = document.getElementById('contacto-nombre').value.trim();
     if(!nombre) return;
     r.contactos.push({
-      id: uid(),
-      nombre: nombre,
+      id: uid(), nombre: nombre,
       parentesco: document.getElementById('contacto-parentesco').value.trim(),
       telefono: document.getElementById('contacto-telefono').value.trim(),
       email: document.getElementById('contacto-email').value.trim(),
@@ -635,11 +768,298 @@
   document.getElementById('contactos-list').addEventListener('click', function(e){
     var btn = e.target.closest('[data-del-contacto]');
     if(!btn) return;
-    var r = currentResidente(contactoSel);
+    var r = currentResidente(acepSel);
     if(!r) return;
     r.contactos = r.contactos.filter(function(c){ return c.id !== btn.dataset.delContacto; });
     saveResidentes();
     renderContactos(r);
+  });
+
+  // ---------- TAB 3: DIAGNÓSTICOS Y CUIDADOS ----------
+  function loadDiag(){
+    var r = currentResidente(diagSel);
+    var contentEl = document.getElementById('diag-content');
+    var emptyEl = document.getElementById('diag-empty');
+    if(!r){ contentEl.style.display='none'; emptyEl.style.display='block'; return; }
+    contentEl.style.display='block'; emptyEl.style.display='none';
+    renderDiagnosticos(r.id);
+    renderCuidados(r.id);
+    document.getElementById('diag-save-flash').textContent = '';
+  }
+  diagSel.addEventListener('change', loadDiag);
+
+  function renderDiagnosticos(residenteId){
+    var ficha = getFicha(residenteId);
+    var el = document.getElementById('diagnosticos-list');
+    if(ficha.diagnosticos.length === 0){
+      el.innerHTML = '<p class="empty-hint">Sin diagnósticos registrados todavía.</p>';
+      return;
+    }
+    el.innerHTML = ficha.diagnosticos.map(function(d){
+      var medsHtml = (d.medicamentos||[]).map(function(m){
+        return '<div class="med-row" data-med="'+m.id+'">'+
+          '<div><span class="lbl">Medicamento</span>'+esc(m.nombre)+'</div>'+
+          '<div><span class="lbl">Dosis</span>'+esc(m.dosis||'—')+'</div>'+
+          '<div><span class="lbl">Horarios</span>'+esc(m.horarios||'—')+'</div>'+
+          '<div><span class="lbl">Indicaciones</span>'+esc(m.indicaciones||'—')+'</div>'+
+          '<div><button type="button" class="danger small" data-del-med="'+d.id+'|'+m.id+'">Eliminar</button></div>'+
+        '</div>';
+      }).join('') || '<p class="field-hint">Sin medicamentos para este diagnóstico.</p>';
+      return '<div class="diag-block" data-diag="'+d.id+'">'+
+        '<div class="diag-head"><h4>'+esc(d.nombre)+'</h4><button type="button" class="danger small" data-del-diag="'+d.id+'">Eliminar diagnóstico</button></div>'+
+        medsHtml+
+        '<div class="subtable">'+
+          '<div class="subtable-grid">'+
+            '<div><div class="mini-label">Medicamento</div><input class="med-nombre" placeholder="Ej. Metformina 850mg"></div>'+
+            '<div><div class="mini-label">Dosis</div><input class="med-dosis" placeholder="Ej. 1 comprimido"></div>'+
+            '<div><div class="mini-label">Horarios</div><input class="med-horarios" placeholder="08:00, 20:00"></div>'+
+            '<div><div class="mini-label">Indicaciones</div><input class="med-indicaciones" placeholder="Ej. Con alimentos"></div>'+
+            '<div><button type="button" class="secondary small" data-add-med="'+d.id+'">+ Agregar medicamento</button></div>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  document.getElementById('btn-add-diag').addEventListener('click', function(){
+    var r = currentResidente(diagSel);
+    if(!r) return;
+    var input = document.getElementById('nuevo-diag-nombre');
+    var nombre = input.value.trim();
+    if(!nombre) return;
+    getFicha(r.id).diagnosticos.push({ id: uid(), nombre: nombre, medicamentos: [] });
+    saveFichas();
+    input.value = '';
+    renderDiagnosticos(r.id);
+  });
+
+  document.getElementById('diagnosticos-list').addEventListener('click', function(e){
+    var r = currentResidente(diagSel);
+    if(!r) return;
+    var ficha = getFicha(r.id);
+    var delDiagBtn = e.target.closest('[data-del-diag]');
+    if(delDiagBtn){
+      if(!confirm('¿Eliminar este diagnóstico y todos sus medicamentos?')) return;
+      ficha.diagnosticos = ficha.diagnosticos.filter(function(d){ return d.id !== delDiagBtn.dataset.delDiag; });
+      saveFichas(); renderDiagnosticos(r.id); return;
+    }
+    var delMedBtn = e.target.closest('[data-del-med]');
+    if(delMedBtn){
+      var parts = delMedBtn.dataset.delMed.split('|');
+      var diag = ficha.diagnosticos.find(function(d){ return d.id === parts[0]; });
+      if(diag) diag.medicamentos = diag.medicamentos.filter(function(m){ return m.id !== parts[1]; });
+      saveFichas(); renderDiagnosticos(r.id); return;
+    }
+    var addMedBtn = e.target.closest('[data-add-med]');
+    if(addMedBtn){
+      var diagId = addMedBtn.dataset.addMed;
+      var block = addMedBtn.closest('.diag-block');
+      var nombre = block.querySelector('.med-nombre').value.trim();
+      if(!nombre) return;
+      var diag2 = ficha.diagnosticos.find(function(d){ return d.id === diagId; });
+      diag2.medicamentos.push({
+        id: uid(), nombre: nombre,
+        dosis: block.querySelector('.med-dosis').value.trim(),
+        horarios: block.querySelector('.med-horarios').value.trim(),
+        indicaciones: block.querySelector('.med-indicaciones').value.trim()
+      });
+      saveFichas(); renderDiagnosticos(r.id);
+    }
+  });
+
+  function renderCuidados(residenteId){
+    var ficha = getFicha(residenteId);
+    var el = document.getElementById('cuidados-list');
+    if(ficha.cuidadosGenerales.length === 0){
+      el.innerHTML = '<p class="empty-hint">Sin cuidados generales registrados todavía.</p>';
+      return;
+    }
+    el.innerHTML = ficha.cuidadosGenerales.map(function(c){
+      return '<div class="subtable">'+
+        '<div class="subtable-grid">'+
+          '<div><div class="mini-label">Tipo</div><span class="badge '+esc(c.tipo)+'">'+esc(TIPO_LABEL[c.tipo]||'Otro')+'</span></div>'+
+          '<div><div class="mini-label">Nombre</div>'+esc(c.nombre)+(c.dosis?' — '+esc(c.dosis):'')+'</div>'+
+          '<div><div class="mini-label">Horarios</div>'+esc(c.horarios||'—')+'</div>'+
+          '<div><div class="mini-label">Indicaciones</div>'+esc(c.indicaciones||'—')+'</div>'+
+          '<div><button type="button" class="danger small" data-del-cuidado="'+c.id+'">Eliminar</button></div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  document.getElementById('btn-add-cuidado').addEventListener('click', function(){
+    var r = currentResidente(diagSel);
+    if(!r) return;
+    var nombre = document.getElementById('cui-nombre').value.trim();
+    if(!nombre) return;
+    getFicha(r.id).cuidadosGenerales.push({
+      id: uid(), tipo: document.getElementById('cui-tipo').value, nombre: nombre,
+      dosis: document.getElementById('cui-dosis').value.trim(),
+      horarios: document.getElementById('cui-horarios').value.trim(),
+      indicaciones: document.getElementById('cui-indicaciones').value.trim()
+    });
+    saveFichas();
+    document.getElementById('cui-nombre').value = '';
+    document.getElementById('cui-dosis').value = '';
+    document.getElementById('cui-horarios').value = '';
+    document.getElementById('cui-indicaciones').value = '';
+    renderCuidados(r.id);
+  });
+
+  document.getElementById('cuidados-list').addEventListener('click', function(e){
+    var btn = e.target.closest('[data-del-cuidado]');
+    if(!btn) return;
+    var r = currentResidente(diagSel);
+    if(!r) return;
+    var ficha = getFicha(r.id);
+    ficha.cuidadosGenerales = ficha.cuidadosGenerales.filter(function(c){ return c.id !== btn.dataset.delCuidado; });
+    saveFichas(); renderCuidados(r.id);
+  });
+
+  // ---------- TAB 4: CONTROL DIARIO ----------
+  function buildCareItems(residenteId){
+    var ficha = getFicha(residenteId);
+    var items = [];
+    ficha.diagnosticos.forEach(function(d){
+      (d.medicamentos||[]).forEach(function(m){
+        var horarios = parseHorarios(m.horarios);
+        if(horarios.length===0) horarios = ['(sin horario)'];
+        horarios.forEach(function(h){
+          items.push({ key: 'med_'+m.id+'|'+h, categoria:'medicamento', catLabel:'Medicamento',
+            nombre: m.nombre+' — '+d.nombre, detalle: (m.dosis||'')+(m.indicaciones?' · '+m.indicaciones:''), horario: h });
+        });
+      });
+    });
+    ficha.cuidadosGenerales.forEach(function(c){
+      var horarios = parseHorarios(c.horarios);
+      if(horarios.length===0) horarios = ['(sin horario)'];
+      horarios.forEach(function(h){
+        items.push({ key: 'cui_'+c.id+'|'+h, categoria: c.tipo, catLabel: TIPO_LABEL[c.tipo] || 'Otro',
+          nombre: c.nombre, detalle: (c.dosis?c.dosis+' · ':'')+(c.indicaciones||''), horario: h });
+      });
+    });
+    return items;
+  }
+
+  function checklistKey(residenteId, fecha){ return residenteId+'_'+fecha; }
+  function getChecklistDay(residenteId, fecha){
+    var key = checklistKey(residenteId, fecha);
+    if(!checklist[key]) checklist[key] = {};
+    return checklist[key];
+  }
+
+  var ctlFechaInput = document.getElementById('ctl-fecha');
+  ctlFechaInput.value = todayStr();
+  ctlSel.addEventListener('change', renderControl);
+  ctlFechaInput.addEventListener('change', renderControl);
+  document.getElementById('btn-ctl-prev').addEventListener('click', function(){ ctlFechaInput.value = addDays(ctlFechaInput.value, -1); renderControl(); });
+  document.getElementById('btn-ctl-next').addEventListener('click', function(){ ctlFechaInput.value = addDays(ctlFechaInput.value, 1); renderControl(); });
+
+  function complianceFor(residenteId, fecha){
+    var items = buildCareItems(residenteId);
+    if(items.length === 0) return null;
+    var dayData = getChecklistDay(residenteId, fecha);
+    var hechos = items.filter(function(it){ return dayData[it.key] && dayData[it.key].hecho; }).length;
+    return { total: items.length, hechos: hechos, pct: Math.round((hechos/items.length)*100) };
+  }
+
+  function render7DayCompliance(residenteId){
+    var fechaFin = ctlFechaInput.value;
+    var totalItems = 0, totalHechos = 0, dias = 0;
+    for(var i=0;i<7;i++){
+      var f = addDays(fechaFin, -i);
+      var c = complianceFor(residenteId, f);
+      if(c){ totalItems += c.total; totalHechos += c.hechos; dias++; }
+    }
+    if(dias===0 || totalItems===0) return null;
+    return { pct: Math.round((totalHechos/totalItems)*100), total: totalItems, hechos: totalHechos };
+  }
+
+  function renderComplianceSummary(residenteId, fecha){
+    var summaryEl = document.getElementById('compliance-summary');
+    var today = complianceFor(residenteId, fecha);
+    var week = render7DayCompliance(residenteId);
+    if(!today){ summaryEl.innerHTML = ''; return; }
+    summaryEl.innerHTML = '<div class="compliance-grid">'+
+      '<div class="compliance-stat'+(today.pct<100?' warn':'')+'"><div class="stat-label">Cumplimiento del día</div><div class="stat-value">'+today.pct+'% ('+today.hechos+'/'+today.total+')</div></div>'+
+      (week ? '<div class="compliance-stat'+(week.pct<80?' warn':'')+'"><div class="stat-label">Últimos 7 días</div><div class="stat-value">'+week.pct+'% ('+week.hechos+'/'+week.total+')</div></div>' : '')+
+    '</div>';
+  }
+
+  function renderControl(){
+    var r = currentResidente(ctlSel);
+    var contentEl = document.getElementById('control-content');
+    var summaryEl = document.getElementById('compliance-summary');
+    var infoEl = document.getElementById('ctl-info-card');
+    if(!r){
+      contentEl.innerHTML = '<p class="field-hint">Selecciona un residente para ver su control diario.</p>';
+      summaryEl.innerHTML = ''; infoEl.innerHTML = '';
+      return;
+    }
+    var ficha = getFicha(r.id);
+    infoEl.innerHTML = '<div class="info-card">'+
+      '<div class="info-block"><div class="info-label">Habitación / Piso</div><div class="info-value">'+esc(ficha.habitacion||'—')+' / '+esc(ficha.piso||'—')+'</div></div>'+
+      '<div class="info-block"><div class="info-label">Estado</div><div class="info-value">'+esc(estadoLabel(ficha))+'</div></div>'+
+      '<div class="info-block" style="flex:1;"><div class="info-label">Gustos y mimos sugeridos</div><div class="info-value" style="font-weight:400;">'+esc(ficha.gustosYMimos||'—')+'</div></div>'+
+    '</div>';
+    var items = buildCareItems(r.id);
+    if(items.length === 0){
+      contentEl.innerHTML = '<p class="field-hint">Este residente no tiene medicamentos ni cuidados generales registrados. Agrégalos en la pestaña Diagnósticos y cuidados.</p>';
+      summaryEl.innerHTML = ''; return;
+    }
+    var fecha = ctlFechaInput.value;
+    var dayData = getChecklistDay(r.id, fecha);
+    renderComplianceSummary(r.id, fecha);
+
+    contentEl.innerHTML = items.map(function(it){
+      var rec = dayData[it.key] || {};
+      var checked = !!rec.hecho;
+      return '<div class="care-row'+(checked?' checked':'')+'" data-item="'+it.key+'">'+
+        '<div class="care-top">'+
+          '<input type="checkbox" class="chk-hecho"'+(checked?' checked':'')+'>'+
+          '<div class="care-info">'+
+            '<span class="care-cat '+it.categoria+'">'+esc(it.catLabel)+' · '+esc(it.horario)+'</span>'+
+            '<div class="care-name">'+esc(it.nombre)+'</div>'+
+            (it.detalle ? '<div class="care-detail">'+esc(it.detalle)+'</div>' : '')+
+          '</div>'+
+        '</div>'+
+        '<div class="care-execute" style="'+(checked?'':'display:none;')+'">'+
+          '<div><div class="mini-label">Realizado por</div><input class="inp-quien" value="'+esc(rec.quien||'')+'" placeholder="Nombre de quien lo realizó"></div>'+
+          '<div><div class="mini-label">Hora</div><input class="inp-hora" value="'+esc(rec.hora||'')+'" placeholder="Ej. 08:15"></div>'+
+          '<div class="full"><div class="mini-label">Notas (opcional)</div><input class="inp-notas" value="'+esc(rec.notas||'')+'" placeholder="Observaciones"></div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  document.getElementById('control-content').addEventListener('change', function(e){
+    var row = e.target.closest('.care-row');
+    if(!row) return;
+    var r = currentResidente(ctlSel);
+    if(!r) return;
+    var fecha = ctlFechaInput.value;
+    var dayData = getChecklistDay(r.id, fecha);
+    var key = row.dataset.item;
+    if(!dayData[key]) dayData[key] = { hecho:false, quien:'', hora:'', notas:'' };
+
+    if(e.target.classList.contains('chk-hecho')){
+      dayData[key].hecho = e.target.checked;
+      var exec = row.querySelector('.care-execute');
+      if(e.target.checked){
+        exec.style.display = '';
+        if(!dayData[key].hora){
+          var now = new Date();
+          dayData[key].hora = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+          row.querySelector('.inp-hora').value = dayData[key].hora;
+        }
+      } else { exec.style.display = 'none'; }
+      row.classList.toggle('checked', e.target.checked);
+    }
+    if(e.target.classList.contains('inp-quien')) dayData[key].quien = e.target.value;
+    if(e.target.classList.contains('inp-hora')) dayData[key].hora = e.target.value;
+    if(e.target.classList.contains('inp-notas')) dayData[key].notas = e.target.value;
+    saveChecklist();
+    renderComplianceSummary(r.id, fecha);
   });
 
   // ---------- REPORTES PDF ----------
@@ -649,86 +1069,54 @@
     setTimeout(function(){ if(el.textContent===msg) el.textContent=''; }, ms||4000);
   }
 
-  document.getElementById('btn-pdf-residentes').addEventListener('click', async function(){
-    if(residentes.length===0){ flash('residentes-save-flash','No hay residentes para incluir en el reporte.'); return; }
-    try{
-      var filas = residentes.map(function(r){
-        var estado = estadoResidente(r) === 'activo' ? 'Activo' : 'Egresado el ' + fmtDate(r.fechaEgreso) + (r.motivoEgreso ? ' — ' + (MOTIVO_EGRESO_LABEL[r.motivoEgreso] || r.motivoEgreso) : '');
-        return { label: r.nombre+(r.rut?' — '+r.rut:''), valor: fmtCLP(r.cuotaPermanencia)+'/mes', nota: 'Ingreso '+fmtDate(r.fechaIngreso)+' · '+estado };
-      });
-      var totalActivos = residentes.filter(function(r){ return estadoResidente(r)==='activo'; });
-      var totalCuota = totalActivos.reduce(function(a,r){ return a+(r.cuotaPermanencia||0); },0);
-      var doc = ReportPDF.buildDoc({
-        titulo: 'Nómina de residentes',
-        subtitulo: residentes.length+' residente(s) registrados · '+totalActivos.length+' activos',
-        empresa: empresa,
-        secciones: [{ titulo:'Residentes', filas: filas }],
-        resumenFinal: { label:'Ingreso mensual por cuotas (residentes activos)', valor: fmtCLP(totalCuota) },
-        notaPie: 'Reporte confidencial generado desde el módulo de Ingreso — Residencia Senior Omar Wall.'
-      });
-      var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('residentes-'+(empresa.nombre||'residencia'))+'.pdf');
-      flash('residentes-save-flash', res.mensaje, 6000);
-    }catch(e){
-      flash('residentes-save-flash', '✗ '+e.message, 6000);
-    }
-  });
-
   document.getElementById('btn-pdf-ficha').addEventListener('click', async function(){
-    var r = currentResidente(contactoSel);
+    var r = currentResidente(acepSel);
     if(!r) return;
     try{
+      var ficha = getFicha(r.id);
       var estado = estadoResidente(r) === 'activo' ? 'Activo' : 'Egresado el ' + fmtDate(r.fechaEgreso);
       var secciones = [
-        {
-          titulo: 'Datos generales',
-          filas: [
-            { label:'Nombre', valor: r.nombre },
-            { label:'RUT', valor: r.rut || '—' },
-            { label:'Fecha de ingreso', valor: fmtDate(r.fechaIngreso) },
-            { label:'Estado', valor: estado },
-            { label:'Cuota de incorporación mensual', valor: fmtCLP(r.cuotaPermanencia) }
-          ]
-        },
-        {
-          titulo: 'Contactos de emergencia / apoderado',
-          sub: r.contactos.length === 0 ? 'Sin contactos registrados.' : '',
+        { titulo: 'Datos generales', filas: [
+          { label:'Nombre', valor: r.nombre }, { label:'RUT', valor: r.rut || '—' },
+          { label:'Fecha de ingreso', valor: fmtDate(r.fechaIngreso) }, { label:'Estado', valor: estado },
+          { label:'Patología principal', valor: ficha.patologiaPrincipal || '—' }
+        ]},
+        { titulo: 'Contactos de emergencia / apoderado', sub: r.contactos.length === 0 ? 'Sin contactos registrados.' : '',
           filas: r.contactos.map(function(c){
             return { label: c.nombre+(c.apoderado?' (Apoderado)':'')+(c.parentesco?' — '+c.parentesco:''), valor: c.telefono || '—', nota: c.email || '' };
           })
         }
       ];
       var doc = ReportPDF.buildDoc({
-        titulo: 'Ficha de ingreso',
-        subtitulo: r.nombre,
-        empresa: empresa,
-        secciones: secciones,
-        notaPie: 'Ficha confidencial generada desde el módulo de Ingreso — Residencia Senior Omar Wall. Contiene datos personales, de contacto y financieros — uso interno restringido.'
+        titulo: 'Ficha de ingreso', subtitulo: r.nombre, empresa: empresa, secciones: secciones,
+        notaPie: 'Ficha confidencial generada desde el módulo de Residentes — Residencia Senior Omar Wall.'
       });
       var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('ingreso-'+r.nombre)+'.pdf');
       flash('ficha-save-flash', res.mensaje, 6000);
-      // La Carta de Derechos y Deberes y el Consentimiento Voluntario de Ingreso son documentos de firma
-      // obligatoria al ingreso de cada residente (Decreto 20, Art. 29) — se generan automáticamente junto
-      // con la ficha de ingreso, en un solo click, para que no quede pendiente ninguno de los dos.
-      generarDocumentosIngresoResidente(r);
-    }catch(e){
-      flash('ficha-save-flash', '✗ '+e.message, 6000);
-    }
+    }catch(e){ flash('ficha-save-flash', '✗ '+e.message, 6000); }
+  });
+
+  document.getElementById('btn-pdf-consentimiento').addEventListener('click', function(){
+    var r = currentResidente(acepSel);
+    if(!r) return;
+    generarDocumentosIngresoResidente(r);
   });
 
   function generarDocumentosIngresoResidente(r){
     try{
+      var ficha = getFicha(r.id);
       var clauses = [
         { title: 'I. DERECHOS DE LA PERSONA MAYOR RESIDENTE', body:
           'A ser tratada con dignidad, respeto y buen trato, sin discriminación de ningún tipo; a la privacidad y confidencialidad de su información personal y de salud; a recibir información clara sobre su estado de salud, cuidados y tratamiento; a participar en las decisiones sobre su propio cuidado, en la medida de sus capacidades; a mantener sus vínculos familiares y sociales, y su libertad de culto; a recibir atención oportuna en caso de urgencia médica; a un entorno seguro, limpio y adecuado a sus necesidades; a presentar reclamos o sugerencias sin temor a represalias; a conocer el Reglamento Interno del establecimiento; y a decidir voluntariamente su ingreso y, en las condiciones que la ley permita, su egreso del establecimiento.',
           note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 29.' },
         { title: 'II. DEBERES DE LA PERSONA MAYOR RESIDENTE', body:
           'Respetar la convivencia y los derechos de los demás residentes y del personal; cumplir con el Reglamento Interno del establecimiento; informar oportunamente cambios relevantes en su situación de salud, cuando sea posible; mantener al día el pago de la cuota de permanencia acordada; y comunicar oportunamente cualquier decisión de traslado o egreso del establecimiento.' },
-        { title: 'III. CONSENTIMIENTO VOLUNTARIO DE INGRESO', body:
-          'Quien suscribe declara: haber recibido información clara y suficiente sobre los servicios, las condiciones de ingreso y el funcionamiento de la Residencia Senior Omar Wall; haber tomado conocimiento del Reglamento Interno y de la Carta de Derechos y Deberes del establecimiento; consentir voluntariamente el ingreso de ' + r.nombre + (r.rut ? ', RUT ' + r.rut : '') + ' a la residencia, en las condiciones informadas; y haber sido informado/a de que el ingreso es voluntario y que puede solicitar el egreso en cualquier momento, sujeto a las condiciones del contrato de prestación de servicios.',
+        { title: 'III. ACEPTACIÓN DE INFORME MÉDICO Y CONSENTIMIENTO VOLUNTARIO DE INGRESO', body:
+          'Quien suscribe declara: haber recibido información clara y suficiente sobre los servicios, las condiciones de ingreso y el funcionamiento de la Residencia Senior Omar Wall; haber tomado conocimiento del Reglamento Interno y de la Carta de Derechos y Deberes del establecimiento; conocer y aceptar la patología principal informada — ' + (ficha.patologiaPrincipal || 'sin patología relevante declarada') + ' — y las indicaciones de cuidado asociadas; consentir voluntariamente el ingreso de ' + r.nombre + (r.rut ? ', RUT ' + r.rut : '') + ' a la residencia, en las condiciones informadas; y haber sido informado/a de que el ingreso es voluntario y que puede solicitar el egreso en cualquier momento, sujeto a las condiciones del contrato de prestación de servicios.',
           note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 12 letra b) y 29. Fecha de ingreso: ' + fmtDate(r.fechaIngreso) + '.' }
       ];
       var doc = ReportPDF.buildContractDoc({
-        titulo: 'DOCUMENTOS DE INGRESO',
+        titulo: 'DOCUMENTOS DE INGRESO Y ACEPTACIÓN DE INFORME MÉDICO',
         subtitulo: r.nombre + (r.rut ? ' · RUT ' + r.rut : ''),
         disclaimer: 'Estos documentos se entregan al residente o a su representante legal al momento del ingreso a la Residencia Senior Omar Wall, conforme al Decreto Supremo N°20/2021 del Ministerio de Salud. La Carta de Derechos y Deberes debe entregarse además por escrito y mantenerse exhibida en un lugar visible del establecimiento.',
         clauses: clauses,
@@ -747,8 +1135,68 @@
     }
   }
 
+  document.getElementById('btn-pdf-diag').addEventListener('click', async function(){
+    var r = currentResidente(diagSel);
+    if(!r) return;
+    try{
+      var ficha = getFicha(r.id);
+      var secciones = [
+        { titulo: 'Ubicación y estado', filas: [
+          { label: 'Patología principal', valor: ficha.patologiaPrincipal || '—' },
+          { label: 'Habitación', valor: ficha.habitacion || '—' }, { label: 'Piso', valor: ficha.piso || '—' },
+          { label: 'Estado', valor: estadoLabel(ficha) },
+          { label: 'Gustos y mimos sugeridos', valor: ficha.gustosYMimos || '—' }
+        ]}
+      ];
+      if(ficha.diagnosticos.length === 0){
+        secciones.push({ titulo:'Diagnósticos', sub:'Sin diagnósticos registrados.', filas: [] });
+      } else {
+        ficha.diagnosticos.forEach(function(d){
+          secciones.push({
+            titulo: 'Diagnóstico — ' + d.nombre, sub: (d.medicamentos||[]).length === 0 ? 'Sin medicamentos asociados.' : '',
+            filas: (d.medicamentos||[]).map(function(m){
+              return { label: m.nombre+(m.dosis?' — '+m.dosis:''), valor: m.horarios||'—', nota: m.indicaciones||'' };
+            })
+          });
+        });
+      }
+      var doc = ReportPDF.buildDoc({
+        titulo: 'Diagnósticos y cuidados', subtitulo: r.nombre, empresa: empresa, secciones: secciones,
+        notaPie: 'Ficha generada desde el módulo de Residentes — Residencia Senior Omar Wall.'
+      });
+      var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('diagnosticos-'+r.nombre)+'.pdf');
+      flash('diag-save-flash', res.mensaje, 6000);
+    }catch(e){ flash('diag-save-flash', '✗ '+e.message, 6000); }
+  });
+
+  document.getElementById('btn-pdf-control').addEventListener('click', async function(){
+    var r = currentResidente(ctlSel);
+    if(!r){ flash('control-save-flash','Selecciona un residente primero.'); return; }
+    try{
+      var fecha = ctlFechaInput.value;
+      var items = buildCareItems(r.id);
+      if(items.length === 0){ flash('control-save-flash','Este residente no tiene cuidados registrados.'); return; }
+      var dayData = getChecklistDay(r.id, fecha);
+      var filas = items.map(function(it){
+        var rec = dayData[it.key] || {};
+        var estado = rec.hecho ? ('Realizado ✓ por ' + (rec.quien||'—') + (rec.hora?' a las '+rec.hora:'')) : 'Pendiente';
+        return { label: it.catLabel+' — '+it.nombre+' ('+it.horario+')', valor: estado, nota: rec.notas || it.detalle || '' };
+      });
+      var c = complianceFor(r.id, fecha);
+      var doc = ReportPDF.buildDoc({
+        titulo: 'Control diario de cuidados', subtitulo: r.nombre + ' — ' + fmtDate(fecha), empresa: empresa,
+        secciones: [{ titulo:'Checklist del día', filas: filas }],
+        resumenFinal: { label:'Cumplimiento del día', valor: c.pct+'% ('+c.hechos+'/'+c.total+')' },
+        firmas: [{ label:'Firma de quien realizó los cuidados' }, { label:'Firma responsable del turno' }],
+        notaPie: 'Reporte generado desde el módulo de Residentes — Residencia Senior Omar Wall. El registro digital de "Realizado por" queda arriba; esta firma es la constancia en papel.'
+      });
+      var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('cuidados-'+r.nombre+'-'+fecha)+'.pdf');
+      flash('control-save-flash', res.mensaje, 6000);
+    }catch(e){ flash('control-save-flash', '✗ '+e.message, 6000); }
+  });
+
   // ---------- INIT ----------
-  renderResidentes();
+  limpiarFormResidente();
 })();
 </script>
 </body>

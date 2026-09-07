@@ -4,16 +4,14 @@
 
   // Número de versión visible en toda la app — súbelo con cada tanda de cambios notables
   // (sobre todo de diseño/paleta) para poder referirse a "la versión X" al dar feedback.
-  var APP_VERSION = "3.15";
+  var APP_VERSION = "4.1";
 
   var STEPS = [
-    { file: "control-residentes.html", num: "1", label: "Ingreso de residentes" },
-    { file: "ficha-medica.html", num: "2", label: "Ficha médica y cuidados" },
-    { file: "control-horas.html", num: "3", label: "Trabajadores y liquidaciones" },
-    { file: "control-financiero.html", num: "4", label: "Gastos" },
-    { file: "estado-resultados.html", num: "5", label: "Estado de resultados" },
-    { file: "cumplimiento-eleam.html", num: "6", label: "Cumplimiento ELEAM" },
-    { file: "proyeccion-abuelos.html", num: "7", label: "Proyección por residente" }
+    { file: "control-residentes.html", num: "1", label: "Residentes" },
+    { file: "administracion.html", num: "2", label: "Administración" },
+    { file: "control-financiero.html", num: "3", label: "Gastos" },
+    { file: "estado-resultados.html", num: "4", label: "Estado de resultados" },
+    { file: "proyeccion-abuelos.html", num: "5", label: "Proyección por residente" }
   ];
 
   function currentFile() {

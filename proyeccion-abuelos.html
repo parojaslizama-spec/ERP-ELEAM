@@ -139,12 +139,13 @@
   <div class="card">
     <h2>Dotaci&oacute;n m&iacute;nima por tramo</h2>
     <p class="card-sub">Define desde cu&aacute;ntos residentes cambia la dotaci&oacute;n y cu&aacute;ntas personas de cada tipo se contratan en ese tramo. "Cuidador/TENS" y "Cocina/Aseo" usan el costo real promedio de esos cargos (o el de respaldo si a&uacute;n no los contratas) &mdash; ver Supuestos.</p>
+    <div id="dotacionLegalInfo" class="field-hint" style="margin-bottom:10px;"></div>
     <table>
       <thead>
         <tr>
           <th>Tramo</th><th class="num">Hasta (N&deg; residentes)</th>
           <th class="num">Cuidadores / TENS</th><th class="num">Cocina / Aseo</th>
-          <th class="num">N&deg; empleados</th><th class="num">Costo empresa mensual</th><th></th>
+          <th class="num">N&deg; empleados</th><th class="num">Costo empresa mensual</th><th>M&iacute;nimo Seremi</th><th></th>
         </tr>
       </thead>
       <tbody id="tablaTramos"></tbody>
@@ -152,6 +153,7 @@
     <div class="actions-row">
       <button class="secondary small" id="btnAgregarTramo" type="button">+ Agregar tramo</button>
       <button class="secondary small" id="btnRestaurarTramos" type="button">Restaurar tramos por defecto</button>
+      <button class="gold small" id="btnAplicarLegalTodos" type="button">Aplicar m&iacute;nimo Seremi a todos los tramos</button>
     </div>
   </div>
 
@@ -223,6 +225,32 @@
     var residentes = window.storage.get('residentes', []);
     var hoy = todayStr();
     return residentes.filter(function(r){ return !(r.fechaEgreso && r.fechaEgreso <= hoy); });
+  }
+
+  // ---------- DOTACIÓN MÍNIMA LEGAL (Decreto 20/2021 MINSAL, Art. 15/16/17) ----------
+  // Art. 15 (residentes con dependencia): 1 cuidador cada 8 de día, 1 cada 12 de noche.
+  // Art. 16 (residentes autovalentes): 1 cuidador cada 20, de día y de noche.
+  // Art. 17 ("regla que nunca se puede bajar"): mínimo absoluto de 2 cuidadores presentes de noche siempre.
+  function mixDependenciaActual(){
+    var fichas = window.storage.get('fichas', {});
+    var activos = residentesActivos();
+    if(activos.length === 0) return { pctDependencia: 1, nMuestras: 0 };
+    var dependientes = activos.filter(function(r){
+      var f = fichas[r.id];
+      var estado = f ? f.estado : null;
+      return estado === 'postrado' || estado === 'semivalente' || estado === 'otro' || !estado;
+    }).length;
+    return { pctDependencia: dependientes/activos.length, nMuestras: activos.length };
+  }
+  function dotacionLegalPara(N, pctDependencia){
+    var nDep = Math.round(N*pctDependencia), nAut = N - nDep;
+    var posDia = Math.ceil(nDep/8) + Math.ceil(nAut/20);
+    var posNoche = Math.max(Math.ceil(nDep/12) + Math.ceil(nAut/20), 2);
+    // Turnos que rotan día y noche (ciclo 4×3 estándar del módulo Administración): cada cuidador cubre
+    // 4 turnos de 7 días de ciclo — headcount = turnos-semana necesarios ÷ turnos que cubre una persona.
+    var turnosSemanaNecesarios = 7*(posDia+posNoche);
+    var turnosPorPersonaSemana = 4; // ciclo 4×3: 4 turnos trabajados cada 7 días
+    return { nDep: nDep, nAut: nAut, posDia: posDia, posNoche: posNoche, headcount: Math.ceil(turnosSemanaNecesarios/turnosPorPersonaSemana) };
   }
 
   // ---------- DATOS REALES: costo empresa por categoría de cargo ----------
@@ -398,17 +426,25 @@
 
   // ---------- RENDER: tramos ----------
   function renderTramos(costos){
+    var mix = mixDependenciaActual();
+    var infoEl = document.getElementById('dotacionLegalInfo');
+    infoEl.textContent = mix.nMuestras > 0
+      ? 'Mezcla actual de residentes: ' + Math.round(mix.pctDependencia*100) + '% con dependencia (postrado/semivalente), ' + Math.round((1-mix.pctDependencia)*100) + '% autovalente — usada para proyectar el mínimo legal en cada tramo. Asume ciclo 4×3 (4 turnos/semana por persona).'
+      : 'Sin residentes con estado registrado todavía — el mínimo legal asume 100% con dependencia (el escenario más exigente) hasta que cargues fichas médicas en Residentes.';
     var tbody = document.getElementById('tablaTramos');
     tbody.innerHTML = tramos.map(function(tramo, i){
       var costoMensual = costoPersonalTramo(tramo, costos);
+      var legal = dotacionLegalPara(tramo.hasta, mix.pctDependencia);
+      var bajoMinimo = tramo.cuidadoresTens < legal.headcount;
       return '<tr>'+
         '<td><input type="text" data-tramo-idx="'+i+'" data-tramo-field="letra" value="'+tramo.letra+'" style="width:60px;"></td>'+
         '<td class="num"><input type="number" data-tramo-idx="'+i+'" data-tramo-field="hasta" value="'+tramo.hasta+'"></td>'+
-        '<td class="num"><input type="number" data-tramo-idx="'+i+'" data-tramo-field="cuidadoresTens" value="'+tramo.cuidadoresTens+'"></td>'+
+        '<td class="num"><input type="number" data-tramo-idx="'+i+'" data-tramo-field="cuidadoresTens" value="'+tramo.cuidadoresTens+'" style="'+(bajoMinimo?'border-color:var(--danger); color:var(--danger);':'')+'"></td>'+
         '<td class="num"><input type="number" data-tramo-idx="'+i+'" data-tramo-field="cocinaAseo" value="'+tramo.cocinaAseo+'"></td>'+
         '<td class="num mono">'+numEmpleadosTramo(tramo)+'</td>'+
         '<td class="num mono">'+fmtCLP(costoMensual)+'</td>'+
-        '<td><button class="danger-outline" type="button" data-eliminar-tramo="'+i+'">Eliminar</button></td>'+
+        '<td class="num mono" title="Día: '+legal.posDia+' simultáneos · Noche: '+legal.posNoche+' simultáneos (mínimo 2, Art. 17)">'+legal.headcount+(bajoMinimo?' ⚠':'')+'</td>'+
+        '<td style="white-space:nowrap;"><button class="secondary small" type="button" data-aplicar-legal="'+i+'">Aplicar</button> <button class="danger-outline" type="button" data-eliminar-tramo="'+i+'">Eliminar</button></td>'+
       '</tr>';
     }).join('');
     tbody.querySelectorAll('input').forEach(function(inp){
@@ -429,7 +465,22 @@
         renderTodo();
       });
     });
+    tbody.querySelectorAll('[data-aplicar-legal]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var idx = parseInt(btn.getAttribute('data-aplicar-legal'),10);
+        var legal = dotacionLegalPara(tramos[idx].hasta, mixDependenciaActual().pctDependencia);
+        tramos[idx].cuidadoresTens = legal.headcount;
+        guardarTramos();
+        renderTodo();
+      });
+    });
   }
+  document.getElementById('btnAplicarLegalTodos').addEventListener('click', function(){
+    var pct = mixDependenciaActual().pctDependencia;
+    tramos.forEach(function(t){ t.cuidadoresTens = dotacionLegalPara(t.hasta, pct).headcount; });
+    guardarTramos();
+    renderTodo();
+  });
   document.getElementById('btnAgregarTramo').addEventListener('click', function(){
     var ultimo = tramos[tramos.length-1];
     tramos.push({ letra: String.fromCharCode(65+tramos.length), hasta: ultimo.hasta+10, cuidadoresTens: ultimo.cuidadoresTens, cocinaAseo: ultimo.cocinaAseo });

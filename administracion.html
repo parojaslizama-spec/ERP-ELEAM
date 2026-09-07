@@ -1,0 +1,2412 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<script src="assets/auth.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administración — Residencia Senior Omar Wall</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8a6a35">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wall">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+  :root{
+    --paper:#F7F1E2;
+    --paper-dark:#efe2c4;
+    --ink:#3a2b1c;
+    --ink-soft:#6b5842;
+    --petroleo:#8a6a35;
+    --petroleo-dark:#6b4f24;
+    --dorado:#c79a3f;
+    --dorado-soft:#ecd9ad;
+    --line:#e2d0a8;
+    --card:#fffcf5;
+    --danger:#a4452f;
+    --danger-bg:#f4d9cc;
+    --ok:#4f7a4a;
+    --weekend-bg:#efe4cd;
+    --info:#4a6b8a;
+    --info-bg:#dbe6ee;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      repeating-linear-gradient(#F7F1E2 0px, #F7F1E2 27px, #ede0c1 28px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    line-height:1.45;
+    padding-bottom:60px;
+  }
+  h1,h2,h3{ font-family:'Lora',serif; font-weight:600; color:var(--petroleo-dark); margin:0 0 6px; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  label{ font-weight:600; font-size:12.5px; color:var(--ink-soft); display:block; margin-bottom:4px; }
+  input, select{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13.5px;
+    padding:7px 9px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:#fffef9;
+    color:var(--ink);
+    width:100%;
+  }
+  select{ font-family:'Inter',sans-serif; }
+  input:focus, select:focus{ outline:2px solid var(--dorado-soft); border-color:var(--dorado); }
+  button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    border:1px solid var(--petroleo);
+    background:var(--petroleo);
+    color:#fff;
+    padding:9px 16px;
+    border-radius:5px;
+    transition:background .15s, transform .05s;
+  }
+  button:hover{ background:var(--petroleo-dark); }
+  button:active{ transform:translateY(1px); }
+  button.secondary{ background:transparent; color:var(--petroleo); }
+  button.secondary:hover{ background:var(--paper-dark); }
+  button.gold{ background:var(--dorado); border-color:var(--dorado); }
+  button.gold:hover{ background:#9c7325; }
+  button.danger{ background:transparent; border-color:var(--danger); color:var(--danger); padding:5px 10px; font-size:12px; }
+  button.danger:hover{ background:var(--danger-bg); }
+
+  /* Header */
+  .top-header{
+    background:linear-gradient(180deg, var(--petroleo) 0%, var(--petroleo-dark) 100%);
+    color:#f3ead3;
+    padding:18px 28px;
+    border-bottom:4px solid var(--dorado);
+  }
+  .top-header .header-inner{ max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-mark{ font-family:'Lora',serif; font-size:26px; color:var(--dorado-soft); }
+  .empresa-fields{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .empresa-nombre-fija{ font-family:'Lora',serif; font-size:15px; font-weight:600; color:#f6f2e7; }
+  .empresa-fields input{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.25);
+    color:#f6f2e7;
+    font-family:'Lora',serif;
+    font-size:14px;
+    min-width:220px;
+  }
+  .empresa-fields input::placeholder{ color:#cdd8d3; }
+  .empresa-fields input:focus{ outline:2px solid var(--dorado); }
+  .subtitle{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--dorado-soft); margin-top:2px; }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  /* Tabs */
+  .tabbar{ display:flex; gap:4px; margin:22px 0 18px; border-bottom:2px solid var(--line); }
+  .tab-btn{
+    background:transparent; border:1px solid transparent; border-bottom:none;
+    color:var(--ink-soft); font-family:'Lora',serif; font-size:15px; font-weight:600;
+    padding:10px 20px; border-radius:6px 6px 0 0;
+  }
+  .tab-btn:hover{ background:var(--paper-dark); color:var(--petroleo-dark); }
+  .tab-btn.active{
+    background:var(--card); color:var(--petroleo-dark);
+    border-color:var(--line);
+    box-shadow:0 -2px 0 var(--dorado) inset;
+    margin-bottom:-2px;
+    border-bottom:2px solid var(--card);
+  }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; animation:fade .15s ease; }
+  @keyframes fade{ from{opacity:0} to{opacity:1} }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px 22px;
+    margin-bottom:20px;
+    box-shadow:0 1px 3px rgba(30,25,10,.06);
+  }
+  .card h2{ font-size:18px; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:16px; }
+  .card h3{ font-size:15px; margin-top:0; }
+
+  .grid-form{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px,1fr)); gap:14px; align-items:end; }
+  .grid-form .full{ grid-column:1/-1; }
+  .field-hint{ font-size:11px; color:var(--ink-soft); margin-top:3px; }
+  .field-hint.warn-text{ color:var(--danger); font-weight:600; }
+
+  table{ width:100%; border-collapse:collapse; margin-top:6px; }
+  th{
+    text-align:left; font-family:'Inter',sans-serif; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--dorado); border-bottom:2px solid var(--petroleo); padding:8px 10px; background:var(--paper-dark);
+  }
+  td{ padding:8px 10px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:middle; }
+  tbody tr:hover{ background:#fbf7ea; }
+  td.num, th.num{ font-family:'JetBrains Mono',monospace; text-align:right; }
+  .empty-row td{ text-align:center; color:var(--ink-soft); padding:24px; font-style:italic; }
+
+  .selector-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:end; margin-bottom:18px; }
+  .selector-row .field{ min-width:180px; }
+  .selector-row .field.small{ min-width:110px; }
+
+  /* Calendar */
+  .cal-scroll{ overflow-x:auto; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; min-width:640px; }
+  .cal-head{ font-family:'Lora',serif; font-weight:600; text-align:center; color:var(--petroleo); font-size:12.5px; padding-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
+  .cal-cell{
+    background:#fffef9; border:1px solid var(--line); border-radius:6px; padding:8px;
+    display:flex; flex-direction:column; gap:6px; min-height:142px;
+  }
+  .cal-cell.empty{ background:transparent; border:none; }
+  .cal-cell.weekend{ background:var(--weekend-bg); }
+  .cal-cell.fuera-contrato{ opacity:.55; }
+  .cal-daynum{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px; display:flex; justify-content:space-between; align-items:baseline; color:var(--petroleo-dark); }
+  .cal-dayname{ font-family:'Inter',sans-serif; font-weight:500; font-size:10px; color:var(--ink-soft); text-transform:uppercase; }
+  .cal-estado{ font-size:11.5px; padding:5px 6px; }
+  .cal-horas{ font-size:12.5px; padding:5px 6px; }
+  .cal-horas:disabled{ background:#eee7d4; color:#a89e88; }
+  .cal-asistio-label{ display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:var(--ink-soft); margin:0; cursor:pointer; }
+  .cal-asistio-label input{ width:15px; height:15px; accent-color:var(--ok); }
+  .cal-turno, .cal-motivo{ font-size:11px; padding:4px 5px; }
+  .cal-hora-ingreso, .cal-hora-salida{ font-size:12px; padding:4px 5px; }
+  .cal-tiempos{ display:flex; gap:4px; }
+  .cal-tiempos input{ min-width:0; }
+  .cal-cell.tarde .cal-hora-ingreso{ border-color:var(--danger); color:var(--danger); }
+
+  /* Vista celular/tablet del calendario: lista de días en vez de grilla de 7 columnas — la grilla
+     semanal no cabe legible en una pantalla angosta, así que bajo este ancho cada día pasa a ser
+     una fila horizontal compacta y se oculta el encabezado de días de la semana (ya no aplica). */
+  @media (max-width:760px){
+    #cal-head-row{ display:none; }
+    .cal-grid{ grid-template-columns:1fr; min-width:0; gap:8px; }
+    .cal-cell{
+      flex-direction:row; flex-wrap:wrap; align-items:center; min-height:auto; padding:9px 10px; gap:6px 10px;
+    }
+    .cal-cell.empty{ display:none; }
+    .cal-daynum{ flex:none; flex-direction:row; gap:5px; width:auto; font-size:12.5px; }
+    .cal-asistio-label{ flex:none; }
+    .cal-turno, .cal-motivo{ flex:1 1 130px; }
+    .cal-tiempos{ flex:1 1 130px; }
+  }
+
+  /* Vista general (todo el equipo): una fila por trabajador, una columna por día del mes — pensada
+     para verlo todo de un vistazo, con la columna de nombres fija mientras se hace scroll horizontal
+     por los días. */
+  .view-toggle{ display:flex; gap:8px; margin-bottom:16px; }
+  .view-toggle-btn{
+    background:transparent; border:1px solid var(--line); color:var(--ink-soft);
+    border-radius:999px; padding:7px 16px; font-size:12.5px; font-weight:600; font-family:'Inter',sans-serif;
+  }
+  .view-toggle-btn:hover{ border-color:var(--dorado); color:var(--petroleo-dark); }
+  .view-toggle-btn.active{ background:var(--petroleo); border-color:var(--petroleo); color:#fff; }
+
+  .roster-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:6px; }
+  table.team-roster{ width:auto; min-width:100%; border-collapse:separate; border-spacing:0; margin-top:0; }
+  table.team-roster th, table.team-roster td{ border-bottom:1px solid var(--line); padding:0; }
+  table.team-roster thead th{
+    background:var(--paper-dark); color:var(--petroleo-dark); font-family:'JetBrains Mono',monospace;
+    font-size:11px; font-weight:700; text-align:center; padding:6px 3px; border-bottom:2px solid var(--petroleo);
+  }
+  table.team-roster thead th span{ display:block; font-family:'Inter',sans-serif; font-weight:500; font-size:9px; text-transform:uppercase; color:var(--ink-soft); }
+  table.team-roster th.roster-day-col.weekend, table.team-roster td.roster-day-col.weekend{ background:var(--weekend-bg); }
+  .roster-name-col{
+    position:sticky; left:0; z-index:2; background:var(--card); text-align:left;
+    padding:8px 12px !important; font-size:12.5px; font-weight:600; color:var(--ink);
+    min-width:150px; max-width:220px; border-right:2px solid var(--line); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  thead .roster-name-col{ background:var(--paper-dark); z-index:3; }
+  .roster-cargo{ display:block; font-weight:400; font-size:10.5px; color:var(--ink-soft); }
+  td.roster-cell{
+    width:30px; min-width:30px; text-align:center; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700;
+    color:var(--ink-soft);
+  }
+  td.roster-cell.rc-dia{ background:var(--dorado-soft); color:#5c4315; }
+  td.roster-cell.rc-noche{ background:var(--petroleo-dark); color:#fff; }
+  td.roster-cell.rc-descanso{ background:transparent; }
+  td.roster-cell.rc-fi{ background:var(--danger); color:#fff; }
+  td.roster-cell.rc-fj{ background:var(--danger-bg); color:var(--danger); }
+  td.roster-cell.rc-lic{ background:var(--info-bg); color:var(--info); }
+  td.roster-cell.rc-vac{ background:var(--ok); color:#fff; }
+  td.roster-cell.rc-fuera{ background:repeating-linear-gradient(45deg, #eee7d4, #eee7d4 4px, #e4dabf 4px, #e4dabf 8px); }
+  tbody tr:hover .roster-name-col{ background:#fbf7ea; }
+
+  .roster-legend{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:14px; font-size:11.5px; color:var(--ink-soft); }
+  .roster-legend .chip{ display:inline-flex; align-items:center; gap:6px; }
+  .roster-legend .swatch{ width:14px; height:14px; border-radius:4px; display:inline-block; border:1px solid var(--line); }
+
+  .summary-cards{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-top:18px; }
+  .stat{
+    background:var(--paper-dark); border:1px solid var(--line); border-left:4px solid var(--petroleo);
+    border-radius:6px; padding:12px 14px;
+  }
+  .stat.warn{ border-left-color:var(--danger); }
+  .stat.gold{ border-left-color:var(--dorado); }
+  .stat .stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); font-weight:600; }
+  .stat .stat-value{ font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--petroleo-dark); margin-top:4px; }
+
+  .liq-columns{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:820px){ .liq-columns{ grid-template-columns:1fr; } }
+  .liq-total-row{ display:flex; justify-content:space-between; padding:10px 0; border-top:2px solid var(--petroleo); margin-top:8px; font-weight:700; }
+  .liq-total-row .amt{ font-family:'JetBrains Mono',monospace; font-size:16px; }
+  .liquido-box{
+    background:var(--petroleo); color:#fff; border-radius:8px; padding:18px 20px; margin-top:18px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .liquido-box .lbl{ font-family:'Lora',serif; font-size:16px; }
+  .liquido-box .val{ font-family:'JetBrains Mono',monospace; font-size:26px; font-weight:700; color:var(--dorado-soft); }
+  .actions-row{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  .save-flash{ font-size:12.5px; color:var(--ok); font-weight:600; margin-left:6px; }
+  .badge{ display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; background:var(--dorado-soft); color:#5c4315; }
+
+  footer.note{ max-width:1180px; margin:30px auto 0; padding:0 24px; font-size:11.5px; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<header class="top-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">&#9998;</div>
+      <div>
+        <div class="empresa-fields">
+          <span class="empresa-nombre-fija">Residencia Senior Omar Wall</span>
+          <input id="empresa-rut" placeholder="RUT empresa (ej. 76.123.456-7)">
+        </div>
+        <div class="subtitle">Administración &middot; trabajadores, turnos, liquidaciones, residentes y cumplimiento</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="tabbar">
+    <button class="tab-btn active" data-tab="trabajadores">Trabajadores</button>
+    <button class="tab-btn" data-tab="nomina">Nómina de trabajadores</button>
+    <button class="tab-btn" data-tab="turnos">Turnos</button>
+    <button class="tab-btn" data-tab="liquidaciones">Liquidaciones</button>
+    <button class="tab-btn" data-tab="residentes-nomina">Nómina de residentes</button>
+    <button class="tab-btn" data-tab="documentos">Documentos de respaldo</button>
+    <a class="tab-btn" href="cumplimiento-eleam.html">Cumplimiento ELEAM</a>
+  </nav>
+
+  <!-- TAB 1: TRABAJADORES (alta simplificada) -->
+  <section id="tab-trabajadores" class="tab-panel active">
+    <div class="card">
+      <h2 id="form-trabajador-titulo">Agregar trabajador</h2>
+      <p class="field-hint">Al agregar un trabajador, queda autom&aacute;ticamente marcado como horario completo cumplido todos los d&iacute;as del mes (gasto fijo) — solo cambia si t&uacute; editas su asistencia en Turnos.</p>
+      <form id="form-trabajador">
+        <div class="grid-form">
+          <div>
+            <label for="trab-nombre">Nombre completo</label>
+            <input id="trab-nombre" required style="font-family:'Inter',sans-serif;">
+          </div>
+          <div>
+            <label for="trab-rut">RUT</label>
+            <input id="trab-rut" placeholder="12.345.678-9" required>
+          </div>
+          <div>
+            <label for="trab-fecha-ingreso">Fecha de ingreso</label>
+            <input id="trab-fecha-ingreso" type="date" required>
+          </div>
+          <div>
+            <label for="trab-tipo">Tipo de personal</label>
+            <select id="trab-tipo">
+              <option value="soporte">Soporte (aseo, cocina, TENS) — 40 hrs/semana</option>
+              <option value="esencial">Esencial (cuidadores) — turno 4&times;3 (LLNNXXX)</option>
+              <option value="esencial_4x4">Esencial (cuidadores) — turno 4&times;4 (LLNN/OOOO)</option>
+              <option value="esencial_nocturno">Esencial nocturno (cuidadores) — turno 2&times;2 (solo noche)</option>
+            </select>
+            <p class="field-hint" id="trab-jornada-legal-hint"></p>
+          </div>
+          <div>
+            <label for="trab-contrato">Tipo de contrato</label>
+            <select id="trab-contrato">
+              <option value="indefinido">Indefinido (cesant&iacute;a 0,6%)</option>
+              <option value="plazo_fijo">Plazo fijo (cesant&iacute;a 0%)</option>
+            </select>
+          </div>
+          <div>
+            <label for="trab-sueldo">Sueldo base (imponible, CLP)</label>
+            <input id="trab-sueldo" type="number" min="0" step="1000" required>
+          </div>
+          <div>
+            <label for="trab-bono">Bono (no imponible, CLP)</label>
+            <input id="trab-bono" type="number" min="0" step="1000" value="0">
+          </div>
+          <div>
+            <label for="trab-cargas">Cargas familiares acreditadas</label>
+            <input id="trab-cargas" type="number" min="0" step="1" value="0">
+            <p class="field-hint">Si es mayor a 0, completa los datos de cada carga abajo y sube el respaldo en la pesta&ntilde;a Documentos de respaldo.</p>
+          </div>
+          <div style="display:none;">
+            <label for="trab-cargo">Cargo</label>
+            <input id="trab-cargo" style="font-family:'Inter',sans-serif;">
+          </div>
+          <div id="trab-ciclo-inicio-wrap" style="display:none;">
+            <input id="trab-ciclo-inicio" type="date" style="display:none;">
+          </div>
+          <div style="display:none;">
+            <input id="trab-afp" type="number" value="11.44">
+            <select id="trab-salud-tipo"><option value="fonasa" selected>Fonasa (7%)</option><option value="isapre">Isapre</option></select>
+            <div id="trab-salud-monto-wrap"><input id="trab-salud-monto" type="number" value="0"></div>
+            <input id="trab-liquido" type="number">
+            <input id="trab-horas" type="number" value="8">
+            <input id="trab-hora-entrada" type="time" value="08:00">
+          </div>
+        </div>
+
+        <div id="trab-cargas-detalle-wrap" style="display:none; margin-top:14px;">
+          <h3>Datos de las cargas familiares</h3>
+          <div id="trab-cargas-detalle-list"></div>
+          <div class="subtable subtable-add">
+            <div class="subtable-grid">
+              <div><div class="mini-label">Nombre</div><input id="carga-nombre" placeholder="Nombre completo"></div>
+              <div><div class="mini-label">RUT</div><input id="carga-rut" placeholder="12.345.678-9"></div>
+              <div><div class="mini-label">Parentesco</div><input id="carga-parentesco" placeholder="Ej. Hijo/a, cónyuge"></div>
+              <div><div class="mini-label">Fecha de nacimiento</div><input id="carga-fecha-nacimiento" type="date"></div>
+              <div><button type="button" id="btn-add-carga" class="secondary small">+ Agregar carga</button></div>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:18px;">Contacto de emergencia</h3>
+        <div class="grid-form" style="margin-top:8px;">
+          <div>
+            <label for="trab-contacto-nombre">Nombre</label>
+            <input id="trab-contacto-nombre" style="font-family:'Inter',sans-serif;" placeholder="Nombre completo">
+          </div>
+          <div>
+            <label for="trab-contacto-parentesco">Parentesco / relaci&oacute;n</label>
+            <input id="trab-contacto-parentesco" style="font-family:'Inter',sans-serif;" placeholder="Ej. Cónyuge, hermano/a">
+          </div>
+          <div>
+            <label for="trab-contacto-telefono">Tel&eacute;fono</label>
+            <input id="trab-contacto-telefono" placeholder="+56 9 ...">
+          </div>
+        </div>
+
+        <div class="full" style="display:flex; gap:10px; margin-top:18px;">
+          <button type="submit" id="btn-guardar-trabajador">Agregar trabajador</button>
+          <button type="button" id="btn-cancelar-trabajador" class="secondary" style="display:none;">Cancelar edici&oacute;n</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card" id="card-finiquito" style="display:none;">
+      <h2>T&eacute;rmino de relaci&oacute;n laboral — <span id="finiquito-nombre-trab"></span></h2>
+      <div class="grid-form">
+        <div>
+          <label for="fin-fecha-termino">Fecha de t&eacute;rmino</label>
+          <input id="fin-fecha-termino" type="date">
+        </div>
+        <div>
+          <label for="fin-causal">Causal de t&eacute;rmino</label>
+          <select id="fin-causal">
+            <option value="mutuo_acuerdo">Mutuo acuerdo de las partes (Art. 159 N&deg;1)</option>
+            <option value="renuncia">Renuncia voluntaria del trabajador (Art. 159 N&deg;2)</option>
+            <option value="plazo_fijo">Vencimiento del plazo convenido (Art. 159 N&deg;4)</option>
+            <option value="necesidades_empresa">Necesidades de la empresa (Art. 161)</option>
+            <option value="caducidad">Caducidad — falta grave del trabajador (Art. 160)</option>
+          </select>
+        </div>
+        <div id="fin-aviso-wrap" style="display:none;">
+          <label for="fin-aviso-previo">&iquest;Se dio aviso previo de 30 d&iacute;as?</label>
+          <select id="fin-aviso-previo">
+            <option value="si">S&iacute;</option>
+            <option value="no">No (se paga indemnizaci&oacute;n sustitutiva)</option>
+          </select>
+        </div>
+      </div>
+      <p class="field-hint" id="fin-antiguedad-hint"></p>
+
+      <table style="margin-top:14px;">
+        <thead><tr><th>Concepto del finiquito</th><th class="num">Monto</th></tr></thead>
+        <tbody id="tabla-finiquito"></tbody>
+      </table>
+      <div class="liq-total-row"><span>Total a pagar (finiquito)</span><span class="amt mono" id="fin-total">$ 0</span></div>
+
+      <p class="field-hint warn-text" style="margin-top:10px;">Estimaci&oacute;n autom&aacute;tica, NO es asesor&iacute;a legal — revisar con abogado o contador antes de firmar.</p>
+
+      <div class="actions-row">
+        <button id="btn-confirmar-finiquito" class="danger" type="button" style="background:var(--danger); color:#fff;">Confirmar t&eacute;rmino y generar finiquito PDF</button>
+        <button id="btn-cancelar-finiquito" class="secondary" type="button">Cancelar</button>
+        <span id="finiquito-save-flash" class="save-flash"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: NÓMINA DE TRABAJADORES -->
+  <section id="tab-nomina" class="tab-panel">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h2 style="border:none; padding:0; margin:0;">N&oacute;mina</h2>
+        <div>
+          <button id="btn-dotacion-minima" class="secondary" type="button">Cargar dotaci&oacute;n m&iacute;nima (4+2+1+1)</button>
+          <button id="btn-pdf-nomina" class="gold" type="button">Generar reporte PDF de n&oacute;mina</button>
+          <span id="nomina-save-flash" class="save-flash"></span>
+        </div>
+      </div>
+      <p class="field-hint" id="dotacion-minima-hint"></p>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th><th>RUT</th><th>Tipo</th>
+            <th class="num">Sueldo base</th><th class="num">Bono</th><th class="num">Cargas</th>
+            <th class="num">Vacaciones disponibles</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tabla-trabajadores"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Personal desvinculado</h2>
+      <p class="field-hint">Ya no aparecen en Turnos ni en nuevas liquidaciones; sus liquidaciones pasadas se conservan.</p>
+      <table>
+        <thead>
+          <tr><th>Nombre</th><th>RUT</th><th>Cargo</th><th>Ingreso</th><th>T&eacute;rmino</th><th>Causal</th><th></th></tr>
+        </thead>
+        <tbody id="tabla-desvinculados"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- TAB 3: TURNOS -->
+  <section id="tab-turnos" class="tab-panel">
+    <div class="card">
+      <h2>Turnos y asistencia</h2>
+      <div class="view-toggle">
+        <button type="button" class="view-toggle-btn active" data-view="individual">Por trabajador</button>
+        <button type="button" class="view-toggle-btn" data-view="general">Vista general (todo el equipo)</button>
+      </div>
+      <div class="selector-row">
+        <div class="field" id="asis-trabajador-wrap">
+          <label for="asis-trabajador">Trabajador</label>
+          <select id="asis-trabajador"></select>
+        </div>
+        <div class="field small">
+          <label for="asis-mes">Mes</label>
+          <select id="asis-mes"></select>
+        </div>
+        <div class="field small">
+          <label for="asis-anio">A&ntilde;o</label>
+          <input id="asis-anio" type="number" min="2015" max="2100">
+        </div>
+        <div id="asis-autofill-wrap">
+          <button id="btn-autofill" class="gold" type="button">Rellenar mes como "Trabajado"</button>
+          <button id="btn-autofill-4x4" class="gold" type="button" style="display:none;">Generar turno autom&aacute;tico</button>
+        </div>
+      </div>
+      <div id="asis-vista-individual">
+        <p class="field-hint" id="asis-tipo-hint"></p>
+        <div class="cal-scroll">
+          <div id="cal-head-row" class="cal-grid" style="margin-bottom:4px;"></div>
+          <div id="calendar-grid" class="cal-grid"></div>
+        </div>
+        <div id="asis-resumen" class="summary-cards"></div>
+      </div>
+      <div id="asis-vista-general" style="display:none;">
+        <p class="field-hint">Un vistazo a todo el equipo activo para el mes seleccionado — qui&eacute;n trabaja, en qu&eacute; turno, y qui&eacute;n est&aacute; de descanso, falta, licencia o vacaciones. Solo lectura: para editar un d&iacute;a, vuelve a "Por trabajador".</p>
+        <div class="roster-scroll">
+          <table class="team-roster" id="team-roster-table"></table>
+        </div>
+        <div class="roster-legend" id="roster-legend"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: LIQUIDACIONES -->
+  <section id="tab-liquidaciones" class="tab-panel">
+    <div class="card">
+      <h2>Liquidaci&oacute;n de sueldo</h2>
+      <div class="selector-row">
+        <div class="field">
+          <label for="liq-trabajador">Trabajador</label>
+          <select id="liq-trabajador"></select>
+        </div>
+        <div class="field small">
+          <label for="liq-mes">Mes</label>
+          <select id="liq-mes"></select>
+        </div>
+        <div class="field small">
+          <label for="liq-anio">A&ntilde;o</label>
+          <input id="liq-anio" type="number" min="2015" max="2100">
+        </div>
+        <div class="field small">
+          <label for="liq-imm">IMM vigente (CLP) — fijo por ley, no editable</label>
+          <input id="liq-imm" type="text" disabled class="mono">
+        </div>
+        <div class="field small">
+          <label for="liq-utm">UTM del mes (CLP)</label>
+          <input id="liq-utm" type="number" min="0" step="100">
+        </div>
+      </div>
+      <p class="field-hint">UTM cambia cada mes — actualízala aquí (sii.cl).</p>
+
+      <div id="liq-content" style="display:none;">
+        <div class="liq-columns">
+          <div>
+            <h3>Haberes</h3>
+            <div class="grid-form" style="grid-template-columns:1fr 1fr;">
+              <div><label for="liq-sueldo-base">Sueldo base (editable solo para este mes)</label><input id="liq-sueldo-base" type="number" min="0" step="1000" class="mono"></div>
+              <div><label for="liq-gratificacion">Gratificaci&oacute;n legal (25%, 2 cuotas)</label><input id="liq-gratificacion" type="number" min="0" step="1000" disabled class="mono"></div>
+              <div><label for="liq-he-cantidad">Horas extra (cantidad, sugerido desde Asistencia — editable)</label><input id="liq-he-cantidad" type="number" min="0" step="0.5" class="mono"></div>
+              <div><label for="liq-he-valor">Valor hora extra (editable)</label><input id="liq-he-valor" type="number" min="0" step="100" class="mono"></div>
+              <div><label>Total valor hora extra</label><input id="liq-he-total" type="text" disabled class="mono"></div>
+              <div><label>Asignaci&oacute;n familiar (no imponible)</label><input id="liq-asignacion-familiar" type="text" disabled class="mono"></div>
+              <div><label for="liq-locomocion">Locomoci&oacute;n (no imponible, editable)</label><input id="liq-locomocion" type="number" min="0" step="100" class="mono"></div>
+              <div><label for="liq-bono">Bono (no imponible, desde Trabajadores — editable)</label><input id="liq-bono" type="number" min="0" step="1000" class="mono"></div>
+              <div style="grid-column:1/-1;"><p class="field-hint" id="liq-asignacion-familiar-hint"></p></div>
+              <div style="grid-column:1/-1;"><p class="field-hint" id="liq-gratificacion-hint"></p></div>
+            </div>
+            <div class="liq-total-row"><span>Total haberes</span><span class="amt mono" id="liq-total-haberes">$ 0</span></div>
+          </div>
+          <div>
+            <h3>Descuentos</h3>
+            <div class="grid-form" style="grid-template-columns:1fr 1fr;">
+              <div><label for="liq-dias-falta">D&iacute;as de falta (injustificada, sugerido desde Asistencia — editable)</label><input id="liq-dias-falta" type="number" min="0" step="1" class="mono"></div>
+              <div><label>Descuento por inasistencia</label><input id="liq-desc-inasistencia" type="text" disabled class="mono"></div>
+              <div><label>AFP (%)</label><input id="liq-afp-monto" type="text" disabled class="mono"></div>
+              <div><label>Salud</label><input id="liq-salud-monto" type="text" disabled class="mono"></div>
+              <div><label>Seguro cesant&iacute;a</label><input id="liq-cesantia-monto" type="text" disabled class="mono"></div>
+              <div><label for="liq-impuesto">Impuesto &uacute;nico</label><input id="liq-impuesto" type="number" min="0" step="100" disabled class="mono"></div>
+              <div><label for="liq-otros">Otros descuentos</label><input id="liq-otros" type="number" min="0" step="100" disabled class="mono"></div>
+              <div><label for="liq-adelanto">Anticipo de sueldo (quincena, ya pagado) — editable</label><input id="liq-adelanto" type="number" min="0" step="1000"></div>
+              <div style="grid-column:1/-1;"><p class="field-hint" id="liq-impuesto-hint"></p></div>
+              <div style="grid-column:1/-1;"><p class="field-hint" id="liq-adelanto-hint"></p></div>
+            </div>
+            <div class="liq-total-row"><span>Total descuentos</span><span class="amt mono" id="liq-total-descuentos">$ 0</span></div>
+          </div>
+        </div>
+
+        <div class="liquido-box">
+          <span class="lbl">L&iacute;quido a pagar</span>
+          <span class="val mono" id="liq-liquido">$ 0</span>
+        </div>
+
+        <div class="actions-row">
+          <button id="btn-guardar-liq" class="secondary" type="button">Guardar liquidaci&oacute;n</button>
+          <button id="btn-pdf-liq" class="gold" type="button">Generar PDF y guardar en Reportes</button>
+          <span id="liq-save-flash" class="save-flash"></span>
+        </div>
+      </div>
+      <div id="liq-empty" class="field-hint">Selecciona un trabajador, mes y a&ntilde;o para preparar la liquidaci&oacute;n.</div>
+    </div>
+  </section>
+
+  <!-- TAB 5: NÓMINA DE RESIDENTES -->
+  <section id="tab-residentes-nomina" class="tab-panel">
+    <div class="card">
+      <h2 id="form-res-titulo">Agregar residente a la nómina</h2>
+      <form id="form-res-nomina">
+        <div class="grid-form">
+          <div>
+            <label for="resn-nombre">Nombre completo</label>
+            <input id="resn-nombre" required style="font-family:'Inter',sans-serif;">
+          </div>
+          <div>
+            <label for="resn-rut">RUT (opcional)</label>
+            <input id="resn-rut" placeholder="12.345.678-9">
+          </div>
+          <div>
+            <label for="resn-cuota">Cuota mensual (CLP)</label>
+            <input id="resn-cuota" type="number" min="0" step="1000" required>
+          </div>
+          <div class="full" style="display:flex; gap:10px;">
+            <button type="submit" id="btn-guardar-res-nomina">Agregar / vincular a la nómina</button>
+            <button type="button" id="btn-cancelar-res-nomina" class="secondary" style="display:none;">Cancelar edici&oacute;n</button>
+          </div>
+        </div>
+      </form>
+      <p class="field-hint">Los datos personales, m&eacute;dicos y de contacto de cada residente se administran en el m&oacute;dulo Residentes — aqu&iacute; solo se gestiona la cuota mensual.</p>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h2 style="border:none; padding:0; margin:0;">N&oacute;mina de residentes</h2>
+        <span id="res-nomina-save-flash" class="save-flash"></span>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Nombre</th><th>RUT</th><th>Estado</th><th class="num">Cuota mensual</th><th></th></tr>
+        </thead>
+        <tbody id="tabla-res-nomina"></tbody>
+      </table>
+      <p class="field-hint">La cuota de cada residente activo se suma sola en el m&oacute;dulo de Gastos, secci&oacute;n Ingresos.</p>
+    </div>
+  </section>
+
+  <!-- TAB 6: DOCUMENTOS DE RESPALDO -->
+  <section id="tab-documentos" class="tab-panel">
+    <div class="card">
+      <h2>Documentos de respaldo</h2>
+      <p class="field-hint">Seguimiento de los documentos entregados por cada trabajador con cargas familiares acreditadas (certificado de nacimiento, matr&iacute;cula/estudios u otro respaldo exigido por Previred).</p>
+      <div id="documentos-content"></div>
+      <div id="documentos-empty" class="field-hint">Ning&uacute;n trabajador activo tiene cargas familiares registradas.</div>
+    </div>
+  </section>
+</div>
+
+<footer class="note">Los datos se guardan solo en este navegador &mdash; no se env&iacute;an a ning&uacute;n servidor. Respalda peri&oacute;dicamente si es informaci&oacute;n cr&iacute;tica.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="assets/pdf-export.js"></script>
+<script src="assets/backup.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  if(!window.storage){
+    window.storage = {
+      get:function(key, def){
+        try{
+          var raw = localStorage.getItem('rha_'+key);
+          return raw===null ? def : JSON.parse(raw);
+        }catch(e){ return def; }
+      },
+      set:function(key, value){
+        try{ localStorage.setItem('rha_'+key, JSON.stringify(value)); }catch(e){}
+      }
+    };
+  }
+
+  var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  var CICLO_4X4 = ['turno_dia','turno_dia','turno_noche','turno_noche','descanso_turno','descanso_turno','descanso_turno','descanso_turno'];
+  // Turno nocturno exclusivo (2 noches trabajadas + 2 libres) — para cuidadores contratados solo para
+  // cubrir la noche, distinto del ciclo 4×4 (que rota día y noche).
+  var CICLO_2X2_NOCTURNO = ['turno_noche','turno_noche','descanso_turno','descanso_turno'];
+  // Ciclo 4×3 (LLNNXXX): 2 turnos día + 2 turnos noche + 3 días de descanso, ciclo de 7 días — así siempre
+  // hay gente en la residencia, con más días de descanso proporcional que el 4×4. Ratio de días trabajados
+  // distinto (4/7 vs 4/8), así que promedioSemanalPorCiclo() calcula el promedio real según el patrón, no
+  // un factor fijo — importante para no subestimar el promedio semanal frente a la Ley N°21.561.
+  var CICLO_4X3 = ['turno_dia','turno_dia','turno_noche','turno_noche','descanso_turno','descanso_turno','descanso_turno'];
+  var ESTADOS_TRABAJADOS = { trabajado:1, turno_dia:1, turno_noche:1 };
+
+  // Calendario del Ingreso Mínimo Mensual (IMM) por ley — agrega una fila nueva cada vez que la ley
+  // reajuste el sueldo mínimo (avísale a Claude la fecha y el monto) y el valor vigente se actualiza
+  // solo en toda la app, sin depender de que alguien lo edite a mano. Misma tabla en control-financiero.html.
+  var IMM_SCHEDULE = [
+    { desde: '2023-05-01', monto: 440000 },
+    { desde: '2023-09-01', monto: 460000 },
+    { desde: '2024-07-01', monto: 500000 },
+    { desde: '2025-01-01', monto: 510636 },
+    { desde: '2025-05-01', monto: 529000 },
+    { desde: '2026-01-01', monto: 539000 },
+    { desde: '2026-05-01', monto: 553553 }
+  ];
+  function immLegalVigente(fecha){
+    fecha = fecha || new Date();
+    var actual = IMM_SCHEDULE[0].monto;
+    for(var i=0;i<IMM_SCHEDULE.length;i++){
+      if(new Date(IMM_SCHEDULE[i].desde+'T00:00:00') <= fecha) actual = IMM_SCHEDULE[i].monto;
+    }
+    return actual;
+  }
+
+  var empresa = window.storage.get('empresa', {nombre:'', rut:''});
+  var trabajadores = window.storage.get('trabajadores', []);
+  var asistencia = window.storage.get('asistencia', {});
+  var liquidaciones = window.storage.get('liquidaciones', {});
+  var residentes = window.storage.get('residentes', []);
+  var documentosRespaldo = window.storage.get('documentos_respaldo', {});
+  var immVigente = immLegalVigente(new Date());
+  var utmVigente = window.storage.get('utm', 71649);
+  // Piso interno para personal esencial (cuidadores): por sobre el IMM legal, política de la residencia
+  // desde agosto 2026. La gratificación se calcula igual, automáticamente, sobre este monto.
+  var SUELDO_BASE_ESENCIAL = 570000;
+
+  function saveEmpresa(){ window.storage.set('empresa', empresa); }
+  function saveUtm(){ window.storage.set('utm', utmVigente); }
+  function saveTrabajadores(){ window.storage.set('trabajadores', trabajadores); }
+  function saveAsistencia(){ window.storage.set('asistencia', asistencia); }
+  function saveLiquidaciones(){ window.storage.set('liquidaciones', liquidaciones); }
+  function saveResidentes(){ window.storage.set('residentes', residentes); }
+  function saveDocumentosRespaldo(){ window.storage.set('documentos_respaldo', documentosRespaldo); }
+
+  function uid(){ return 't_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+  function fmtCLP(n){ n = Math.round(Number(n)||0); return '$ '+n.toLocaleString('es-CL'); }
+  function num(v){ var n = parseFloat(v); return isNaN(n)?0:n; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  // ---------- HEADER EMPRESA ----------
+  // El nombre ya está definido (Residencia Senior Omar Wall) — no hace falta pedirlo, solo el RUT.
+  var elEmpresaRut = document.getElementById('empresa-rut');
+  if (empresa.nombre !== 'Residencia Senior Omar Wall') { empresa.nombre = 'Residencia Senior Omar Wall'; saveEmpresa(); }
+  elEmpresaRut.value = empresa.rut || '';
+  elEmpresaRut.addEventListener('input', function(){ empresa.rut = elEmpresaRut.value; saveEmpresa(); });
+
+  // ---------- TABS ----------
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var tabPanels = {
+    trabajadores: document.getElementById('tab-trabajadores'),
+    nomina: document.getElementById('tab-nomina'),
+    turnos: document.getElementById('tab-turnos'),
+    liquidaciones: document.getElementById('tab-liquidaciones'),
+    'residentes-nomina': document.getElementById('tab-residentes-nomina'),
+    documentos: document.getElementById('tab-documentos')
+  };
+  tabBtns.forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      if(!tabPanels[btn.dataset.tab]) return; // enlace real (Cumplimiento ELEAM) — navega normalmente
+      tabBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      Object.keys(tabPanels).forEach(function(k){ tabPanels[k].classList.remove('active'); });
+      tabPanels[btn.dataset.tab].classList.add('active');
+      if(btn.dataset.tab === 'nomina') { renderTrabajadores(); }
+      if(btn.dataset.tab === 'turnos') renderAsistenciaActiveView();
+      if(btn.dataset.tab === 'liquidaciones') loadLiquidacion();
+      if(btn.dataset.tab === 'residentes-nomina') renderResidentesNomina();
+      if(btn.dataset.tab === 'documentos') renderDocumentosRespaldo();
+    });
+  });
+
+  // ---------- TRABAJADORES ----------
+  var saludTipoSel = document.getElementById('trab-salud-tipo');
+  var saludMontoWrap = document.getElementById('trab-salud-monto-wrap');
+  saludTipoSel.addEventListener('change', function(){
+    saludMontoWrap.style.display = saludTipoSel.value === 'isapre' ? 'block' : 'none';
+  });
+
+  var tipoSel = document.getElementById('trab-tipo');
+  var cicloInicioWrap = document.getElementById('trab-ciclo-inicio-wrap');
+  var cicloInicioLabel = document.getElementById('trab-ciclo-inicio-label');
+  var horasInput = document.getElementById('trab-horas');
+  var horasLabel = document.getElementById('trab-horas-label');
+  var jornadaLegalHint = document.getElementById('trab-jornada-legal-hint');
+  // El selector ofrece 4 opciones de UI, pero por dentro solo existen dos campos: tipo ('soporte' o
+  // 'esencial') y cicloTipo ('4x3', '4x4' o '2x2n') — así todo el resto de la app que ya sabe leer
+  // tipo==='esencial' sigue funcionando sin cambios; cicloTipo decide qué patrón usa patronCicloPara().
+  function esEsencial(){ return tipoSel.value.indexOf('esencial') === 0; }
+  function cicloTipoSeleccionado(){
+    if(tipoSel.value === 'esencial_nocturno') return '2x2n';
+    if(tipoSel.value === 'esencial_4x4') return '4x4';
+    if(tipoSel.value === 'esencial') return '4x3';
+    return '';
+  }
+  function esNocturno2x2(){ return cicloTipoSeleccionado() === '2x2n'; }
+  function patronPorCicloTipo(cicloTipo){
+    if(cicloTipo === '2x2n') return CICLO_2X2_NOCTURNO;
+    if(cicloTipo === '4x4') return CICLO_4X4;
+    return CICLO_4X3;
+  }
+  var CICLO_LABEL = { '4x3':'Ciclo 4×3 (2 turnos día + 2 noche + 3 descanso)', '4x4':'Ciclo 4×4 (2 turnos día + 2 noche + 4 descanso)', '2x2n':'Ciclo 2×2 nocturno (2 noches + 2 descanso)' };
+  function updateJornadaLegalHint(){
+    var esencial = esEsencial();
+    var maxLegal = jornadaMaximaSemanalLegal();
+    if(!esencial){
+      jornadaLegalHint.textContent = 'Máximo legal vigente: ' + maxLegal + ' horas semanales (Ley N°21.561, "Ley de 40 horas").';
+      jornadaLegalHint.className = 'field-hint';
+      return;
+    }
+    var cicloTipo = cicloTipoSeleccionado();
+    var horas = num(horasInput.value) || 12;
+    var promedio = promedioSemanalPorCiclo(horas, patronPorCicloTipo(cicloTipo));
+    var excede = promedio > maxLegal;
+    jornadaLegalHint.textContent = CICLO_LABEL[cicloTipo] + ': promedio semanal de ' + promedio.toFixed(1) + ' horas. Máximo legal vigente: ' + maxLegal + ' horas semanales (Ley N°21.561, "Ley de 40 horas")' +
+      (excede ? ' — ¡EXCEDE EL MÁXIMO LEGAL! Reduce las horas por turno o pide autorización de la Dirección del Trabajo (Art. 38 del Código del Trabajo).' : ' — dentro del máximo, requiere de todas formas autorización de la Dirección del Trabajo como sistema excepcional (Art. 38 del Código del Trabajo).');
+    jornadaLegalHint.className = 'field-hint' + (excede ? ' warn-text' : '');
+  }
+  function applyTipoUI(){
+    var esencial = esEsencial();
+    horasInput.value = esencial ? 12 : 8;
+    updateJornadaLegalHint();
+  }
+  tipoSel.addEventListener('change', function(){
+    applyTipoUI();
+    // Solo autocompleta el sueldo sugerido cuando se está agregando un trabajador nuevo (no editando uno existente),
+    // para no pisar un sueldo ya negociado al cambiar el tipo por error.
+    if(editandoTrabajadorId === null) sueldoBaseInput.value = esEsencial() ? SUELDO_BASE_ESENCIAL : immVigente;
+  });
+  horasInput.addEventListener('input', updateJornadaLegalHint);
+  applyTipoUI();
+
+  // ---------- Sueldo líquido → sueldo base (cálculo referencial) ----------
+  var liquidoInput = document.getElementById('trab-liquido');
+  var sueldoBaseInput = document.getElementById('trab-sueldo');
+  function calcularBaseDesdeLiquido(){
+    var liquido = num(liquidoInput.value);
+    if(!liquido) return;
+    var afpPct = num(document.getElementById('trab-afp').value);
+    var contrato = document.getElementById('trab-contrato').value;
+    var cesantiaPct = contrato === 'indefinido' ? 0.6 : 0;
+    var saludMonto = num(document.getElementById('trab-salud-monto').value);
+    var base;
+    if(saludTipoSel.value === 'fonasa'){
+      var factor = 1 - (afpPct + 7 + cesantiaPct) / 100;
+      base = factor > 0 ? liquido / factor : liquido;
+    } else {
+      var factor2 = 1 - (afpPct + cesantiaPct) / 100;
+      base = factor2 > 0 ? (liquido + saludMonto) / factor2 : liquido + saludMonto;
+    }
+    sueldoBaseInput.value = Math.round(base / 1000) * 1000;
+  }
+  liquidoInput.addEventListener('input', calcularBaseDesdeLiquido);
+  document.getElementById('trab-afp').addEventListener('input', calcularBaseDesdeLiquido);
+  saludTipoSel.addEventListener('change', calcularBaseDesdeLiquido);
+  document.getElementById('trab-salud-monto').addEventListener('input', calcularBaseDesdeLiquido);
+  document.getElementById('trab-contrato').addEventListener('change', calcularBaseDesdeLiquido);
+
+  var editandoTrabajadorId = null;
+
+  // ---------- Datos de cargas familiares (detalle opcional, solo cuando cargas > 0) ----------
+  var cargasDetalleActual = [];
+  var cargasDetalleWrap = document.getElementById('trab-cargas-detalle-wrap');
+  function actualizarVisibilidadCargasDetalle(){
+    cargasDetalleWrap.style.display = num(document.getElementById('trab-cargas').value) > 0 ? 'block' : 'none';
+  }
+  document.getElementById('trab-cargas').addEventListener('input', actualizarVisibilidadCargasDetalle);
+  function renderCargasDetalle(){
+    var el = document.getElementById('trab-cargas-detalle-list');
+    if(cargasDetalleActual.length === 0){
+      el.innerHTML = '<p class="field-hint">Sin datos de cargas registrados todavía.</p>';
+      return;
+    }
+    el.innerHTML = cargasDetalleActual.map(function(c, i){
+      return '<div class="subtable"><div class="subtable-grid">'+
+        '<div><div class="mini-label">Nombre</div>'+esc(c.nombre)+'</div>'+
+        '<div><div class="mini-label">RUT</div>'+esc(c.rut||'—')+'</div>'+
+        '<div><div class="mini-label">Parentesco</div>'+esc(c.parentesco||'—')+'</div>'+
+        '<div><div class="mini-label">Nacimiento</div>'+esc(c.fechaNacimiento||'—')+'</div>'+
+        '<div><button type="button" class="danger small" data-del-carga="'+i+'">Eliminar</button></div>'+
+      '</div></div>';
+    }).join('');
+  }
+  document.getElementById('btn-add-carga').addEventListener('click', function(){
+    var nombre = document.getElementById('carga-nombre').value.trim();
+    if(!nombre) return;
+    cargasDetalleActual.push({
+      nombre: nombre,
+      rut: document.getElementById('carga-rut').value.trim(),
+      parentesco: document.getElementById('carga-parentesco').value.trim(),
+      fechaNacimiento: document.getElementById('carga-fecha-nacimiento').value
+    });
+    document.getElementById('carga-nombre').value = '';
+    document.getElementById('carga-rut').value = '';
+    document.getElementById('carga-parentesco').value = '';
+    document.getElementById('carga-fecha-nacimiento').value = '';
+    renderCargasDetalle();
+  });
+  document.getElementById('trab-cargas-detalle-list').addEventListener('click', function(e){
+    var btn = e.target.closest('[data-del-carga]');
+    if(!btn) return;
+    cargasDetalleActual.splice(parseInt(btn.dataset.delCarga,10), 1);
+    renderCargasDetalle();
+  });
+
+  function cancelarEdicionTrabajador(){
+    editandoTrabajadorId = null;
+    document.getElementById('form-trabajador').reset();
+    document.getElementById('trab-afp').value = 11.44;
+    document.getElementById('trab-sueldo').value = immVigente;
+    document.getElementById('trab-bono').value = 0;
+    cargasDetalleActual = [];
+    renderCargasDetalle();
+    actualizarVisibilidadCargasDetalle();
+    tipoSel.value = 'soporte';
+    applyTipoUI();
+    saludMontoWrap.style.display = 'none';
+    document.getElementById('form-trabajador-titulo').textContent = 'Agregar trabajador';
+    document.getElementById('btn-guardar-trabajador').textContent = 'Agregar trabajador';
+    document.getElementById('btn-cancelar-trabajador').style.display = 'none';
+  }
+  document.getElementById('btn-cancelar-trabajador').addEventListener('click', cancelarEdicionTrabajador);
+
+  // TENS de la dotación mínima: sueldo negociado distinto al mínimo legal (dato real entregado por el usuario).
+  var SUELDO_TENS_DOTACION = 600000;
+  // Toda la dotación mínima entra a contar en Gastos a partir de septiembre 2026 (fecha pedida por el usuario),
+  // no desde "hoy" — así no aparece como gasto retroactivo en meses donde aún no estaban contratados.
+  var FECHA_INGRESO_DOTACION_MINIMA = '2026-09-01';
+
+  function updateDotacionMinimaHint(){
+    document.getElementById('dotacion-minima-hint').textContent =
+      '4 cuidadores 4×4 (' + fmtCLP(SUELDO_BASE_ESENCIAL) + ') + 2 cuidadores nocturnos 2×2 (' + fmtCLP(immVigente) + ') + 1 TENS (' + fmtCLP(SUELDO_TENS_DOTACION) + ') + 1 cocinero(a) (' + fmtCLP(immVigente) + '), todos desde el ' + FECHA_INGRESO_DOTACION_MINIMA + '. Úsalo una sola vez; después edita nombres y RUT reales.';
+  }
+  updateDotacionMinimaHint();
+
+  document.getElementById('btn-dotacion-minima').addEventListener('click', function(){
+    if(!confirm('Esto agrega 4 cuidadores 4×4 (' + fmtCLP(SUELDO_BASE_ESENCIAL) + '), 2 cuidadores nocturnos 2×2 (' + fmtCLP(immVigente) + '), 1 TENS (' + fmtCLP(SUELDO_TENS_DOTACION) + ') y 1 cocinero(a) (' + fmtCLP(immVigente) + ') nuevos a la nómina, todos con ingreso el ' + FECHA_INGRESO_DOTACION_MINIMA + '. ¿Continuar?')) return;
+    var hoyStr = FECHA_INGRESO_DOTACION_MINIMA;
+    var hace4Dias = new Date(FECHA_INGRESO_DOTACION_MINIMA+'T00:00:00'); hace4Dias.setDate(hace4Dias.getDate()-4);
+    var hace4DiasStr = hace4Dias.getFullYear()+'-'+String(hace4Dias.getMonth()+1).padStart(2,'0')+'-'+String(hace4Dias.getDate()).padStart(2,'0');
+    function cuidador(n, ciclo){
+      return { nombre:'Cuidador(a) '+n, rut:'', cargo:'Cuidador(a)', fechaIngreso: hoyStr, tipo:'esencial', cicloTipo:'4x4', cicloInicio: ciclo,
+        sueldoBase: SUELDO_BASE_ESENCIAL, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        horasJornada:12, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} };
+    }
+    function cuidadorNocturno(n){
+      return { nombre:'Cuidador(a) nocturno(a) '+n, rut:'', cargo:'Cuidador(a) nocturno(a)', fechaIngreso: hoyStr, tipo:'esencial', cicloTipo:'2x2n', cicloInicio: hoyStr,
+        sueldoBase: immVigente, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        horasJornada:12, horaEntrada:'20:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} };
+    }
+    var nuevos = [
+      cuidador(1, hoyStr), cuidador(2, hoyStr),
+      cuidador(3, hace4DiasStr), cuidador(4, hace4DiasStr),
+      cuidadorNocturno(1), cuidadorNocturno(2),
+      { nombre:'TENS', rut:'', cargo:'TENS', fechaIngreso: hoyStr, tipo:'soporte', cicloInicio:'',
+        sueldoBase: SUELDO_TENS_DOTACION, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        horasJornada:8, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} },
+      { nombre:'Cocinero(a)', rut:'', cargo:'Cocina', fechaIngreso: hoyStr, tipo:'soporte', cicloInicio:'',
+        sueldoBase: immVigente, cargasFamiliares: 0, afpPct: 11.44, saludTipo:'fonasa', saludMonto:0, contratoTipo:'indefinido', cesantiaPct:0.6,
+        horasJornada:8, horaEntrada:'08:00', contactoEmergencia:{nombre:'',parentesco:'',telefono:''} }
+    ];
+    nuevos.forEach(function(n){ n.id = uid(); n.activo = true; trabajadores.push(n); });
+    saveTrabajadores();
+    renderTrabajadores();
+    refreshSelectors();
+    var flash = document.getElementById('nomina-save-flash');
+    flash.textContent = nuevos.length + ' trabajadores agregados ✓ — completa RUT y nombres reales cuando corresponda.';
+    setTimeout(function(){ flash.textContent=''; }, 8000);
+  });
+
+  document.getElementById('form-trabajador').addEventListener('submit', function(e){
+    e.preventDefault();
+    var nombre = document.getElementById('trab-nombre').value.trim();
+    var rut = document.getElementById('trab-rut').value.trim();
+    var fechaIngreso = document.getElementById('trab-fecha-ingreso').value;
+    if(!nombre || !rut || !fechaIngreso) return;
+    var contrato = document.getElementById('trab-contrato').value;
+    var CARGO_POR_TIPO = { esencial: 'Cuidador(a)', esencial_4x4: 'Cuidador(a)', esencial_nocturno: 'Cuidador(a) nocturno(a)', soporte: '' };
+    var datos = {
+      nombre: nombre,
+      rut: rut,
+      cargo: document.getElementById('trab-cargo').value.trim() || CARGO_POR_TIPO[tipoSel.value] || '',
+      fechaIngreso: fechaIngreso,
+      tipo: esEsencial() ? 'esencial' : 'soporte',
+      cicloTipo: cicloTipoSeleccionado(),
+      // El ciclo de turnos parte el mismo día del ingreso — así el trabajador nuevo queda con horario
+      // completo automáticamente desde el día 1 (gasto fijo), sin pedir una fecha aparte.
+      cicloInicio: esEsencial() ? (document.getElementById('trab-ciclo-inicio').value || fechaIngreso) : '',
+      sueldoBase: num(document.getElementById('trab-sueldo').value),
+      bonoNoImponible: num(document.getElementById('trab-bono').value),
+      cargasFamiliares: num(document.getElementById('trab-cargas').value),
+      cargasDetalle: cargasDetalleActual,
+      afpPct: num(document.getElementById('trab-afp').value),
+      saludTipo: saludTipoSel.value,
+      saludMonto: num(document.getElementById('trab-salud-monto').value),
+      contratoTipo: contrato,
+      cesantiaPct: contrato === 'indefinido' ? 0.6 : 0,
+      horasJornada: num(horasInput.value) || (esEsencial() ? 12 : 8),
+      horaEntrada: document.getElementById('trab-hora-entrada').value || '08:00',
+      contactoEmergencia: {
+        nombre: document.getElementById('trab-contacto-nombre').value.trim(),
+        parentesco: document.getElementById('trab-contacto-parentesco').value.trim(),
+        telefono: document.getElementById('trab-contacto-telefono').value.trim()
+      }
+    };
+    if(editandoTrabajadorId){
+      var existente = trabajadores.find(function(x){ return x.id === editandoTrabajadorId; });
+      if(existente) Object.assign(existente, datos);
+    } else {
+      datos.id = uid();
+      datos.activo = true;
+      trabajadores.push(datos);
+    }
+    saveTrabajadores();
+    cancelarEdicionTrabajador();
+    renderTrabajadores();
+    refreshSelectors();
+  });
+
+  var TIPO_UI_POR_CICLO = { '2x2n':'esencial_nocturno', '4x4':'esencial_4x4', '4x3':'esencial' };
+  function editarTrabajador(id){
+    var t = trabajadores.find(function(x){ return x.id === id; });
+    if(!t) return;
+    editandoTrabajadorId = id;
+    document.getElementById('trab-nombre').value = t.nombre;
+    document.getElementById('trab-rut').value = t.rut;
+    document.getElementById('trab-cargo').value = t.cargo || '';
+    document.getElementById('trab-fecha-ingreso').value = t.fechaIngreso || '';
+    tipoSel.value = t.tipo === 'esencial' ? (TIPO_UI_POR_CICLO[t.cicloTipo] || 'esencial') : 'soporte';
+    applyTipoUI();
+    document.getElementById('trab-ciclo-inicio').value = t.cicloInicio || '';
+    document.getElementById('trab-afp').value = t.afpPct;
+    saludTipoSel.value = t.saludTipo || 'fonasa';
+    saludMontoWrap.style.display = t.saludTipo === 'isapre' ? 'block' : 'none';
+    document.getElementById('trab-salud-monto').value = t.saludMonto || 0;
+    document.getElementById('trab-contrato').value = t.contratoTipo || 'indefinido';
+    document.getElementById('trab-sueldo').value = t.sueldoBase;
+    document.getElementById('trab-bono').value = t.bonoNoImponible || 0;
+    document.getElementById('trab-cargas').value = t.cargasFamiliares || 0;
+    cargasDetalleActual = (t.cargasDetalle || []).slice();
+    renderCargasDetalle();
+    actualizarVisibilidadCargasDetalle();
+    document.getElementById('trab-liquido').value = '';
+    document.getElementById('trab-horas').value = t.horasJornada;
+    document.getElementById('trab-hora-entrada').value = t.horaEntrada || '08:00';
+    var contacto = t.contactoEmergencia || {};
+    document.getElementById('trab-contacto-nombre').value = contacto.nombre || '';
+    document.getElementById('trab-contacto-parentesco').value = contacto.parentesco || '';
+    document.getElementById('trab-contacto-telefono').value = contacto.telefono || '';
+    document.getElementById('form-trabajador-titulo').textContent = 'Editar trabajador — ' + t.nombre;
+    document.getElementById('btn-guardar-trabajador').textContent = 'Guardar cambios';
+    document.getElementById('btn-cancelar-trabajador').style.display = 'inline-block';
+    document.getElementById('form-trabajador').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  var CAUSAL_TERMINO_LABEL = {
+    mutuo_acuerdo: 'Mutuo acuerdo de las partes (Art. 159 N°1)',
+    renuncia: 'Renuncia voluntaria del trabajador (Art. 159 N°2)',
+    plazo_fijo: 'Vencimiento del plazo convenido (Art. 159 N°4)',
+    necesidades_empresa: 'Necesidades de la empresa (Art. 161)',
+    caducidad: 'Caducidad — falta grave del trabajador (Art. 160)'
+  };
+
+  function trabajadoresActivos(){ return trabajadores.filter(function(t){ return t.activo !== false; }); }
+
+  function renderTrabajadores(){
+    var tbody = document.getElementById('tabla-trabajadores');
+    if(!tbody) return;
+    var activos = trabajadoresActivos();
+    if(activos.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">A&uacute;n no hay trabajadores activos registrados.</td></tr>';
+    } else {
+      var hoy = new Date();
+      tbody.innerHTML = activos.map(function(t){
+        var CICLO_BADGE = { '2x2n':'Esencial · 2&times;2 noche', '4x4':'Esencial · 4&times;4', '4x3':'Esencial · 4&times;3' };
+        var tipoLabel = t.tipo === 'esencial'
+          ? '<span class="badge">'+(CICLO_BADGE[t.cicloTipo]||'Esencial')+'</span>'
+          : '<span class="badge" style="background:var(--paper-dark); color:var(--ink-soft);">Soporte</span>';
+        var v = calcularVacaciones(t, hoy);
+        return '<tr>'+
+          '<td>'+esc(t.nombre)+'</td>'+
+          '<td class="mono">'+esc(t.rut)+'</td>'+
+          '<td>'+tipoLabel+'</td>'+
+          '<td class="num">'+fmtCLP(t.sueldoBase)+'</td>'+
+          '<td class="num">'+fmtCLP(t.bonoNoImponible||0)+'</td>'+
+          '<td class="num">'+(t.cargasFamiliares||0)+'</td>'+
+          '<td class="num">'+(v ? v.saldo : '—')+'</td>'+
+          '<td style="white-space:nowrap;"><button class="gold small" data-contrato="'+t.id+'">Generar contrato</button> <button class="secondary small" data-edit="'+t.id+'">Editar</button> <button class="danger small" data-terminar="'+t.id+'" style="background:transparent; border-color:var(--danger); color:var(--danger);">Terminar relación</button> <button class="danger" data-del="'+t.id+'">Eliminar</button></td>'+
+        '</tr>';
+      }).join('');
+    }
+    renderDesvinculados();
+  }
+  function renderDesvinculados(){
+    var tbody = document.getElementById('tabla-desvinculados');
+    var inactivos = trabajadores.filter(function(t){ return t.activo === false; });
+    if(inactivos.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Sin trabajadores desvinculados.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = inactivos.map(function(t){
+      return '<tr>'+
+        '<td>'+esc(t.nombre)+'</td>'+
+        '<td class="mono">'+esc(t.rut)+'</td>'+
+        '<td>'+esc(t.cargo)+'</td>'+
+        '<td class="mono">'+esc(t.fechaIngreso||'—')+'</td>'+
+        '<td class="mono">'+esc(t.fechaTermino||'—')+'</td>'+
+        '<td>'+esc(CAUSAL_TERMINO_LABEL[t.causalTermino] || t.causalTermino || '—')+'</td>'+
+        '<td class="num">'+fmtCLP(t.finiquitoMonto||0)+'</td>'+
+      '</tr>';
+    }).join('');
+  }
+  document.getElementById('tabla-trabajadores').addEventListener('click', function(e){
+    var contratoBtn = e.target.closest('[data-contrato]');
+    if(contratoBtn){ generarContratoTrabajador(contratoBtn.dataset.contrato); return; }
+    var editBtn = e.target.closest('[data-edit]');
+    if(editBtn){ editarTrabajador(editBtn.dataset.edit); return; }
+    var terminarBtn = e.target.closest('[data-terminar]');
+    if(terminarBtn){ abrirFiniquito(terminarBtn.dataset.terminar); return; }
+    var btn = e.target.closest('[data-del]');
+    if(!btn) return;
+    var id = btn.dataset.del;
+    var t = trabajadores.find(function(x){ return x.id===id; });
+    if(!t) return;
+    if(!confirm('¿Eliminar a '+t.nombre+' de la nómina? Esto borra el registro por completo — para un término normal de la relación laboral usa "Terminar relación" en vez de esto.')) return;
+    trabajadores = trabajadores.filter(function(x){ return x.id!==id; });
+    saveTrabajadores();
+    if(editandoTrabajadorId === id) cancelarEdicionTrabajador();
+    renderTrabajadores();
+    refreshSelectors();
+  });
+
+  // ---------- TÉRMINO DE RELACIÓN LABORAL Y FINIQUITO ----------
+  // Cálculo simplificado: sueldo proporcional del mes, vacaciones proporcionales (15 días hábiles/año),
+  // e indemnización por años de servicio + sustitutiva de aviso previo solo si la causal es "necesidades
+  // de la empresa" (Art. 161). No aplica el tope de 90 UF/año — se advierte en el PDF generado.
+  function calcularFiniquito(trab, fechaTerminoStr, causal, avisoPrevioDado){
+    var inicio = new Date(trab.fechaIngreso + 'T00:00:00');
+    var termino = new Date(fechaTerminoStr + 'T00:00:00');
+    var mesesServicio = (termino.getFullYear()-inicio.getFullYear())*12 + (termino.getMonth()-inicio.getMonth());
+    if(termino.getDate() < inicio.getDate()) mesesServicio--;
+    mesesServicio = Math.max(0, mesesServicio);
+    var aniosCompletos = Math.floor(mesesServicio/12);
+    var mesesResto = mesesServicio - aniosCompletos*12;
+
+    var sueldoDiario = trab.sueldoBase / 30;
+    var vacacionesProporcionales = Math.round((mesesResto/12) * 15 * sueldoDiario / 100) * 100;
+
+    var aniosIndemnizables = Math.min(aniosCompletos + (mesesResto > 6 ? 1 : 0), 11);
+    var indemnizacionAnios = causal === 'necesidades_empresa' ? aniosIndemnizables * trab.sueldoBase : 0;
+    var indemnizacionAvisoPrevio = (causal === 'necesidades_empresa' && avisoPrevioDado === 'no') ? trab.sueldoBase : 0;
+
+    var diaTermino = termino.getDate();
+    var sueldoProporcional = Math.round(sueldoDiario * diaTermino / 100) * 100;
+
+    var totalHaberes = vacacionesProporcionales + indemnizacionAnios + indemnizacionAvisoPrevio + sueldoProporcional;
+
+    return {
+      mesesServicio: mesesServicio, aniosCompletos: aniosCompletos, mesesResto: mesesResto,
+      vacacionesProporcionales: vacacionesProporcionales,
+      aniosIndemnizables: aniosIndemnizables, indemnizacionAnios: indemnizacionAnios,
+      indemnizacionAvisoPrevio: indemnizacionAvisoPrevio,
+      sueldoProporcional: sueldoProporcional, totalHaberes: totalHaberes
+    };
+  }
+
+  var finiquitoTrabId = null;
+
+  function actualizarVisibilidadAviso(){
+    var causal = document.getElementById('fin-causal').value;
+    document.getElementById('fin-aviso-wrap').style.display = causal === 'necesidades_empresa' ? 'block' : 'none';
+  }
+
+  function recomputeFiniquito(){
+    if(!finiquitoTrabId) return null;
+    var t = trabajadores.find(function(x){ return x.id===finiquitoTrabId; });
+    if(!t) return null;
+    var fecha = document.getElementById('fin-fecha-termino').value;
+    if(!fecha) return null;
+    var causal = document.getElementById('fin-causal').value;
+    var aviso = document.getElementById('fin-aviso-previo').value;
+    var c = calcularFiniquito(t, fecha, causal, aviso);
+    var filas = [
+      { label: 'Sueldo proporcional del mes (' + new Date(fecha+'T00:00:00').getDate() + ' día(s))', monto: c.sueldoProporcional },
+      { label: 'Vacaciones proporcionales', monto: c.vacacionesProporcionales }
+    ];
+    if(c.indemnizacionAnios > 0) filas.push({ label: 'Indemnización por años de servicio (' + c.aniosIndemnizables + ' año(s))', monto: c.indemnizacionAnios });
+    if(c.indemnizacionAvisoPrevio > 0) filas.push({ label: 'Indemnización sustitutiva de aviso previo', monto: c.indemnizacionAvisoPrevio });
+    document.getElementById('tabla-finiquito').innerHTML = filas.map(function(f){
+      return '<tr><td>'+f.label+'</td><td class="num">'+fmtCLP(f.monto)+'</td></tr>';
+    }).join('');
+    document.getElementById('fin-total').textContent = fmtCLP(c.totalHaberes);
+    document.getElementById('fin-antiguedad-hint').textContent = 'Antigüedad: ' + c.aniosCompletos + ' año(s) y ' + c.mesesResto + ' mes(es) desde el ' + (t.fechaIngreso||'—') + '.';
+    return c;
+  }
+
+  function abrirFiniquito(id){
+    var t = trabajadores.find(function(x){ return x.id===id; });
+    if(!t) return;
+    if(!t.fechaIngreso){
+      alert('Este trabajador no tiene fecha de ingreso registrada. Edítalo primero (botón "Editar") para completarla antes de calcular el finiquito.');
+      return;
+    }
+    finiquitoTrabId = id;
+    document.getElementById('finiquito-nombre-trab').textContent = t.nombre;
+    document.getElementById('fin-fecha-termino').value = new Date().toISOString().slice(0,10);
+    document.getElementById('fin-causal').value = 'mutuo_acuerdo';
+    document.getElementById('fin-aviso-previo').value = 'si';
+    actualizarVisibilidadAviso();
+    document.getElementById('card-finiquito').style.display = 'block';
+    document.getElementById('finiquito-save-flash').textContent = '';
+    recomputeFiniquito();
+    document.getElementById('card-finiquito').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  document.getElementById('fin-fecha-termino').addEventListener('input', recomputeFiniquito);
+  document.getElementById('fin-causal').addEventListener('change', function(){ actualizarVisibilidadAviso(); recomputeFiniquito(); });
+  document.getElementById('fin-aviso-previo').addEventListener('change', recomputeFiniquito);
+
+  document.getElementById('btn-cancelar-finiquito').addEventListener('click', function(){
+    finiquitoTrabId = null;
+    document.getElementById('card-finiquito').style.display = 'none';
+  });
+
+  async function generarFiniquitoPDF(t, c, fecha, causal){
+    var clauses = [
+      { title: 'PRIMERO: Individualización', body: 'Entre ' + (empresa.nombre||'[Nombre empresa]') + ', RUT ' + (empresa.rut||'[RUT empresa]') + ', en adelante "el empleador", y don(ña) ' + t.nombre + ', RUT ' + t.rut + ', en adelante "el trabajador", se ha convenido el siguiente finiquito de la relación laboral que los unió desde el ' + (t.fechaIngreso||'[fecha ingreso]') + ' hasta el ' + fecha + '.' },
+      { title: 'SEGUNDO: Causal de término', body: 'La relación laboral termina por la causal: ' + (CAUSAL_TERMINO_LABEL[causal] || causal) + '.' },
+      { title: 'TERCERO: Liquidación de haberes', body: 'Se pagan al trabajador los siguientes conceptos: sueldo proporcional de ' + fmtCLP(c.sueldoProporcional) + '; vacaciones proporcionales de ' + fmtCLP(c.vacacionesProporcionales) +
+        (c.indemnizacionAnios>0 ? '; indemnización por años de servicio (' + c.aniosIndemnizables + ' año(s)) de ' + fmtCLP(c.indemnizacionAnios) : '') +
+        (c.indemnizacionAvisoPrevio>0 ? '; indemnización sustitutiva de aviso previo de ' + fmtCLP(c.indemnizacionAvisoPrevio) : '') +
+        '. Total líquido a pagar: ' + fmtCLP(c.totalHaberes) + '.' },
+      { title: 'CUARTO: Declaración', body: 'El trabajador declara recibir conforme el pago indicado y no tener cargo ni cobro pendiente en contra del empleador por concepto de la relación laboral que los unió, sin perjuicio de las acciones que procedan conforme a la ley.' }
+    ];
+    var doc = ReportPDF.buildContractDoc({
+      titulo: 'FINIQUITO DE CONTRATO DE TRABAJO',
+      subtitulo: t.nombre + ' — RUT ' + t.rut,
+      disclaimer: CONTRATO_DISCLAIMER + ' Este cálculo no aplica el tope de 90 UF por año en la indemnización por años de servicio ni distingue un eventual despido injustificado; verifícalo con un abogado o contador antes de pagar y firmar.',
+      clauses: clauses,
+      closing: 'Para constancia, firman ambas partes en dos ejemplares del mismo tenor.',
+      firmas: [{ label:'Firma Trabajador' }, { label:'Firma Empleador' }]
+    });
+    var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('finiquito-'+t.nombre)+'.pdf');
+    document.getElementById('finiquito-save-flash').textContent = res.mensaje;
+  }
+
+  document.getElementById('btn-confirmar-finiquito').addEventListener('click', function(){
+    if(!finiquitoTrabId) return;
+    var t = trabajadores.find(function(x){ return x.id===finiquitoTrabId; });
+    if(!t) return;
+    var fecha = document.getElementById('fin-fecha-termino').value;
+    var causal = document.getElementById('fin-causal').value;
+    var aviso = document.getElementById('fin-aviso-previo').value;
+    if(!fecha){ alert('Ingresa la fecha de término.'); return; }
+    if(!confirm('¿Confirmar el término de la relación laboral de ' + t.nombre + ' el ' + fecha + '? Pasa a "Personal desvinculado" — el registro no se elimina.')) return;
+    var c = calcularFiniquito(t, fecha, causal, aviso);
+    t.activo = false;
+    t.fechaTermino = fecha;
+    t.causalTermino = causal;
+    t.avisoPrevioDado = aviso;
+    t.finiquitoMonto = c.totalHaberes;
+    saveTrabajadores();
+    generarFiniquitoPDF(t, c, fecha, causal).catch(function(e){
+      document.getElementById('finiquito-save-flash').textContent = '✗ ' + e.message;
+    });
+    finiquitoTrabId = null;
+    document.getElementById('card-finiquito').style.display = 'none';
+    renderTrabajadores();
+    refreshSelectors();
+  });
+
+  // ---------- VACACIONES ----------
+  // Días de feriado ya tomados: se cuentan directo desde los días marcados "Vacaciones" en Asistencia,
+  // a través de todos los meses y años guardados para este trabajador.
+  function diasVacacionesTomados(trabId){
+    var total = 0;
+    Object.keys(asistencia).forEach(function(key){
+      if(key.indexOf(trabId+'_') !== 0) return;
+      var monthData = asistencia[key];
+      Object.keys(monthData).forEach(function(day){
+        if(monthData[day].estado === 'vacaciones') total++;
+      });
+    });
+    return total;
+  }
+
+  var FERIADO_DIAS_POR_ANIO = 15;
+  var FERIADO_TOPE_ACUMULACION = 30; // 2 períodos consecutivos, Art. 70 Código del Trabajo
+
+  function calcularVacaciones(trab, hoy){
+    hoy = hoy || new Date();
+    if(!trab.fechaIngreso) return null;
+    var inicio = new Date(trab.fechaIngreso+'T00:00:00');
+    var mesesServicio = (hoy.getFullYear()-inicio.getFullYear())*12 + (hoy.getMonth()-inicio.getMonth());
+    if(hoy.getDate() < inicio.getDate()) mesesServicio--;
+    mesesServicio = Math.max(0, mesesServicio);
+    var aniosCompletos = Math.floor(mesesServicio/12);
+    var mesesResto = mesesServicio - aniosCompletos*12;
+
+    var diasAcumulados = Math.floor((mesesServicio/12) * FERIADO_DIAS_POR_ANIO);
+    var diasTomados = diasVacacionesTomados(trab.id);
+    var saldoBruto = diasAcumulados - diasTomados;
+    var saldo = Math.max(0, Math.min(saldoBruto, FERIADO_TOPE_ACUMULACION));
+    var enTope = saldoBruto >= FERIADO_TOPE_ACUMULACION;
+
+    var proximoAniversario = new Date(hoy.getFullYear(), inicio.getMonth(), inicio.getDate());
+    if(proximoAniversario <= hoy) proximoAniversario = new Date(hoy.getFullYear()+1, inicio.getMonth(), inicio.getDate());
+
+    return {
+      aniosCompletos: aniosCompletos, mesesResto: mesesResto,
+      diasAcumulados: diasAcumulados, diasTomados: diasTomados,
+      saldo: saldo, enTope: enTope, proximoAniversario: proximoAniversario
+    };
+  }
+
+  function renderVacaciones(){
+    var tbody = document.getElementById('tabla-vacaciones');
+    var activos = trabajadoresActivos();
+    if(activos.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">A&uacute;n no hay trabajadores activos registrados.</td></tr>';
+      return;
+    }
+    var hoy = new Date();
+    tbody.innerHTML = activos.map(function(t){
+      var v = calcularVacaciones(t, hoy);
+      if(!v){
+        return '<tr><td>'+esc(t.nombre)+'</td><td>'+esc(t.cargo||'—')+'</td><td colspan="6" style="color:var(--danger);">Falta fecha de ingreso — edítalo en Trabajadores para calcular sus vacaciones.</td></tr>';
+      }
+      var antiguedadTxt = v.aniosCompletos+' a&ntilde;o(s) '+v.mesesResto+' mes(es)';
+      var saldoTxt = v.saldo + (v.enTope ? ' <span class="badge" style="background:var(--danger-bg); color:var(--danger); margin-left:6px;">tope alcanzado</span>' : '');
+      return '<tr>'+
+        '<td>'+esc(t.nombre)+'</td>'+
+        '<td>'+esc(t.cargo||'—')+'</td>'+
+        '<td class="mono">'+esc(t.fechaIngreso)+'</td>'+
+        '<td class="num">'+antiguedadTxt+'</td>'+
+        '<td class="num">'+v.diasAcumulados+'</td>'+
+        '<td class="num">'+v.diasTomados+'</td>'+
+        '<td class="num">'+saldoTxt+'</td>'+
+        '<td class="mono">'+v.proximoAniversario.toLocaleDateString('es-CL')+'</td>'+
+      '</tr>';
+    }).join('');
+  }
+
+  // ---------- SELECT POBLADORES COMPARTIDOS ----------
+  function fillMesSelect(sel){
+    sel.innerHTML = MESES.map(function(m,i){ return '<option value="'+(i+1)+'">'+m+'</option>'; }).join('');
+  }
+  function fillTrabajadorSelect(sel){
+    var prev = sel.value;
+    var activos = trabajadoresActivos();
+    if(activos.length===0){
+      sel.innerHTML = '<option value="">(sin trabajadores)</option>';
+      return;
+    }
+    sel.innerHTML = activos.map(function(t){ return '<option value="'+t.id+'">'+esc(t.nombre)+' — '+esc(t.rut)+'</option>'; }).join('');
+    if(activos.some(function(t){ return t.id===prev; })) sel.value = prev;
+  }
+
+  var asisTrabSel = document.getElementById('asis-trabajador');
+  var asisMesSel = document.getElementById('asis-mes');
+  var asisAnioInput = document.getElementById('asis-anio');
+  var liqTrabSel = document.getElementById('liq-trabajador');
+  var liqMesSel = document.getElementById('liq-mes');
+  var liqAnioInput = document.getElementById('liq-anio');
+  var liqImmInput = document.getElementById('liq-imm');
+  var liqUtmInput = document.getElementById('liq-utm');
+
+  var today = new Date();
+  fillMesSelect(asisMesSel); asisMesSel.value = today.getMonth()+1;
+  fillMesSelect(liqMesSel); liqMesSel.value = today.getMonth()+1;
+  asisAnioInput.value = today.getFullYear();
+  liqAnioInput.value = today.getFullYear();
+  liqImmInput.value = fmtCLP(immVigente);
+  liqUtmInput.value = utmVigente;
+
+  function refreshSelectors(){
+    fillTrabajadorSelect(asisTrabSel);
+    fillTrabajadorSelect(liqTrabSel);
+  }
+  refreshSelectors();
+
+  var asisViewMode = 'individual';
+  function renderAsistenciaActiveView(){
+    if(asisViewMode === 'general') renderVistaGeneral();
+    else renderCalendar();
+  }
+  document.querySelectorAll('.view-toggle-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.view-toggle-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      asisViewMode = btn.dataset.view;
+      var individual = asisViewMode === 'individual';
+      document.getElementById('asis-vista-individual').style.display = individual ? '' : 'none';
+      document.getElementById('asis-vista-general').style.display = individual ? 'none' : '';
+      document.getElementById('asis-trabajador-wrap').style.display = individual ? '' : 'none';
+      document.getElementById('asis-autofill-wrap').style.display = individual ? '' : 'none';
+      renderAsistenciaActiveView();
+    });
+  });
+
+  asisTrabSel.addEventListener('change', renderCalendar);
+  [asisMesSel, asisAnioInput].forEach(function(el){ el.addEventListener('change', renderAsistenciaActiveView); });
+  [liqTrabSel, liqMesSel, liqAnioInput].forEach(function(el){ el.addEventListener('change', loadLiquidacion); });
+  // El IMM ya NO es editable a mano: siempre viene del calendario legal (IMM_SCHEDULE) según la fecha
+  // de hoy — así el tope de la gratificación nunca queda desalineado con lo que dice la ley vigente.
+  liqUtmInput.addEventListener('input', function(){
+    utmVigente = num(liqUtmInput.value) || 71649;
+    saveUtm();
+    loadLiquidacion();
+  });
+
+  // ---------- ASISTENCIA ----------
+  function keyAsis(trabId, year, month){ return trabId+'_'+year+'_'+month; }
+  function getMonthData(trabId, year, month){
+    var key = keyAsis(trabId, year, month);
+    if(!asistencia[key]) asistencia[key] = {};
+    return asistencia[key];
+  }
+  var headRow = document.getElementById('cal-head-row');
+  headRow.innerHTML = DIAS.map(function(d){ return '<div class="cal-head">'+d+'</div>'; }).join('');
+
+  function currentTrabajador(sel){
+    var id = sel.value;
+    return trabajadores.find(function(t){ return t.id===id; });
+  }
+
+  function diasEntre(a, b){
+    var ms = Date.UTC(b.getFullYear(),b.getMonth(),b.getDate()) - Date.UTC(a.getFullYear(),a.getMonth(),a.getDate());
+    return Math.round(ms / 86400000);
+  }
+  function patronCicloPara(trab){
+    return patronPorCicloTipo(trab.cicloTipo);
+  }
+  function estadoCiclo4x4(trab, year, month, d){
+    if(!trab.cicloInicio) return null;
+    var patron = patronCicloPara(trab);
+    var parts = trab.cicloInicio.split('-');
+    var inicio = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+    var fecha = new Date(year, month-1, d);
+    var diff = diasEntre(inicio, fecha);
+    var idx = ((diff % patron.length) + patron.length) % patron.length;
+    return patron[idx];
+  }
+
+  // ---------- Ayudas de horario (para puntualidad y horas trabajadas) ----------
+  function horaAMinutos(hhmm){
+    if(!hhmm) return null;
+    var p = String(hhmm).split(':');
+    var h = parseInt(p[0],10), m = parseInt(p[1],10);
+    if(isNaN(h) || isNaN(m)) return null;
+    return h*60 + m;
+  }
+  function minutosAHora(min){
+    min = ((min % 1440) + 1440) % 1440;
+    var h = Math.floor(min/60), m = Math.round(min%60);
+    return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  }
+  function sumarHoras(hhmm, horas){
+    var base = horaAMinutos(hhmm);
+    if(base===null) return '';
+    return minutosAHora(base + Math.round(horas*60));
+  }
+  function horaEntradaEsperada(trab, estado){
+    var base = trab.horaEntrada || '08:00';
+    // El turno nocturno exclusivo no tiene turno día de referencia: su hora de entrada YA es la de la
+    // noche, a diferencia del 4×4 donde la noche se calcula como 12 h después del inicio del turno día.
+    if(trab.cicloTipo === '2x2n') return base;
+    return estado === 'turno_noche' ? sumarHoras(base, 12) : base;
+  }
+  function horasEntreHoras(ingreso, salida){
+    var i = horaAMinutos(ingreso), s = horaAMinutos(salida);
+    if(i===null || s===null) return null;
+    if(i === s) return 0; // misma hora de entrada y salida: sin turno real, no un día completo de 24h
+    var diff = s - i;
+    if(diff <= 0) diff += 1440; // turno cruza medianoche
+    return diff/60;
+  }
+  function esPuntual(horaIngreso, horaEsperada){
+    if(!horaIngreso || !horaEsperada) return null;
+    return horaAMinutos(horaIngreso) <= horaAMinutos(horaEsperada);
+  }
+
+  function defaultDayInfo(trab, year, month, d, isWeekend){
+    var fecha = year + '-' + String(month).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    if((trab.fechaIngreso && fecha < trab.fechaIngreso) || (trab.fechaTermino && fecha > trab.fechaTermino)){
+      return {estado:'fuera_contrato', horas:0, horaIngreso:'', horaSalida:''};
+    }
+    if(trab.tipo === 'esencial'){
+      var estado = estadoCiclo4x4(trab, year, month, d) || 'descanso_turno';
+      var trabajado = !!ESTADOS_TRABAJADOS[estado];
+      var horaIngreso = trabajado ? horaEntradaEsperada(trab, estado) : '';
+      var horaSalida = trabajado ? sumarHoras(horaIngreso, trab.horasJornada) : '';
+      return { estado: estado, horas: trabajado ? trab.horasJornada : 0, horaIngreso: horaIngreso, horaSalida: horaSalida };
+    }
+    if(isWeekend) return {estado:'no_aplica', horas:0, horaIngreso:'', horaSalida:''};
+    var hi = trab.horaEntrada || '08:00';
+    return {estado:'trabajado', horas: trab.horasJornada, horaIngreso: hi, horaSalida: sumarHoras(hi, trab.horasJornada)};
+  }
+
+  // Igual que defaultDayInfo, pero de solo lectura: no escribe en monthData ni en localStorage. Se usa
+  // en la Vista general para mostrar el turno esperado de un día que el usuario nunca abrió a mano
+  // (el calendario por trabajador recién guarda un día la primera vez que se visualiza/edita).
+  function resolveDayInfo(trab, year, month, d){
+    var monthData = getMonthData(trab.id, year, month);
+    if(monthData[d]) return monthData[d];
+    var wd = (new Date(year, month-1, d).getDay()+6)%7;
+    return defaultDayInfo(trab, year, month, d, wd===5||wd===6);
+  }
+
+  var ESTADO_ROSTER = {
+    turno_dia:           { label:'D',   cls:'rc-dia',      nombre:'Turno día' },
+    turno_noche:         { label:'N',   cls:'rc-noche',    nombre:'Turno noche' },
+    trabajado:           { label:'T',   cls:'rc-dia',      nombre:'Trabajado' },
+    descanso_turno:      { label:'',    cls:'rc-descanso', nombre:'Descanso (turno)' },
+    no_aplica:           { label:'',    cls:'rc-descanso', nombre:'Fin de semana (no aplica)' },
+    falta_injustificada: { label:'FI',  cls:'rc-fi',       nombre:'Falta injustificada' },
+    falta_justificada:   { label:'FJ',  cls:'rc-fj',       nombre:'Falta justificada' },
+    licencia:            { label:'LIC', cls:'rc-lic',      nombre:'Licencia médica' },
+    vacaciones:          { label:'VAC', cls:'rc-vac',      nombre:'Vacaciones' },
+    fuera_contrato:      { label:'',    cls:'rc-fuera',    nombre:'Fuera de contrato' }
+  };
+  var ROSTER_LEGEND = [
+    ['rc-dia','Turno día / trabajado'], ['rc-noche','Turno noche'], ['rc-descanso','Descanso / fin de semana'],
+    ['rc-fi','Falta injustificada'], ['rc-fj','Falta justificada'], ['rc-lic','Licencia médica'],
+    ['rc-vac','Vacaciones'], ['rc-fuera','Fuera de contrato']
+  ];
+
+  function renderVistaGeneral(){
+    var year = parseInt(asisAnioInput.value,10) || today.getFullYear();
+    var month = parseInt(asisMesSel.value,10) || (today.getMonth()+1);
+    var activos = trabajadores.filter(function(t){ return t.activo !== false; });
+    var table = document.getElementById('team-roster-table');
+    var legendEl = document.getElementById('roster-legend');
+    if(activos.length === 0){
+      table.innerHTML = '<tr><td class="field-hint" style="padding:16px;">Sin trabajadores activos.</td></tr>';
+      legendEl.innerHTML = '';
+      return;
+    }
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var headCells = '<th class="roster-name-col">Trabajador</th>';
+    for(var d=1; d<=daysInMonth; d++){
+      var wdHead = (new Date(year, month-1, d).getDay()+6)%7;
+      var weekendCls = (wdHead===5 || wdHead===6) ? ' weekend' : '';
+      headCells += '<th class="roster-day-col'+weekendCls+'">'+d+'<span>'+DIAS[wdHead]+'</span></th>';
+    }
+    var rowsHtml = activos.map(function(t){
+      var cells = '<td class="roster-name-col" title="'+esc(t.nombre)+'">'+esc(t.nombre)+(t.cargo ? '<span class="roster-cargo">'+esc(t.cargo)+'</span>' : '')+'</td>';
+      for(var d=1; d<=daysInMonth; d++){
+        var info = resolveDayInfo(t, year, month, d);
+        var meta = ESTADO_ROSTER[info.estado] || { label:'?', cls:'', nombre:info.estado };
+        var wd = (new Date(year, month-1, d).getDay()+6)%7;
+        var weekendCellCls = (wd===5 || wd===6) ? ' weekend' : '';
+        cells += '<td class="roster-cell roster-day-col'+weekendCellCls+' '+meta.cls+'" title="'+esc(meta.nombre)+' — '+d+' de '+MESES[month-1]+'">'+meta.label+'</td>';
+      }
+      return '<tr>'+cells+'</tr>';
+    }).join('');
+    table.innerHTML = '<thead><tr>'+headCells+'</tr></thead><tbody>'+rowsHtml+'</tbody>';
+    legendEl.innerHTML = ROSTER_LEGEND.map(function(pair){
+      return '<span class="chip"><span class="swatch '+pair[0]+'"></span>'+pair[1]+'</span>';
+    }).join('');
+  }
+
+  function renderCalendar(){
+    var grid = document.getElementById('calendar-grid');
+    var trab = currentTrabajador(asisTrabSel);
+    var year = parseInt(asisAnioInput.value,10) || today.getFullYear();
+    var month = parseInt(asisMesSel.value,10) || (today.getMonth()+1);
+    var hintEl = document.getElementById('asis-tipo-hint');
+    var btnAuto = document.getElementById('btn-autofill');
+    var btnAuto4x4 = document.getElementById('btn-autofill-4x4');
+    if(!trab){
+      grid.innerHTML = '<div class="field-hint" style="grid-column:1/-1;">Selecciona un trabajador para ver su calendario.</div>';
+      document.getElementById('asis-resumen').innerHTML = '';
+      hintEl.textContent = '';
+      btnAuto.style.display = 'none';
+      btnAuto4x4.style.display = 'none';
+      return;
+    }
+    var esencial = trab.tipo === 'esencial';
+    var CICLO_BTN_LABEL = { '2x2n':'Generar turno 2×2 nocturno', '4x4':'Generar turno 4×4 (LLNN/OOOO)', '4x3':'Generar turno 4×3 (LLNNXXX)' };
+    var CICLO_NOMBRE = { '2x2n':'2×2 nocturno', '4x4':'4×4', '4x3':'4×3' };
+    btnAuto.style.display = esencial ? 'none' : 'inline-block';
+    btnAuto4x4.style.display = esencial ? 'inline-block' : 'none';
+    btnAuto4x4.textContent = CICLO_BTN_LABEL[trab.cicloTipo] || 'Generar turno automático';
+    hintEl.textContent = esencial
+      ? (trab.cicloInicio ? 'Ciclo ' + (CICLO_NOMBRE[trab.cicloTipo]||trab.cicloTipo) + ' desde ' + trab.cicloInicio + '.' : 'Falta fecha de inicio de ciclo — edítala en Trabajadores.')
+      : '';
+    var monthData = getMonthData(trab.id, year, month);
+    var daysInMonth = new Date(year, month, 0).getDate();
+    var firstWeekday = (new Date(year, month-1, 1).getDay()+6)%7;
+    var motivos = esencial
+      ? [['descanso_turno','Descanso (turno)'],['falta_injustificada','Falta injustificada'],['falta_justificada','Falta justificada'],['licencia','Licencia médica'],['vacaciones','Vacaciones'],['fuera_contrato','Fuera de contrato']]
+      : [['no_aplica','No aplica (fin de semana)'],['falta_injustificada','Falta injustificada'],['falta_justificada','Falta justificada'],['licencia','Licencia médica'],['vacaciones','Vacaciones'],['fuera_contrato','Fuera de contrato']];
+    var html = '';
+    for(var i=0;i<firstWeekday;i++) html += '<div class="cal-cell empty"></div>';
+    for(var d=1; d<=daysInMonth; d++){
+      var wd = (new Date(year, month-1, d).getDay()+6)%7;
+      var isWeekend = wd===5 || wd===6;
+      if(!monthData[d]){
+        monthData[d] = defaultDayInfo(trab, year, month, d, isWeekend);
+      }
+      var info = monthData[d];
+      var trabajado = !!ESTADOS_TRABAJADOS[info.estado];
+      var tarde = trabajado && esPuntual(info.horaIngreso, horaEntradaEsperada(trab, info.estado)) === false;
+      var inner = '<div class="cal-daynum">'+d+'<span class="cal-dayname">'+DIAS[wd]+'</span></div>'+
+        '<label class="cal-asistio-label"><input type="checkbox" class="cal-asistio" data-day="'+d+'"'+(trabajado?' checked':'')+'> Asistió</label>';
+      if(trabajado){
+        if(esencial){
+          inner += '<select class="cal-turno" data-day="'+d+'">'+
+            '<option value="turno_dia"'+(info.estado==='turno_dia'?' selected':'')+'>Turno día</option>'+
+            '<option value="turno_noche"'+(info.estado==='turno_noche'?' selected':'')+'>Turno noche</option>'+
+          '</select>';
+        }
+        inner += '<div class="cal-tiempos">'+
+          '<input type="time" class="cal-hora-ingreso" data-day="'+d+'" value="'+(info.horaIngreso||'')+'" title="Hora de ingreso">'+
+          '<input type="time" class="cal-hora-salida" data-day="'+d+'" value="'+(info.horaSalida||'')+'" title="Hora de salida">'+
+        '</div>';
+      } else {
+        inner += '<select class="cal-motivo" data-day="'+d+'">'+
+          motivos.map(function(m){ return '<option value="'+m[0]+'"'+(info.estado===m[0]?' selected':'')+'>'+m[1]+'</option>'; }).join('') +
+        '</select>';
+      }
+      html += '<div class="cal-cell'+(isWeekend && !esencial?' weekend':'')+(tarde?' tarde':'')+(info.estado==='fuera_contrato'?' fuera-contrato':'')+'" data-day="'+d+'">'+inner+'</div>';
+    }
+    grid.innerHTML = html;
+    saveAsistencia();
+    renderResumen(trab, year, month);
+  }
+
+  function recalcularHorasDia(trab, info){
+    var horasReales = horasEntreHoras(info.horaIngreso, info.horaSalida);
+    info.horas = horasReales !== null ? horasReales : trab.horasJornada;
+  }
+
+  document.getElementById('calendar-grid').addEventListener('change', function(e){
+    var trab = currentTrabajador(asisTrabSel);
+    if(!trab) return;
+    var year = parseInt(asisAnioInput.value,10);
+    var month = parseInt(asisMesSel.value,10);
+    var monthData = getMonthData(trab.id, year, month);
+    var esencial = trab.tipo === 'esencial';
+
+    if(e.target.classList.contains('cal-asistio')){
+      var day = e.target.dataset.day;
+      if(e.target.checked){
+        var estadoNuevo = esencial ? 'turno_dia' : 'trabajado';
+        monthData[day].estado = estadoNuevo;
+        monthData[day].horaIngreso = horaEntradaEsperada(trab, estadoNuevo);
+        monthData[day].horaSalida = sumarHoras(monthData[day].horaIngreso, trab.horasJornada);
+        recalcularHorasDia(trab, monthData[day]);
+      } else {
+        monthData[day].estado = 'falta_injustificada';
+        monthData[day].horas = 0;
+        monthData[day].horaIngreso = '';
+        monthData[day].horaSalida = '';
+      }
+      saveAsistencia();
+      renderCalendar();
+      return;
+    }
+    if(e.target.classList.contains('cal-turno')){
+      var day2 = e.target.dataset.day;
+      monthData[day2].estado = e.target.value;
+      monthData[day2].horaIngreso = horaEntradaEsperada(trab, e.target.value);
+      monthData[day2].horaSalida = sumarHoras(monthData[day2].horaIngreso, trab.horasJornada);
+      recalcularHorasDia(trab, monthData[day2]);
+      saveAsistencia();
+      renderCalendar();
+      return;
+    }
+    if(e.target.classList.contains('cal-motivo')){
+      var day3 = e.target.dataset.day;
+      monthData[day3].estado = e.target.value;
+      monthData[day3].horas = 0;
+      monthData[day3].horaIngreso = '';
+      monthData[day3].horaSalida = '';
+      saveAsistencia();
+      renderResumen(trab, year, month);
+      return;
+    }
+    if(e.target.classList.contains('cal-hora-ingreso') || e.target.classList.contains('cal-hora-salida')){
+      var day4 = e.target.dataset.day;
+      var info4 = monthData[day4];
+      if(e.target.classList.contains('cal-hora-ingreso')) info4.horaIngreso = e.target.value;
+      else info4.horaSalida = e.target.value;
+      recalcularHorasDia(trab, info4);
+      saveAsistencia();
+      var tarde4 = esPuntual(info4.horaIngreso, horaEntradaEsperada(trab, info4.estado)) === false;
+      e.target.closest('.cal-cell').classList.toggle('tarde', tarde4);
+      renderResumen(trab, year, month);
+      return;
+    }
+  });
+
+  document.getElementById('btn-autofill').addEventListener('click', function(){
+    var trab = currentTrabajador(asisTrabSel);
+    if(!trab) return;
+    var year = parseInt(asisAnioInput.value,10);
+    var month = parseInt(asisMesSel.value,10);
+    var monthData = getMonthData(trab.id, year, month);
+    var daysInMonth = new Date(year, month, 0).getDate();
+    for(var d=1; d<=daysInMonth; d++){
+      var wd = (new Date(year, month-1, d).getDay()+6)%7;
+      var isWeekend = wd===5 || wd===6;
+      monthData[d] = defaultDayInfo(trab, year, month, d, isWeekend);
+    }
+    saveAsistencia();
+    renderCalendar();
+  });
+
+  document.getElementById('btn-autofill-4x4').addEventListener('click', function(){
+    var trab = currentTrabajador(asisTrabSel);
+    if(!trab || trab.tipo !== 'esencial') return;
+    if(!trab.cicloInicio){
+      alert('Este trabajador no tiene fecha de inicio de ciclo. Edítala en la pestaña Trabajadores.');
+      return;
+    }
+    var year = parseInt(asisAnioInput.value,10);
+    var month = parseInt(asisMesSel.value,10);
+    var monthData = getMonthData(trab.id, year, month);
+    var daysInMonth = new Date(year, month, 0).getDate();
+    for(var d=1; d<=daysInMonth; d++){
+      monthData[d] = defaultDayInfo(trab, year, month, d, false);
+    }
+    saveAsistencia();
+    renderCalendar();
+  });
+
+  function computeResumen(trab, year, month){
+    var monthData = getMonthData(trab.id, year, month);
+    var esencial = trab.tipo === 'esencial';
+    var r = {diasTrabajados:0, horasTotales:0, horasExtra:0, faltaInjust:0, faltaJust:0, licencias:0, vacaciones:0, descansoTurno:0, diasPuntuales:0, diasConRegistro:0};
+    Object.keys(monthData).forEach(function(day){
+      var info = monthData[day];
+      if(ESTADOS_TRABAJADOS[info.estado]){
+        r.diasTrabajados++;
+        r.horasTotales += info.horas;
+        // Turno trabajado fuera del ciclo 4x4 (debía ser día de descanso según LLNN OOOO): todas esas horas son extra.
+        var fueraDeCiclo = esencial && estadoCiclo4x4(trab, year, month, parseInt(day,10)) === 'descanso_turno';
+        r.horasExtra += fueraDeCiclo ? info.horas : Math.max(0, info.horas - trab.horasJornada);
+        var puntual = esPuntual(info.horaIngreso, horaEntradaEsperada(trab, info.estado));
+        if(puntual !== null){
+          r.diasConRegistro++;
+          if(puntual) r.diasPuntuales++;
+        }
+      } else if(info.estado === 'descanso_turno'){ r.descansoTurno++; }
+      else if(info.estado === 'falta_injustificada'){ r.faltaInjust++; }
+      else if(info.estado === 'falta_justificada'){ r.faltaJust++; }
+      else if(info.estado === 'licencia'){ r.licencias++; }
+      else if(info.estado === 'vacaciones'){ r.vacaciones++; }
+    });
+    return r;
+  }
+  function punctualityPct(resumen){
+    if(resumen.diasConRegistro <= 0) return null;
+    return (resumen.diasPuntuales / resumen.diasConRegistro) * 100;
+  }
+
+  function renderResumen(trab, year, month){
+    var r = computeResumen(trab, year, month);
+    var el = document.getElementById('asis-resumen');
+    var pctPuntualidad = punctualityPct(r);
+    el.innerHTML =
+      stat('Días trabajados', r.diasTrabajados, '') +
+      stat('Horas totales', r.horasTotales, '') +
+      stat('Horas extra', r.horasExtra, 'gold') +
+      stat('Puntualidad', pctPuntualidad===null?'—':pctPuntualidad.toFixed(1)+'%', pctPuntualidad!==null && pctPuntualidad<95?'warn':'') +
+      (trab.tipo === 'esencial' ? stat('Días de descanso (turno)', r.descansoTurno, '') : '') +
+      stat('Faltas injustificadas', r.faltaInjust, r.faltaInjust>0?'warn':'') +
+      stat('Faltas justificadas', r.faltaJust, '') +
+      stat('Licencias médicas', r.licencias, '') +
+      stat('Vacaciones', r.vacaciones, '');
+  }
+  function stat(label, value, cls){
+    return '<div class="stat'+(cls?' '+cls:'')+'"><div class="stat-label">'+label+'</div><div class="stat-value">'+value+'</div></div>';
+  }
+
+  // ---------- LIQUIDACIONES ----------
+  function keyLiq(trabId, year, month){ return trabId+'_'+year+'_'+month; }
+
+  var liqFields = ['sueldo-base','gratificacion','he-cantidad','he-valor','dias-falta','impuesto','otros'];
+  function liqEl(name){ return document.getElementById('liq-'+name); }
+
+  // Adelanto de sueldo (quincena): anticipo sugerido según los días efectivamente trabajados hasta el día 15 del mes.
+  function computeAdelantoDefault(trab, year, month){
+    var monthData = getMonthData(trab.id, year, month);
+    var sueldoDiario = trab.sueldoBase / 30;
+    var total = 0;
+    for(var d=1; d<=15; d++){
+      var info = monthData[d];
+      if(info && ESTADOS_TRABAJADOS[info.estado]) total += sueldoDiario;
+    }
+    return Math.round(total / 100) * 100;
+  }
+
+  // AFP, salud y cesantía se calculan sobre el 100% de la base imponible, sin tope — para el rango de
+  // sueldos de esta residencia (hasta ~$1.000.000) el tope legal de AFP/salud (90 UF) y el de cesantía
+  // (135,2 UF) nunca se alcanzan, así que se omiten en vez de mantener un cálculo que nunca aplica.
+  function legalDeductions(trab, baseImponible){
+    var afpMonto = baseImponible * (trab.afpPct/100);
+    var saludMonto = trab.saludTipo === 'fonasa' ? baseImponible * 0.07 : trab.saludMonto;
+    var cesantiaMonto = baseImponible * (trab.cesantiaPct/100);
+    return { afpMonto: afpMonto, saludMonto: saludMonto, cesantiaMonto: cesantiaMonto };
+  }
+
+  // Tabla de Impuesto Único de Segunda Categoría (SII) — tramos mensuales en UTM sobre la renta líquida
+  // tributable (base imponible menos las cotizaciones obligatorias de AFP, salud y cesantía).
+  // Tasas y rebajas de la tabla progresiva estándar del SII; verifica el valor de la UTM del mes vigente en sii.cl.
+  var TRAMOS_IMPUESTO_UNICO = [
+    { hasta: 13.5, tasa: 0,     rebajaUtm: 0 },
+    { hasta: 30,   tasa: 0.04,  rebajaUtm: 0.54 },
+    { hasta: 50,   tasa: 0.08,  rebajaUtm: 1.74 },
+    { hasta: 70,   tasa: 0.135, rebajaUtm: 4.49 },
+    { hasta: 90,   tasa: 0.23,  rebajaUtm: 11.14 },
+    { hasta: 120,  tasa: 0.304, rebajaUtm: 17.80 },
+    { hasta: 150,  tasa: 0.35,  rebajaUtm: 23.32 },
+    { hasta: Infinity, tasa: 0.40, rebajaUtm: 30.82 }
+  ];
+  function calcularImpuestoUnico(rentaTributableMensual, utm){
+    if(!utm || rentaTributableMensual <= 0) return 0;
+    var enUtm = rentaTributableMensual / utm;
+    var tramo = TRAMOS_IMPUESTO_UNICO[0];
+    for(var i=0;i<TRAMOS_IMPUESTO_UNICO.length;i++){
+      if(enUtm <= TRAMOS_IMPUESTO_UNICO[i].hasta){ tramo = TRAMOS_IMPUESTO_UNICO[i]; break; }
+    }
+    var impuestoEnUtm = enUtm * tramo.tasa - tramo.rebajaUtm;
+    return Math.max(0, Math.round((impuestoEnUtm * utm) / 100) * 100);
+  }
+
+  // Asignación Familiar y Maternal — monto por carga acreditada según el tramo de ingreso mensual del
+  // trabajador (Ley N°21.830, vigente desde el 1-may-2026). No es imponible ni tributable: no cuenta
+  // para AFP/salud/cesantía, gratificación ni Impuesto Único — se paga íntegro sobre el líquido.
+  var ASIGNACION_FAMILIAR_TRAMOS = [
+    { hasta: 649039,   monto: 22601 },
+    { hasta: 947990,   monto: 13870 },
+    { hasta: 1478539,  monto: 4382 },
+    { hasta: Infinity, monto: 0 }
+  ];
+  function montoAsignacionFamiliarPorCarga(ingresoMensual){
+    for(var i=0;i<ASIGNACION_FAMILIAR_TRAMOS.length;i++){
+      if(ingresoMensual <= ASIGNACION_FAMILIAR_TRAMOS[i].hasta) return ASIGNACION_FAMILIAR_TRAMOS[i].monto;
+    }
+    return 0;
+  }
+
+  // Ley N°21.561 ("Ley de 40 horas"): reduce gradualmente la jornada ordinaria máxima semanal en 3 etapas
+  // desde su publicación (26-04-2023). Devuelve el máximo legal vigente para una fecha dada.
+  function jornadaMaximaSemanalLegal(fecha){
+    fecha = fecha || new Date();
+    if(fecha >= new Date(2028,3,26)) return 40;
+    if(fecha >= new Date(2026,3,26)) return 42;
+    if(fecha >= new Date(2024,3,26)) return 44;
+    return 45;
+  }
+  // Promedio semanal real de cualquier ciclo de turnos: horas por turno × días trabajados del ciclo ÷
+  // duración del ciclo × 7 días de la semana. Para 4×4 y 2×2n da 3.5× (12h → 42h); para 4×3 da 4× (12h →
+  // 48h, por eso conviene turnos más cortos en ese ciclo) — no usar un factor fijo, cada patrón es distinto.
+  function promedioSemanalPorCiclo(horasJornada, patron){
+    patron = patron || CICLO_4X4;
+    var trabajados = patron.filter(function(e){ return ESTADOS_TRABAJADOS[e]; }).length;
+    return (horasJornada || 0) * trabajados / patron.length * 7;
+  }
+  function promedioSemanalEsencial(horasJornada, trab){
+    return promedioSemanalPorCiclo(horasJornada, trab ? patronCicloPara(trab) : CICLO_4X4);
+  }
+
+  function loadLiquidacion(){
+    var trab = currentTrabajador(liqTrabSel);
+    var contentEl = document.getElementById('liq-content');
+    var emptyEl = document.getElementById('liq-empty');
+    if(!trab){
+      contentEl.style.display = 'none';
+      emptyEl.style.display = 'block';
+      return;
+    }
+    contentEl.style.display = 'block';
+    emptyEl.style.display = 'none';
+
+    var year = parseInt(liqAnioInput.value,10);
+    var month = parseInt(liqMesSel.value,10);
+    var key = keyLiq(trab.id, year, month);
+    var resumen = computeResumen(trab, year, month);
+    var saved = liquidaciones[key];
+    var heCantidadDefault = Math.round(resumen.horasExtra*10)/10;
+    var heValorDefault = Math.round((trab.sueldoBase/30/trab.horasJornada)*1.5);
+    var montoHorasExtraDefault = heCantidadDefault * heValorDefault;
+    // Gratificación legal Art. 50: 25% del sueldo imponible del mes (sueldo base + horas extra, sin
+    // incluir la propia gratificación), con tope de 4,75 IMM al año (mensualizado).
+    var imponibleParaGratificacion = trab.sueldoBase + montoHorasExtraDefault;
+    var topeGratificacionMensual = (4.75 * immVigente) / 12;
+    var gratificacionDefault = Math.round(Math.min(imponibleParaGratificacion * 0.25, topeGratificacionMensual) / 100) * 100;
+    var adelantoDefault = computeAdelantoDefault(trab, year, month);
+    // Impuesto Único de Segunda Categoría: se calcula sobre la renta líquida tributable (base imponible
+    // menos AFP, salud y cesantía), según la tabla progresiva del SII vigente.
+    var baseImponibleDefault = trab.sueldoBase + gratificacionDefault + montoHorasExtraDefault;
+    var legalDefault = legalDeductions(trab, baseImponibleDefault);
+    var rentaTributableDefault = baseImponibleDefault - legalDefault.afpMonto - legalDefault.saludMonto - legalDefault.cesantiaMonto;
+    var impuestoDefault = calcularImpuestoUnico(rentaTributableDefault, utmVigente);
+
+    var data = saved ? Object.assign({ gratificacion: gratificacionDefault, adelanto: adelantoDefault, impuesto: impuestoDefault }, saved) : {
+      sueldoBase: trab.sueldoBase,
+      gratificacion: gratificacionDefault,
+      heCantidad: heCantidadDefault,
+      heValor: heValorDefault,
+      diasFalta: resumen.faltaInjust,
+      impuesto: impuestoDefault,
+      otros: 0,
+      adelanto: adelantoDefault,
+      locomocion: 0,
+      bono: trab.bonoNoImponible || 0
+    };
+
+    liqEl('sueldo-base').value = data.sueldoBase;
+    liqEl('gratificacion').value = data.gratificacion;
+    liqEl('he-cantidad').value = data.heCantidad;
+    liqEl('he-valor').value = data.heValor;
+    liqEl('dias-falta').value = data.diasFalta;
+    liqEl('impuesto').value = data.impuesto;
+    liqEl('otros').value = data.otros;
+    liqEl('adelanto').value = data.adelanto || 0;
+    liqEl('locomocion').value = data.locomocion || 0;
+    liqEl('bono').value = data.bono || 0;
+
+    document.getElementById('liq-adelanto-hint').textContent = 'Sugerido según días trabajados hasta el 15 (' + fmtCLP(adelantoDefault) + '). Ya entregado al trabajador — se descuenta aquí.';
+    document.getElementById('liq-impuesto-hint').textContent =
+      'Renta tributable ' + fmtCLP(rentaTributableDefault) + ' (UTM ' + fmtCLP(utmVigente) + '). ' + (impuestoDefault > 0 ? 'Afecto a impuesto.' : 'Bajo tramo exento: no paga.');
+
+    document.getElementById('liq-save-flash').textContent = '';
+    recomputeLiquidacion();
+  }
+
+  function readLiqForm(){
+    return {
+      sueldoBase: num(liqEl('sueldo-base').value),
+      gratificacion: num(liqEl('gratificacion').value),
+      heCantidad: num(liqEl('he-cantidad').value),
+      heValor: num(liqEl('he-valor').value),
+      diasFalta: num(liqEl('dias-falta').value),
+      impuesto: num(liqEl('impuesto').value),
+      otros: num(liqEl('otros').value),
+      adelanto: num(liqEl('adelanto').value),
+      locomocion: num(liqEl('locomocion').value),
+      bono: num(liqEl('bono').value)
+    };
+  }
+
+  function calcularLiquidacion(trab, form){
+    var montoHorasExtra = form.heCantidad * form.heValor;
+    var baseImponible = form.sueldoBase + form.gratificacion + montoHorasExtra;
+    // Asignación familiar, locomoción y bono: no imponibles ni tributables — se suman DESPUÉS de calcular
+    // la base imponible, para que no afecten AFP/salud/cesantía/impuesto (que se calculan sobre baseImponible).
+    var asignacionFamiliarMonto = (trab.cargasFamiliares || 0) * montoAsignacionFamiliarPorCarga(baseImponible);
+    var locomocionMonto = form.locomocion || 0;
+    var bonoMonto = form.bono || 0;
+    var totalHaberes = form.sueldoBase + form.gratificacion + montoHorasExtra + asignacionFamiliarMonto + locomocionMonto + bonoMonto;
+    // Descuento por inasistencia: se calcula sobre el total de haberes PACTADOS (sueldo base +
+    // gratificación) — no solo el sueldo base — porque la gratificación también forma parte de lo que
+    // el trabajador deja de devengar por el día no trabajado. Las horas extra y la asignación familiar
+    // quedan fuera: son variables (dependen de lo realmente trabajado) o no imponibles, no "pactadas".
+    var sueldoDiario = (form.sueldoBase + form.gratificacion) / 30;
+    var descInasistencia = sueldoDiario * form.diasFalta;
+    var legal = legalDeductions(trab, baseImponible);
+    var afpMonto = legal.afpMonto;
+    var saludMonto = legal.saludMonto;
+    var cesantiaMonto = legal.cesantiaMonto;
+    var adelanto = form.adelanto || 0;
+    var totalDescuentos = afpMonto + saludMonto + cesantiaMonto + descInasistencia + form.impuesto + form.otros + adelanto;
+    var liquido = totalHaberes - totalDescuentos;
+    return {
+      montoHorasExtra: montoHorasExtra, totalHaberes: totalHaberes, baseImponible: baseImponible,
+      asignacionFamiliarMonto: asignacionFamiliarMonto, locomocionMonto: locomocionMonto, bonoMonto: bonoMonto,
+      sueldoDiario: sueldoDiario, descInasistencia: descInasistencia, afpMonto: afpMonto,
+      saludMonto: saludMonto, cesantiaMonto: cesantiaMonto, adelanto: adelanto, totalDescuentos: totalDescuentos, liquido: liquido
+    };
+  }
+
+  function recomputeLiquidacion(){
+    var trab = currentTrabajador(liqTrabSel);
+    if(!trab) return;
+    var form = readLiqForm();
+    // Gratificación se recalcula en vivo sobre el sueldo base editado en esta liquidación (no el de
+    // Trabajadores), para que quede concordante si se ajusta el sueldo solo para este mes.
+    var montoHorasExtraForm = form.heCantidad * form.heValor;
+    var topeGratificacionMensual = (4.75 * immVigente) / 12;
+    var gratificacionRecalculada = Math.round(Math.min((form.sueldoBase + montoHorasExtraForm) * 0.25, topeGratificacionMensual) / 100) * 100;
+    liqEl('gratificacion').value = gratificacionRecalculada;
+    form.gratificacion = gratificacionRecalculada;
+    document.getElementById('liq-gratificacion-hint').textContent =
+      'Gratificación: 25% del sueldo imponible (' + fmtCLP(form.sueldoBase + montoHorasExtraForm) + '), tope mensual ' + fmtCLP(topeGratificacionMensual) + '.';
+    var c = calcularLiquidacion(trab, form);
+    liqEl('he-total').value = fmtCLP(c.montoHorasExtra);
+    liqEl('desc-inasistencia').value = fmtCLP(c.descInasistencia);
+    liqEl('afp-monto').value = fmtCLP(c.afpMonto) + ' ('+trab.afpPct+'%)';
+    liqEl('salud-monto').value = trab.saludTipo==='fonasa' ? fmtCLP(c.saludMonto)+' (Fonasa 7%)' : fmtCLP(c.saludMonto)+' (Isapre)';
+    liqEl('cesantia-monto').value = fmtCLP(c.cesantiaMonto) + ' ('+trab.cesantiaPct+'%)';
+    document.getElementById('liq-asignacion-familiar').value = fmtCLP(c.asignacionFamiliarMonto);
+    document.getElementById('liq-asignacion-familiar-hint').textContent =
+      (trab.cargasFamiliares || 0) === 0
+        ? 'Sin cargas familiares registradas. Locomoción y bono tampoco son imponibles ni tributables.'
+        : (trab.cargasFamiliares) + ' carga(s) × ' + fmtCLP(montoAsignacionFamiliarPorCarga(c.baseImponible)) + ' — no imponible, se reembolsa vía Previred. Locomoción y bono tampoco son imponibles ni tributables.';
+    document.getElementById('liq-total-haberes').textContent = fmtCLP(c.totalHaberes);
+    document.getElementById('liq-total-descuentos').textContent = fmtCLP(c.totalDescuentos);
+    document.getElementById('liq-liquido').textContent = fmtCLP(c.liquido);
+  }
+
+  document.getElementById('liq-content').addEventListener('input', function(e){
+    if(e.target.tagName === 'INPUT' && !e.target.disabled) recomputeLiquidacion();
+  });
+
+  // Cesantía (AFC) de cargo del empleador: 2,4% para contrato indefinido, 3,0% para plazo fijo u
+  // obra/faena (Ley 19.728) — depende del contrato de cada trabajador.
+  function afcEmpresaPctPara(trab){ return trab.contratoTipo === 'indefinido' ? 2.4 : 3.0; }
+
+  // Guarda, junto con las cifras que se ingresan a mano, el resultado YA CALCULADO de la liquidación
+  // (AFP, salud, cesantía, líquido, costo, etc.) — así la liquidación guardada es la ÚNICA fuente que
+  // necesita leer Gastos: no vuelve a recalcular nada con las tasas del trabajador después.
+  function snapshotComputado(trab, form){
+    var c = calcularLiquidacion(trab, form);
+    var afcEmpresaMonto = c.baseImponible * (afcEmpresaPctPara(trab) / 100);
+    // costoBase (el costo real que ve Gastos) EXCLUYE la asignación familiar: la empresa la adelanta al
+    // trabajador dentro del líquido, pero Previred se la reembolsa el mismo mes — no es un gasto neto.
+    return {
+      nombre: trab.nombre, cargo: trab.cargo || '', contratoTipo: trab.contratoTipo,
+      totalHaberes: c.totalHaberes, baseImponible: c.baseImponible, descInasistencia: c.descInasistencia,
+      afpMonto: c.afpMonto, saludMonto: c.saludMonto, cesantiaMonto: c.cesantiaMonto, afcEmpresaMonto: afcEmpresaMonto,
+      asignacionFamiliarMonto: c.asignacionFamiliarMonto,
+      costoBase: c.totalHaberes - c.descInasistencia - c.asignacionFamiliarMonto, liquido: c.liquido
+    };
+  }
+
+  document.getElementById('btn-guardar-liq').addEventListener('click', function(){
+    var trab = currentTrabajador(liqTrabSel);
+    if(!trab) return;
+    var year = parseInt(liqAnioInput.value,10);
+    var month = parseInt(liqMesSel.value,10);
+    var key = keyLiq(trab.id, year, month);
+    var form = readLiqForm();
+    liquidaciones[key] = Object.assign({}, form, snapshotComputado(trab, form));
+    saveLiquidaciones();
+    var flash = document.getElementById('liq-save-flash');
+    flash.textContent = 'Guardado ✓';
+    setTimeout(function(){ flash.textContent=''; }, 2500);
+  });
+
+  // ---------- REPORTES PDF ----------
+  function flash(elId, msg, ms){
+    var el = document.getElementById(elId);
+    el.textContent = msg;
+    setTimeout(function(){ if(el.textContent===msg) el.textContent=''; }, ms||4000);
+  }
+
+  // ---------- CONTRATO DE TRABAJO (generado con los datos reales del trabajador) ----------
+  var CONTRATO_DISCLAIMER = 'ADVERTENCIA: este documento es un modelo o borrador de trabajo generado automáticamente a partir de los datos cargados en el sistema, y NO constituye asesoría legal. Antes de firmar, debe ser revisado y validado por un abogado habilitado en Chile. Los datos entre corchetes [ ] no están disponibles en el sistema y deben completarse a mano.';
+
+  function contratoConfigPara(t){
+    var cargo = (t.cargo||'').toLowerCase();
+    if(t.tipo === 'esencial' || cargo.indexOf('cuidad') !== -1){
+      return {
+        subtitulo: t.cicloTipo === '2x2n' ? 'CUIDADOR(A) NOCTURNO(A) DE PERSONAS MAYORES' : 'CUIDADOR(A) DE PERSONAS MAYORES',
+        primero: 'El trabajador se compromete a prestar servicios como Cuidador(a)' + (t.cicloTipo === '2x2n' ? ' nocturno(a)' : '') + ' de personas mayores para el empleador, cuya función principal consiste en: la atención integral de los residentes, incluyendo apoyo en las actividades de la vida diaria (aseo e higiene personal, alimentación, movilización y vestuario), acompañamiento y vigilancia permanente, formando parte de la dotación mínima de cuidadores que debe mantener el establecimiento simultáneamente presente en la residencia en todo momento, incluido el turno nocturno.',
+        jornada: t.cicloTipo === '2x2n'
+          ? 'La jornada de trabajo se distribuirá bajo un sistema de turnos rotativos de 2×2, exclusivamente en turno nocturno: bloques de dos noches de trabajo, de ' + (t.horasJornada||12) + ' horas cada una, con inicio a las ' + (t.horaEntrada||'20:00') + ' horas, seguidos de dos noches de descanso, conforme al rol de turnos que el empleador comunicará oportunamente al trabajador (Anexo N°1), debiendo asegurarse en todo momento la presencia simultánea de al menos dos cuidadores en la residencia durante el turno nocturno, en cumplimiento de la dotación mínima exigida a los Establecimientos de Larga Estadía para Adultos Mayores (ELEAM).'
+          : 'La jornada de trabajo se distribuirá bajo un sistema de turnos rotativos de ' + (t.cicloTipo==='4x3'?'4×3':'4×4') + ': bloques de cuatro días de trabajo (dos turnos diurnos seguidos de dos turnos nocturnos, de ' + (t.horasJornada||12) + ' horas cada uno, con inicio de turno diurno a las ' + (t.horaEntrada||'08:00') + ' horas) seguidos de ' + (t.cicloTipo==='4x3'?'tres':'cuatro') + ' días de descanso, conforme al rol de turnos que el empleador comunicará oportunamente al trabajador (Anexo N°1), debiendo asegurarse en todo momento la presencia simultánea de al menos dos cuidadores en la residencia, incluido el turno nocturno, en cumplimiento de la dotación mínima exigida a los Establecimientos de Larga Estadía para Adultos Mayores (ELEAM).',
+        jornadaNota: (function(){
+          var maxLegal = jornadaMaximaSemanalLegal();
+          var promedio = promedioSemanalEsencial(t.horasJornada||12, t);
+          var excede = promedio > maxLegal;
+          var nombreCiclo = t.cicloTipo === '2x2n' ? 'ciclo 2×2 nocturno' : (t.cicloTipo==='4x3' ? 'ciclo 4×3' : 'ciclo 4×4');
+          var proximaEtapa = maxLegal === 45 ? ' Baja a 44 horas el 26-04-2024, a 42 horas el 26-04-2026 y a 40 horas el 26-04-2028.'
+            : maxLegal === 44 ? ' Baja a 42 horas el 26-04-2026 y a 40 horas el 26-04-2028.'
+            : maxLegal === 42 ? ' Baja a 40 horas el 26-04-2028 — revisa el turno antes de esa fecha.'
+            : ' Ya en el tramo final de la reducción legal.';
+          return 'NOTA: este ' + nombreCiclo + ' promedia ' + promedio + ' horas semanales, ' + (excede ? 'lo que EXCEDE el máximo legal vigente de ' + maxLegal + ' horas semanales' : 'dentro del máximo legal vigente de ' + maxLegal + ' horas semanales') + ' según la Ley N°21.561 ("Ley de 40 horas"), verificado a la fecha de generación de este contrato.' + proximaEtapa + ' ' +
+            (excede ? '¡ADVERTENCIA! Reduce las horas por turno antes de firmar. ' : '') +
+            'Además, al superar los límites de la jornada ordinaria diaria general, debe formalizarse mediante un sistema excepcional de distribución de jornada y descansos autorizado por la Dirección del Trabajo (artículo 38 del Código del Trabajo) antes de operar de forma permanente.';
+        })(),
+        obligacionesExtra: [
+          'No abandonar su puesto de turno sin ser previamente relevado por otro cuidador, de manera de no comprometer la dotación mínima simultánea exigida en la residencia.',
+          'Informar de inmediato al TENS o a quien corresponda cualquier situación de salud, caída o urgencia que observe en un residente durante su turno.'
+        ]
+      };
+    }
+    if(cargo.indexOf('tens') !== -1){
+      return {
+        subtitulo: 'TÉCNICO EN ENFERMERÍA DE NIVEL SUPERIOR (TENS)',
+        primero: 'El trabajador se compromete a prestar servicios como Técnico en Enfermería de Nivel Superior (TENS) para el empleador, cuya función principal consiste en: la administración y control de medicamentos a los residentes conforme a la indicación médica vigente para cada uno de ellos, el registro de signos vitales y curaciones básicas, y el apoyo en los cuidados de salud de los residentes.',
+        jornada: 'La jornada ordinaria del trabajador será de hasta 40 horas semanales, distribuidas de lunes a sábado, en horario diurno con inicio a las ' + (t.horaEntrada||'08:00') + ' horas, conforme al rol que el empleador comunicará oportunamente (Anexo N°1), con los descansos legales correspondientes dentro de la jornada.',
+        jornadaNota: null,
+        obligacionesExtra: [
+          'Administrar medicamentos únicamente conforme a indicación médica vigente, dejando registro escrito de cada administración.',
+          'Informar de inmediato a la dirección técnica del establecimiento cualquier reacción adversa, urgencia médica o novedad relevante de salud de un residente.'
+        ]
+      };
+    }
+    if(cargo.indexOf('cocin') !== -1){
+      return {
+        subtitulo: 'COCINERA(O)',
+        primero: 'El trabajador se compromete a prestar servicios como Cocinera(o) para el empleador, cuya función principal consiste en: la preparación de alimentos y colaciones para los residentes y el personal del establecimiento, conforme a las pautas nutricionales e higiénico-sanitarias vigentes.',
+        jornada: 'La jornada ordinaria de trabajo será de hasta 40 horas semanales, distribuidas de lunes a sábado, en horario diurno con inicio a las ' + (t.horaEntrada||'08:00') + ' horas, conforme al rol que el empleador comunicará oportunamente (Anexo N°1), con los descansos legales correspondientes dentro de la jornada.',
+        jornadaNota: null,
+        obligacionesExtra: [
+          'Cumplir las normas de manipulación higiénica de alimentos y las pautas nutricionales indicadas para los residentes.',
+          'Informar oportunamente al empleador sobre el estado de los insumos y necesidades de reposición de la cocina.'
+        ]
+      };
+    }
+    if(cargo.indexOf('aseo') !== -1 || cargo.indexOf('limpi') !== -1){
+      return {
+        subtitulo: 'AUXILIAR DE ASEO',
+        primero: 'El trabajador se compromete a prestar servicios como Auxiliar de aseo para el empleador, cuya función principal consiste en: la limpieza, higienización y mantención de las dependencias, mobiliario y espacios comunes del establecimiento, conforme a los protocolos de higiene y sanitización vigentes.',
+        jornada: 'La jornada ordinaria de trabajo será de hasta 40 horas semanales, distribuidas de lunes a sábado, en horario diurno con inicio a las ' + (t.horaEntrada||'08:00') + ' horas, conforme al rol que el empleador comunicará oportunamente (Anexo N°1), con los descansos legales correspondientes dentro de la jornada.',
+        jornadaNota: null,
+        obligacionesExtra: [
+          'Utilizar correctamente los elementos de protección personal e insumos de aseo proporcionados por el empleador.',
+          'Dar aviso oportuno de cualquier desperfecto o necesidad de mantención detectada en las dependencias.'
+        ]
+      };
+    }
+    return {
+      subtitulo: (t.cargo || 'TRABAJADOR(A)').toUpperCase(),
+      primero: 'El trabajador se compromete a prestar servicios como ' + (t.cargo || 'trabajador') + ' para el empleador, cumpliendo las funciones propias de su cargo dentro del establecimiento.',
+      jornada: 'La jornada ordinaria de trabajo será de hasta 40 horas semanales, distribuidas de lunes a sábado, en horario diurno con inicio a las ' + (t.horaEntrada||'08:00') + ' horas, conforme al rol que el empleador comunicará oportunamente (Anexo N°1), con los descansos legales correspondientes dentro de la jornada.',
+      jornadaNota: null,
+      obligacionesExtra: []
+    };
+  }
+
+  function generarContratoTrabajador(id){
+    var t = trabajadores.find(function(x){ return x.id === id; });
+    if(!t) return;
+    try{
+      var cfg = contratoConfigPara(t);
+      var topeGratMensual = (4.75 * immVigente) / 12;
+      var gratMensual = Math.round(Math.min(t.sueldoBase * 0.25, topeGratMensual) / 100) * 100;
+      var descuentoAprox = t.afpPct + (t.saludTipo === 'fonasa' ? 7 : 0) + t.cesantiaPct;
+      var liquidoRef = t.saludTipo === 'fonasa'
+        ? Math.round(t.sueldoBase * (1 - descuentoAprox/100) / 100) * 100
+        : Math.round((t.sueldoBase - t.saludMonto - t.sueldoBase*(t.afpPct+t.cesantiaPct)/100) / 100) * 100;
+      var saludTxt = t.saludTipo === 'fonasa' ? 'Fonasa (7%)' : ('Isapre, plan de ' + fmtCLP(t.saludMonto) + ' mensuales');
+      var contratoTxt = t.contratoTipo === 'indefinido' ? 'indefinido' : 'a plazo fijo';
+
+      var remuneracion = 'El empleador pagará al trabajador un sueldo base mensual bruto de ' + fmtCLP(t.sueldoBase) +
+        ', que conforme a los descuentos legales vigentes (AFP ' + t.afpPct + '%, salud ' + saludTxt + ', seguro de cesantía ' + t.cesantiaPct + '%) equivale referencialmente a un líquido aproximado de ' + fmtCLP(liquidoRef) +
+        '. El trabajador tendrá además derecho a gratificación legal mensual equivalente al 25% de lo devengado en el mes, con tope de 4,75 ingresos mínimos mensuales al año (artículo 50 del Código del Trabajo) — actualmente ' + fmtCLP(gratMensual) + ' mensuales, pagada en 2 cuotas quincenales de ' + fmtCLP(gratMensual/2) + ' cada una. La gratificación es imponible y tributable. La remuneración se pagará por período mensual, dentro de los primeros cinco días hábiles del mes siguiente al trabajado, mediante depósito en la cuenta bancaria que indique el trabajador, previo descuento de las cotizaciones legales y demás descuentos procedentes.';
+
+      var clauses = [
+        { title: 'PRIMERO: Naturaleza de los servicios', body: cfg.primero + ' El trabajador se obliga además a cumplir las demás labores anexas y complementarias a las señaladas, propias de su cargo, que le sean encomendadas por el empleador o quien lo represente, en tanto sean compatibles con sus aptitudes e idoneidad y no importen menoscabo para el trabajador.' },
+        { title: 'SEGUNDO: Lugar de los servicios', body: 'Los servicios se prestarán en las dependencias del establecimiento de larga estadía para adultos mayores ubicado en [DOMICILIO DE LA RESIDENCIA], sin perjuicio de la facultad del empleador de alterar el sitio o recinto dentro del mismo lugar o ciudad, conforme al artículo 12 del Código del Trabajo.' },
+        { title: 'TERCERO: Jornada de trabajo', body: cfg.jornada, note: cfg.jornadaNota },
+        { title: 'CUARTO: Remuneración', body: remuneracion, note: 'NOTA: el líquido referencial es una estimación; verifica estas cifras con tu contador antes de firmar. El IMM usado para el tope de gratificación (' + fmtCLP(immVigente) + ') debe actualizarse cuando cambie por ley.' },
+        { title: 'QUINTO: Duración del contrato', body: 'El presente contrato se celebra ' + contratoTxt + ', por el período comprendido entre el [FECHA DE INICIO]' + (t.contratoTipo!=='indefinido' ? ' y el [FECHA DE TÉRMINO], pudiendo renovarse por igual período de común acuerdo entre las partes. En conformidad al artículo 159 N°4 del Código del Trabajo, el hecho de continuar el trabajador prestando servicios con conocimiento del empleador después de expirado el plazo, o su segunda renovación, o de haber prestado servicios continuadamente por doce meses o más, transforma este contrato en uno de duración indefinida.' : ' en adelante.') },
+        { title: 'SEXTO: Obligaciones del trabajador', body: [
+          'Cumplir el Reglamento Interno de Orden, Higiene y Seguridad del empleador, cuyo texto declara conocer y aceptar.',
+          'Guardar reserva y confidencialidad absoluta respecto de la información de salud, datos personales y situación de los residentes, conforme a la Ley N°19.628 sobre Protección de la Vida Privada, obligación que subsiste con posterioridad al término de la relación laboral.',
+          'Tratar con respeto y dignidad a los residentes del establecimiento, dando cumplimiento a la normativa vigente sobre derechos de las personas mayores.',
+          'Registrar su asistencia y cumplir el horario y rol de turnos que le sea comunicado por el empleador.'
+        ].concat(cfg.obligacionesExtra).join(' ') },
+        { title: 'SÉPTIMO: Previsión y seguridad social', body: 'El trabajador estará afiliado al sistema previsional y de salud que corresponda, efectuándose las cotizaciones legales pertinentes sobre su remuneración imponible. El empleador lo mantendrá afiliado al organismo administrador de la Ley N°16.744 sobre accidentes del trabajo y enfermedades profesionales.' },
+        { title: 'OCTAVO: Terminación del contrato', body: 'El contrato terminará por las causales establecidas en los artículos 159, 160 y 161 del Código del Trabajo.' },
+        { title: 'NOVENO: Domicilio y jurisdicción', body: 'Para todos los efectos derivados del presente contrato, las partes fijan domicilio en la ciudad de [CIUDAD] y se someten a la jurisdicción de sus tribunales.' }
+      ];
+
+      var doc = ReportPDF.buildContractDoc({
+        titulo: 'CONTRATO DE TRABAJO ' + (t.contratoTipo==='indefinido' ? 'INDEFINIDO' : 'A PLAZO FIJO'),
+        subtitulo: cfg.subtitulo,
+        disclaimer: CONTRATO_DISCLAIMER,
+        clauses: clauses,
+        closing: 'En [CIUDAD], a [DÍA] de [MES] de [AÑO], entre [RAZÓN SOCIAL DEL EMPLEADOR], RUT [RUT EMPLEADOR], en adelante «el empleador»; y ' + t.nombre + ', RUT ' + t.rut + ', en adelante «el trabajador», se ha convenido el contrato de trabajo cuyas cláusulas anteceden. Se firma en dos ejemplares del mismo tenor y fecha, quedando uno en poder de cada parte.',
+        firmas: [
+          { label: 'EMPLEADOR', sub: '[RAZÓN SOCIAL] · RUT [RUT EMPLEADOR]' },
+          { label: 'TRABAJADOR(A)', sub: t.nombre + ' · RUT ' + t.rut }
+        ]
+      });
+      (async function(){
+        var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('contrato-'+t.nombre)+'.pdf');
+        flash('nomina-save-flash', res.mensaje, 6000);
+        // El Reglamento Interno (Art. 27) exige que cada trabajador firme un registro de recepción, y el
+        // manejo de datos sensibles de los residentes exige un compromiso de confidencialidad (Art. 30,
+        // Ley 19.628) — se generan automáticamente junto con el contrato, en un solo click, para que no
+        // quede pendiente un documento de firma obligatoria al momento de la contratación.
+        generarDocumentosReglamentoTrabajador(t);
+      })();
+    }catch(e){
+      flash('nomina-save-flash', '✗ '+e.message, 6000);
+    }
+  }
+
+  function generarDocumentosReglamentoTrabajador(t){
+    try{
+      var clauses = [
+        { title: 'I. RECEPCIÓN DEL REGLAMENTO INTERNO', body: 'El trabajador o trabajadora declara haber recibido, al momento de su contratación, una copia del Reglamento Interno de la Residencia Senior Omar Wall. Dicho reglamento declara el respeto irrestricto a los derechos y la autonomía de las personas mayores residentes, incluye el procedimiento de reclamos y las reglas de uso de los espacios comunes, y se mantiene en copia visible y accesible para el personal, los residentes y sus familiares. El trabajador o trabajadora se compromete a cumplirlo en el ejercicio de sus funciones.', note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 27.' },
+        { title: 'II. COMPROMISO DE CONFIDENCIALIDAD Y MANEJO DE DATOS SENSIBLES', body: 'El trabajador o trabajadora declara conocer que, en el ejercicio de sus funciones, tendrá acceso a datos personales sensibles de los residentes (información de salud, situación socioeconómica, entre otros), en los términos de la Ley N°19.628 sobre Protección de la Vida Privada. Se compromete a mantener estricta reserva y confidencialidad respecto de dicha información, a no divulgarla a terceros sin autorización expresa salvo en los casos que la ley exija o autorice, y a acceder solo a la información estrictamente necesaria para el desempeño de sus funciones. Este compromiso se mantiene vigente incluso después de terminada la relación laboral con la residencia, y su incumplimiento puede acarrear responsabilidad civil, administrativa y/o penal, según corresponda.', note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 30; Ley N°19.628.' }
+      ];
+      var doc = ReportPDF.buildContractDoc({
+        titulo: 'DOCUMENTOS DE CONTRATACIÓN',
+        subtitulo: 'Anexos al Reglamento Interno — ' + t.nombre + ' · RUT ' + t.rut,
+        disclaimer: 'Estos documentos se entregan y firman junto con el contrato de trabajo, conforme al Reglamento Interno de la Residencia Senior Omar Wall y al Decreto Supremo N°20/2021 del Ministerio de Salud. No reemplazan al Reglamento Interno completo, que debe mantenerse disponible para consulta del trabajador en todo momento.',
+        clauses: clauses,
+        closing: 'En señal de conformidad con lo declarado en los documentos precedentes, firman:',
+        firmas: [
+          { label: 'TRABAJADOR(A)', sub: t.nombre + ' · RUT ' + t.rut },
+          { label: 'DIRECTOR/A TÉCNICO/A', sub: '[COMPLETAR nombre]' }
+        ]
+      });
+      (async function(){
+        var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('reglamento-'+t.nombre)+'.pdf');
+        flash('nomina-save-flash', res.mensaje, 6000);
+      })();
+    }catch(e){
+      flash('nomina-save-flash', '✗ No se pudo generar el anexo de Reglamento Interno: '+e.message, 6000);
+    }
+  }
+
+  document.getElementById('btn-pdf-nomina').addEventListener('click', async function(){
+    if(trabajadores.length===0){ flash('nomina-save-flash','No hay trabajadores para incluir en el reporte.'); return; }
+    try{
+      var filas = trabajadores.map(function(t){
+        var salud = t.saludTipo==='fonasa' ? 'Fonasa (7%)' : ('Isapre ('+fmtCLP(t.saludMonto)+')');
+        var tipoTxt = t.tipo === 'esencial' ? 'Esencial · turno 4×4' : 'Soporte · 40 hrs/semana';
+        return { label: t.nombre+' — '+t.rut+(t.cargo?' · '+t.cargo:''), valor: fmtCLP(t.sueldoBase)+' base', nota: tipoTxt+' · AFP '+t.afpPct+'% · '+salud+' · Cesantía '+t.cesantiaPct+'% · '+t.horasJornada+' hrs/turno' };
+      });
+      var totalBase = trabajadores.reduce(function(a,t){ return a+(t.sueldoBase||0); },0);
+      var conContacto = trabajadores.filter(function(t){ return t.contactoEmergencia && t.contactoEmergencia.nombre; });
+      var secciones = [{ titulo:'Dotación actual', filas: filas }];
+      secciones.push({
+        titulo: 'Contactos de emergencia',
+        sub: conContacto.length === 0 ? 'Ningún trabajador tiene contacto de emergencia registrado.' : '',
+        filas: conContacto.map(function(t){
+          var c = t.contactoEmergencia;
+          return { label: t.nombre+(c.parentesco?' — '+c.parentesco:''), valor: c.telefono || '—' };
+        })
+      });
+      var doc = ReportPDF.buildDoc({
+        titulo: 'Nómina de trabajadores',
+        subtitulo: trabajadores.length+' trabajador(es) registrados',
+        empresa: empresa,
+        secciones: secciones,
+        resumenFinal: { label:'Total sueldos base (mensual)', valor: fmtCLP(totalBase) },
+        notaPie: 'Reporte generado desde el módulo de Trabajadores, Asistencia y Liquidaciones — Residencia Senior Omar Wall.'
+      });
+      var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('nomina-'+(empresa.nombre||'residencia'))+'.pdf');
+      flash('nomina-save-flash', res.mensaje, 6000);
+    }catch(e){
+      flash('nomina-save-flash', '✗ '+e.message, 6000);
+    }
+  });
+
+  document.getElementById('btn-pdf-liq').addEventListener('click', async function(){
+    var trab = currentTrabajador(liqTrabSel);
+    if(!trab) return;
+    var year = parseInt(liqAnioInput.value,10);
+    var month = parseInt(liqMesSel.value,10);
+    var form = readLiqForm();
+    var c = calcularLiquidacion(trab, form);
+    var periodo = MESES[month-1] + ' ' + year;
+    var saludLabel = trab.saludTipo==='fonasa' ? 'Salud (Fonasa 7%)' : 'Salud (Isapre)';
+    try{
+      var doc = ReportPDF.buildDoc({
+        titulo: 'Liquidación de sueldo',
+        subtitulo: periodo,
+        empresa: empresa,
+        secciones: [
+          {
+            titulo: 'Trabajador',
+            filas: [
+              { label:'Nombre', valor: trab.nombre },
+              { label:'RUT', valor: trab.rut },
+              { label:'Cargo', valor: trab.cargo || '—' }
+            ]
+          },
+          {
+            titulo: 'Haberes',
+            filas: [
+              { label:'Sueldo base', valor: fmtCLP(form.sueldoBase) },
+              { label:'Gratificación legal', valor: fmtCLP(form.gratificacion), nota: '2 cuotas quincenales de '+fmtCLP(form.gratificacion/2)+' c/u' },
+              { label:'Horas extra ('+form.heCantidad+' x '+fmtCLP(form.heValor)+')', valor: fmtCLP(c.montoHorasExtra) },
+              { label:'Asignación familiar ('+(trab.cargasFamiliares||0)+' carga(s), no imponible)', valor: fmtCLP(c.asignacionFamiliarMonto) },
+              { label:'Locomoción (no imponible)', valor: fmtCLP(c.locomocionMonto) },
+              { label:'Bono (no imponible)', valor: fmtCLP(c.bonoMonto) }
+            ],
+            total: { label:'Total haberes', valor: fmtCLP(c.totalHaberes) }
+          },
+          {
+            titulo: 'Descuentos',
+            filas: [
+              { label:'AFP ('+trab.afpPct+'%)', valor: fmtCLP(c.afpMonto) },
+              { label: saludLabel, valor: fmtCLP(c.saludMonto) },
+              { label:'Seguro cesantía ('+trab.cesantiaPct+'%)', valor: fmtCLP(c.cesantiaMonto) },
+              { label:'Descuento por inasistencia ('+form.diasFalta+' día(s))', valor: fmtCLP(c.descInasistencia) },
+              { label:'Impuesto único', valor: fmtCLP(form.impuesto) },
+              { label:'Otros descuentos', valor: fmtCLP(form.otros) },
+              { label:'Anticipo de sueldo (quincena, ya pagado)', valor: fmtCLP(c.adelanto) }
+            ],
+            total: { label:'Total descuentos', valor: fmtCLP(c.totalDescuentos) }
+          }
+        ],
+        resumenFinal: { label:'Líquido a pagar', valor: fmtCLP(c.liquido) },
+        firmas: [{ label:'Firma Trabajador' }, { label:'Firma Empleador' }],
+        notaPie: 'Documento generado desde el módulo de Trabajadores, Asistencia y Liquidaciones — Residencia Senior Omar Wall.'
+      });
+      var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('liquidacion-'+trab.nombre+'-'+periodo)+'.pdf');
+      flash('liq-save-flash', res.mensaje, 6000);
+    }catch(e){
+      flash('liq-save-flash', '✗ '+e.message, 6000);
+    }
+  });
+
+  // ---------- NÓMINA DE RESIDENTES (solo cuota — el resto vive en el módulo Residentes) ----------
+  var editandoResidenteNominaId = null;
+  function resIdCompartido(){ return 'r_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+  function estadoResidenteTxt(r){ return (r.fechaEgreso && r.fechaEgreso <= new Date().toISOString().slice(0,10)) ? 'Egresado' : 'Activo'; }
+
+  function limpiarFormResNomina(){
+    editandoResidenteNominaId = null;
+    document.getElementById('form-res-nomina').reset();
+    document.getElementById('form-res-titulo').textContent = 'Agregar residente a la nómina';
+    document.getElementById('btn-guardar-res-nomina').textContent = 'Agregar / vincular a la nómina';
+    document.getElementById('btn-cancelar-res-nomina').style.display = 'none';
+  }
+  document.getElementById('btn-cancelar-res-nomina').addEventListener('click', limpiarFormResNomina);
+
+  document.getElementById('form-res-nomina').addEventListener('submit', function(e){
+    e.preventDefault();
+    var nombre = document.getElementById('resn-nombre').value.trim();
+    var cuota = num(document.getElementById('resn-cuota').value);
+    if(!nombre) return;
+    if(editandoResidenteNominaId){
+      var existente = residentes.find(function(x){ return x.id === editandoResidenteNominaId; });
+      if(existente){ existente.nombre = nombre; existente.rut = document.getElementById('resn-rut').value.trim(); existente.cuotaPermanencia = cuota; }
+    } else {
+      residentes.push({ id: resIdCompartido(), nombre: nombre, rut: document.getElementById('resn-rut').value.trim(), fechaIngreso:'', fechaEgreso:'', cuotaPermanencia: cuota, contactos: [] });
+    }
+    saveResidentes();
+    limpiarFormResNomina();
+    renderResidentesNomina();
+  });
+
+  function renderResidentesNomina(){
+    var tbody = document.getElementById('tabla-res-nomina');
+    if(!tbody) return;
+    if(residentes.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Aún no hay residentes en la nómina.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = residentes.map(function(r){
+      return '<tr>'+
+        '<td>'+esc(r.nombre)+'</td>'+
+        '<td class="mono">'+esc(r.rut||'—')+'</td>'+
+        '<td>'+esc(estadoResidenteTxt(r))+'</td>'+
+        '<td class="num">'+fmtCLP(r.cuotaPermanencia)+'</td>'+
+        '<td style="white-space:nowrap;"><button class="secondary small" data-edit-res="'+r.id+'">Editar cuota</button></td>'+
+      '</tr>';
+    }).join('');
+  }
+  document.getElementById('tabla-res-nomina').addEventListener('click', function(e){
+    var btn = e.target.closest('[data-edit-res]');
+    if(!btn) return;
+    var r = residentes.find(function(x){ return x.id === btn.dataset.editRes; });
+    if(!r) return;
+    editandoResidenteNominaId = r.id;
+    document.getElementById('resn-nombre').value = r.nombre;
+    document.getElementById('resn-rut').value = r.rut || '';
+    document.getElementById('resn-cuota').value = r.cuotaPermanencia || 0;
+    document.getElementById('form-res-titulo').textContent = 'Editar cuota — ' + r.nombre;
+    document.getElementById('btn-guardar-res-nomina').textContent = 'Guardar cambios';
+    document.getElementById('btn-cancelar-res-nomina').style.display = 'inline-block';
+  });
+
+  // ---------- DOCUMENTOS DE RESPALDO (cargas familiares) ----------
+  var DOCS_RESPALDO_LISTA = ['Certificado de nacimiento', 'Certificado de estudios / matrícula', 'Otro respaldo Previred'];
+  function renderDocumentosRespaldo(){
+    var contentEl = document.getElementById('documentos-content');
+    var emptyEl = document.getElementById('documentos-empty');
+    var conCargas = trabajadoresActivos().filter(function(t){ return (t.cargasFamiliares||0) > 0; });
+    if(conCargas.length === 0){
+      contentEl.innerHTML = '';
+      emptyEl.style.display = 'block';
+      return;
+    }
+    emptyEl.style.display = 'none';
+    contentEl.innerHTML = conCargas.map(function(t){
+      var estado = documentosRespaldo[t.id] || {};
+      var cargasNombres = (t.cargasDetalle||[]).map(function(c){ return c.nombre; }).join(', ') || (t.cargasFamiliares+' carga(s) sin detalle — complétalo en Trabajadores');
+      return '<div class="card" style="margin-bottom:14px;"><h3>'+esc(t.nombre)+'</h3>'+
+        '<p class="field-hint">Cargas: '+esc(cargasNombres)+'</p>'+
+        DOCS_RESPALDO_LISTA.map(function(doc){
+          var checked = estado[doc] ? ' checked' : '';
+          return '<label class="cal-asistio-label" style="margin-bottom:6px;"><input type="checkbox" data-trab="'+t.id+'" data-doc="'+esc(doc)+'"'+checked+'> '+esc(doc)+'</label><br>';
+        }).join('') +
+      '</div>';
+    }).join('');
+  }
+  document.getElementById('documentos-content').addEventListener('change', function(e){
+    if(!e.target.matches('input[type="checkbox"]')) return;
+    var trabId = e.target.dataset.trab, doc = e.target.dataset.doc;
+    if(!documentosRespaldo[trabId]) documentosRespaldo[trabId] = {};
+    documentosRespaldo[trabId][doc] = e.target.checked;
+    saveDocumentosRespaldo();
+  });
+
+  // ---------- INIT ----------
+  document.getElementById('trab-sueldo').value = immVigente;
+  renderTrabajadores();
+  renderCalendar();
+  loadLiquidacion();
+  renderResidentesNomina();
+  renderDocumentosRespaldo();
+})();
+</script>
+</body>
+</html>
