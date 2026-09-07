@@ -205,6 +205,18 @@
   <!-- TAB 1: RESIDENTE (perfil + datos médicos generales) -->
   <section id="tab-residente" class="tab-panel active">
     <div class="card">
+      <h2 style="border:none; padding:0; margin:0 0 10px;">Carga masiva desde Excel</h2>
+      <p class="field-hint">Si ya tienes los datos de los residentes en una planilla, usa la plantilla, complétala y súbela aquí en vez de escribir uno por uno. Si el RUT ya existe, se actualiza; si no, se agrega como residente nuevo.</p>
+      <div class="actions-row" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <a href="plantillas/plantilla-carga-masiva.xlsx" download class="secondary" style="display:inline-block; padding:9px 16px; border:1px solid var(--petroleo); border-radius:5px; text-decoration:none; color:var(--petroleo); font-weight:600; font-size:13px;">&#8681; Descargar plantilla</a>
+        <input type="file" id="import-residentes-file" accept=".xlsx,.xls" style="display:none;">
+        <button type="button" id="btn-import-residentes" class="gold">Importar desde Excel</button>
+        <span id="import-residentes-flash" class="save-flash"></span>
+      </div>
+      <div id="import-residentes-resumen" class="field-hint" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
       <div class="selector-row">
         <div class="field">
           <label for="res-selector">Residente</label>
@@ -468,6 +480,7 @@
 <footer class="note">Los datos se guardan solo en este navegador &mdash; no se env&iacute;an a ning&uacute;n servidor. Respalda peri&oacute;dicamente si es informaci&oacute;n cr&iacute;tica.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/pdf-export.js"></script>
 <script src="assets/backup.js"></script>
 <script src="assets/nav.js"></script>
@@ -1267,6 +1280,84 @@
       var res = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('cuidados-'+r.nombre+'-'+fecha)+'.pdf');
       flash('control-save-flash', res.mensaje, 6000);
     }catch(e){ flash('control-save-flash', '✗ '+e.message, 6000); }
+  });
+
+  // ---------- CARGA MASIVA DESDE EXCEL ----------
+  function excelToYMD(v){
+    if(v instanceof Date && !isNaN(v)) return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0')+'-'+String(v.getDate()).padStart(2,'0');
+    var s = String(v==null?'':v).trim();
+    var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    return m ? (m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0')) : '';
+  }
+  function esSiExcel(v){ return String(v||'').trim().toUpperCase() === 'SI'; }
+
+  document.getElementById('btn-import-residentes').addEventListener('click', function(){
+    document.getElementById('import-residentes-file').click();
+  });
+  document.getElementById('import-residentes-file').addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try{
+        var wbx = XLSX.read(evt.target.result, {type:'array', cellDates:true});
+        var sheetName = wbx.SheetNames.find(function(n){ return n.toLowerCase().indexOf('residente')!==-1; }) || wbx.SheetNames[0];
+        var rows = XLSX.utils.sheet_to_json(wbx.Sheets[sheetName], {defval:''});
+        var agregados = 0, actualizados = 0, omitidos = 0;
+        rows.forEach(function(row){
+          var nombre = String(row.nombre||'').trim();
+          if(!nombre){ omitidos++; return; }
+          var rut = String(row.rut||'').trim();
+          var res = rut ? residentes.find(function(r){ return r.rut && r.rut.trim() === rut; }) : null;
+          var esNuevo = !res;
+          if(esNuevo){
+            res = { id: uid(), contactos: [], cuotaPermanencia: 0 };
+            residentes.push(res);
+          }
+          res.nombre = nombre;
+          res.rut = rut;
+          var fIngreso = excelToYMD(row.fecha_ingreso);
+          if(fIngreso) res.fechaIngreso = fIngreso;
+          var fEgreso = excelToYMD(row.fecha_egreso);
+          if(fEgreso) res.fechaEgreso = fEgreso;
+          if(row.cuota_mensual !== '') res.cuotaPermanencia = num(row.cuota_mensual);
+
+          var contactosFila = [];
+          [1,2].forEach(function(n){
+            var cNombre = String(row['contacto'+n+'_nombre']||'').trim();
+            if(!cNombre) return;
+            contactosFila.push({
+              id: uid(), nombre: cNombre,
+              parentesco: String(row['contacto'+n+'_parentesco']||'').trim(),
+              telefono: String(row['contacto'+n+'_telefono']||'').trim(),
+              email: String(row['contacto'+n+'_email']||'').trim(),
+              apoderado: esSiExcel(row['contacto'+n+'_apoderado'])
+            });
+          });
+          if(contactosFila.length > 0) res.contactos = contactosFila;
+
+          var ficha = getFicha(res.id);
+          if(row.fecha_nacimiento !== '') ficha.fechaNacimiento = excelToYMD(row.fecha_nacimiento);
+          if(row.habitacion !== '') ficha.habitacion = String(row.habitacion).trim();
+          if(row.piso !== '') ficha.piso = String(row.piso).trim();
+          if(row.estado !== '') ficha.estado = String(row.estado).trim().toLowerCase();
+          if(row.patologia_principal !== '') ficha.patologiaPrincipal = String(row.patologia_principal).trim();
+          if(row.gustos_y_mimos !== '') ficha.gustosYMimos = String(row.gustos_y_mimos).trim();
+
+          if(esNuevo) agregados++; else actualizados++;
+        });
+        saveResidentes();
+        saveFichas();
+        refreshSelectors();
+        document.getElementById('import-residentes-resumen').textContent =
+          agregados+' residente(s) agregado(s), '+actualizados+' actualizado(s)'+(omitidos?', '+omitidos+' fila(s) sin nombre omitida(s)':'')+'.';
+        flash('import-residentes-flash', '✓ Importación completa', 6000);
+      }catch(err){
+        flash('import-residentes-flash', '✗ No se pudo importar: '+err.message, 8000);
+      }
+      e.target.value = '';
+    };
+    reader.readAsArrayBuffer(file);
   });
 
   // ---------- INIT ----------

@@ -300,6 +300,18 @@
   <!-- TAB 1: TRABAJADORES (alta simplificada) -->
   <section id="tab-trabajadores" class="tab-panel active">
     <div class="card">
+      <h2 style="border:none; padding:0; margin:0 0 10px;">Carga masiva desde Excel</h2>
+      <p class="field-hint">Si ya tienes los datos de los trabajadores en una planilla, usa la plantilla, complétala y súbela aquí en vez de escribir uno por uno. Si el RUT ya existe, se actualiza; si no, se agrega como trabajador nuevo.</p>
+      <div class="actions-row" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <a href="plantillas/plantilla-carga-masiva.xlsx" download class="secondary" style="display:inline-block; padding:9px 16px; border:1px solid var(--petroleo); border-radius:5px; text-decoration:none; color:var(--petroleo); font-weight:600; font-size:13px;">&#8681; Descargar plantilla</a>
+        <input type="file" id="import-trabajadores-file" accept=".xlsx,.xls" style="display:none;">
+        <button type="button" id="btn-import-trabajadores" class="gold">Importar desde Excel</button>
+        <span id="import-trabajadores-flash" class="save-flash"></span>
+      </div>
+      <div id="import-trabajadores-resumen" class="field-hint" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
       <h2 id="form-trabajador-titulo">Agregar trabajador</h2>
       <p class="field-hint">Al agregar un trabajador, queda autom&aacute;ticamente marcado como horario completo cumplido todos los d&iacute;as del mes (gasto fijo) — solo cambia si t&uacute; editas su asistencia en Turnos.</p>
       <form id="form-trabajador">
@@ -659,6 +671,7 @@
 <footer class="note">Los datos se guardan solo en este navegador &mdash; no se env&iacute;an a ning&uacute;n servidor. Respalda peri&oacute;dicamente si es informaci&oacute;n cr&iacute;tica.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="assets/pdf-export.js"></script>
 <script src="assets/backup.js"></script>
 <script src="assets/nav.js"></script>
@@ -2397,6 +2410,84 @@
     if(!documentosRespaldo[trabId]) documentosRespaldo[trabId] = {};
     documentosRespaldo[trabId][doc] = e.target.checked;
     saveDocumentosRespaldo();
+  });
+
+  // ---------- CARGA MASIVA DESDE EXCEL ----------
+  function excelToYMD(v){
+    if(v instanceof Date && !isNaN(v)) return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0')+'-'+String(v.getDate()).padStart(2,'0');
+    var s = String(v==null?'':v).trim();
+    var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    return m ? (m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0')) : '';
+  }
+  var CICLO_TIPO_DESDE_TIPO_PERSONAL = { esencial_nocturno:'2x2n', esencial_4x4:'4x4', esencial:'4x3' };
+  var CARGO_POR_TIPO_PERSONAL = { esencial:'Cuidador(a)', esencial_4x4:'Cuidador(a)', esencial_nocturno:'Cuidador(a) nocturno(a)' };
+
+  document.getElementById('btn-import-trabajadores').addEventListener('click', function(){
+    document.getElementById('import-trabajadores-file').click();
+  });
+  document.getElementById('import-trabajadores-file').addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try{
+        var wbx = XLSX.read(evt.target.result, {type:'array', cellDates:true});
+        var sheetName = wbx.SheetNames.find(function(n){ return n.toLowerCase().indexOf('trabajador')!==-1; }) || wbx.SheetNames[0];
+        var rows = XLSX.utils.sheet_to_json(wbx.Sheets[sheetName], {defval:''});
+        var agregados = 0, actualizados = 0, omitidos = 0;
+        rows.forEach(function(row){
+          var nombre = String(row.nombre||'').trim();
+          var rut = String(row.rut||'').trim();
+          if(!nombre || !rut){ omitidos++; return; }
+          var t = trabajadores.find(function(x){ return x.rut && x.rut.trim() === rut; });
+          var esNuevo = !t;
+          var tipoPersonal = String(row.tipo_personal||'soporte').trim().toLowerCase();
+          var esEsencialFila = tipoPersonal.indexOf('esencial') === 0;
+          if(esNuevo){
+            t = {
+              id: uid(), activo: true, contactos: [],
+              afpPct: 11.44, saludTipo: 'fonasa', saludMonto: 0,
+              contactoEmergencia: {nombre:'', parentesco:'', telefono:''}
+            };
+            trabajadores.push(t);
+          }
+          t.nombre = nombre;
+          t.rut = rut;
+          var fIngreso = excelToYMD(row.fecha_ingreso);
+          if(fIngreso){ t.fechaIngreso = fIngreso; if(esEsencialFila && !t.cicloInicio) t.cicloInicio = fIngreso; }
+          t.tipo = esEsencialFila ? 'esencial' : 'soporte';
+          t.cicloTipo = esEsencialFila ? (CICLO_TIPO_DESDE_TIPO_PERSONAL[tipoPersonal] || '4x3') : '';
+          t.cargo = CARGO_POR_TIPO_PERSONAL[tipoPersonal] || t.cargo || '';
+          var contrato = String(row.tipo_contrato||'indefinido').trim().toLowerCase();
+          t.contratoTipo = contrato === 'plazo_fijo' ? 'plazo_fijo' : 'indefinido';
+          t.cesantiaPct = t.contratoTipo === 'indefinido' ? 0.6 : 0;
+          if(row.sueldo_base !== '') t.sueldoBase = num(row.sueldo_base);
+          if(row.bono_no_imponible !== '') t.bonoNoImponible = num(row.bono_no_imponible);
+          if(row.cargas_familiares !== '') t.cargasFamiliares = num(row.cargas_familiares);
+          t.horasJornada = esEsencialFila ? 12 : 8;
+          if(!t.horaEntrada) t.horaEntrada = '08:00';
+          var contNombre = String(row.contacto_emergencia_nombre||'').trim();
+          if(contNombre){
+            t.contactoEmergencia = {
+              nombre: contNombre,
+              parentesco: String(row.contacto_emergencia_parentesco||'').trim(),
+              telefono: String(row.contacto_emergencia_telefono||'').trim()
+            };
+          }
+          if(esNuevo) agregados++; else actualizados++;
+        });
+        saveTrabajadores();
+        refreshSelectors();
+        renderTrabajadores();
+        document.getElementById('import-trabajadores-resumen').textContent =
+          agregados+' trabajador(es) agregado(s), '+actualizados+' actualizado(s)'+(omitidos?', '+omitidos+' fila(s) sin nombre/RUT omitida(s)':'')+'.';
+        flash('import-trabajadores-flash', '✓ Importación completa', 6000);
+      }catch(err){
+        flash('import-trabajadores-flash', '✗ No se pudo importar: '+err.message, 8000);
+      }
+      e.target.value = '';
+    };
+    reader.readAsArrayBuffer(file);
   });
 
   // ---------- INIT ----------
