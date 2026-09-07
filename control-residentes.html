@@ -198,7 +198,6 @@
 <div class="wrap">
   <nav class="tabbar">
     <button class="tab-btn active" data-tab="residente">Residente</button>
-    <button class="tab-btn" data-tab="aceptacion">Aceptación de informe médico</button>
     <button class="tab-btn" data-tab="diagnosticos">Diagnósticos y cuidados</button>
     <button class="tab-btn" data-tab="control">Control diario</button>
   </nav>
@@ -302,48 +301,82 @@
       </form>
       <p class="field-hint">La cuota mensual y la n&oacute;mina completa de residentes se administran en el m&oacute;dulo de Administraci&oacute;n. Eliminar un residente aqu&iacute; tambi&eacute;n elimina su ficha m&eacute;dica, cuidados y checklist.</p>
     </div>
-  </section>
 
-  <!-- TAB 2: ACEPTACIÓN DE INFORME MÉDICO -->
-  <section id="tab-aceptacion" class="tab-panel">
-    <div class="card">
-      <h2>Aceptación de informe médico</h2>
-      <div class="selector-row">
-        <div class="field">
-          <label for="acep-residente">Residente</label>
-          <select id="acep-residente"></select>
+    <!-- INGRESO Y CONSENTIMIENTO (solo visible con un residente ya guardado seleccionado) -->
+    <div class="card" id="res-ingreso-consentimiento-wrap" style="display:none;">
+      <h2>Ingreso y consentimiento</h2>
+      <p class="field-hint">El informe m&eacute;dico es un documento externo (lo emite el m&eacute;dico tratante) que la residencia debe recibir y aceptar antes del ingreso — aqu&iacute; solo se deja constancia de que se recibi&oacute;, no se genera. El consentimiento s&iacute; es un documento que genera este sistema.</p>
+
+      <h3>Informe médico de ingreso</h3>
+      <div class="grid-form">
+        <div>
+          <label class="field-hint" style="display:flex; align-items:center; gap:6px; font-weight:600;">
+            <input type="checkbox" id="res-informe-recibido" style="width:16px; height:16px;"> Informe médico externo recibido
+          </label>
+        </div>
+        <div>
+          <label for="res-informe-fecha">Fecha de recepción</label>
+          <input id="res-informe-fecha" type="date">
+        </div>
+        <div>
+          <label for="res-informe-emisor">Emitido por (médico / institución)</label>
+          <input id="res-informe-emisor" style="font-family:'Inter',sans-serif;" placeholder="Ej. Dr. Pérez, Hospital Regional">
         </div>
       </div>
 
-      <div id="acep-content" style="display:none;">
-        <div id="acep-info-card"></div>
+      <h3 style="margin-top:18px;">Consentimiento de ingreso</h3>
+      <div class="grid-form">
+        <div>
+          <label for="res-puede-consentir">&iquest;El residente puede consentir su ingreso voluntariamente?</label>
+          <select id="res-puede-consentir">
+            <option value="si">Sí</option>
+            <option value="no">No — necesita representante con poder</option>
+          </select>
+        </div>
+      </div>
+      <div id="res-representante-wrap" class="grid-form" style="display:none; margin-top:10px;">
+        <div>
+          <label for="res-rep-nombre">Nombre del representante</label>
+          <input id="res-rep-nombre" style="font-family:'Inter',sans-serif;">
+        </div>
+        <div>
+          <label for="res-rep-rut">RUT del representante</label>
+          <input id="res-rep-rut" placeholder="12.345.678-9">
+        </div>
+        <div>
+          <label for="res-rep-tipo-poder">Documento que acredita el poder</label>
+          <select id="res-rep-tipo-poder">
+            <option value="poder_simple">Poder simple</option>
+            <option value="poder_notarial">Poder notarial</option>
+            <option value="curaduria">Curaduría / interdicción</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
 
-        <h3>Contactos de emergencia / apoderado</h3>
-        <p class="field-hint">Opcional — puedes agregar uno o m&aacute;s contactos.</p>
-        <div id="contactos-list"></div>
-        <div class="subtable subtable-add">
-          <div class="subtable-grid">
-            <div><div class="mini-label">Nombre</div><input id="contacto-nombre" placeholder="Nombre completo"></div>
-            <div><div class="mini-label">Parentesco</div><input id="contacto-parentesco" placeholder="Ej. Hijo/a"></div>
-            <div><div class="mini-label">Tel&eacute;fono</div><input id="contacto-telefono" placeholder="+56 9 ..."></div>
-            <div><div class="mini-label">Email (opcional)</div><input id="contacto-email" placeholder="correo@ejemplo.cl"></div>
-            <div>
-              <label class="field-hint" style="display:flex; align-items:center; gap:6px; font-weight:600;">
-                <input type="checkbox" id="contacto-apoderado" style="width:16px; height:16px;"> Es apoderado
-              </label>
-              <button type="button" id="btn-add-contacto" class="secondary small">+ Agregar contacto</button>
-            </div>
+      <h3 style="margin-top:18px;">Contactos de emergencia / apoderado</h3>
+      <p class="field-hint">Opcional — puedes agregar uno o m&aacute;s contactos.</p>
+      <div id="contactos-list"></div>
+      <div class="subtable subtable-add">
+        <div class="subtable-grid">
+          <div><div class="mini-label">Nombre</div><input id="contacto-nombre" placeholder="Nombre completo"></div>
+          <div><div class="mini-label">Parentesco</div><input id="contacto-parentesco" placeholder="Ej. Hijo/a"></div>
+          <div><div class="mini-label">Tel&eacute;fono</div><input id="contacto-telefono" placeholder="+56 9 ..."></div>
+          <div><div class="mini-label">Email (opcional)</div><input id="contacto-email" placeholder="correo@ejemplo.cl"></div>
+          <div>
+            <label class="field-hint" style="display:flex; align-items:center; gap:6px; font-weight:600;">
+              <input type="checkbox" id="contacto-apoderado" style="width:16px; height:16px;"> Es apoderado
+            </label>
+            <button type="button" id="btn-add-contacto" class="secondary small">+ Agregar contacto</button>
           </div>
         </div>
-
-        <p class="field-hint" style="margin-top:16px;">Al generar los documentos, se incluye la patolog&iacute;a principal declarada en la pesta&ntilde;a Residente, junto con los datos de contacto, para la Carta de Derechos y Deberes y el Consentimiento Voluntario de Ingreso (Decreto 20, Art. 29).</p>
-        <div class="liq-actions">
-          <button id="btn-pdf-ficha" class="gold" type="button">Generar ficha de ingreso PDF</button>
-          <button id="btn-pdf-consentimiento" class="sky" type="button">Generar documentos de aceptación (derechos, deberes, consentimiento)</button>
-          <span id="ficha-save-flash" class="save-flash"></span>
-        </div>
       </div>
-      <div id="acep-empty" class="field-hint">Selecciona un residente para ver y editar su aceptaci&oacute;n de informe m&eacute;dico.</div>
+
+      <div class="liq-actions">
+        <button id="btn-pdf-ficha" class="gold" type="button">Generar ficha de ingreso PDF</button>
+        <button id="btn-pdf-consentimiento" class="sky" type="button">Generar documentos de ingreso (derechos, deberes, consentimiento)</button>
+        <span id="ficha-save-flash" class="save-flash"></span>
+      </div>
     </div>
   </section>
 
@@ -540,7 +573,6 @@
   var tabBtns = document.querySelectorAll('.tab-btn');
   var tabPanels = {
     residente: document.getElementById('tab-residente'),
-    aceptacion: document.getElementById('tab-aceptacion'),
     diagnosticos: document.getElementById('tab-diagnosticos'),
     control: document.getElementById('tab-control')
   };
@@ -550,7 +582,6 @@
       btn.classList.add('active');
       Object.keys(tabPanels).forEach(function(k){ tabPanels[k].classList.remove('active'); });
       tabPanels[btn.dataset.tab].classList.add('active');
-      if(btn.dataset.tab === 'aceptacion') loadAceptacion();
       if(btn.dataset.tab === 'diagnosticos') loadDiag();
       if(btn.dataset.tab === 'control') renderControl();
     });
@@ -573,11 +604,10 @@
   }
 
   var resSelector = document.getElementById('res-selector');
-  var acepSel = document.getElementById('acep-residente');
   var diagSel = document.getElementById('diag-residente');
   var ctlSel = document.getElementById('ctl-residente');
 
-  function refreshSelectors(){ [resSelector, acepSel, diagSel, ctlSel].forEach(fillResidenteSelect); }
+  function refreshSelectors(){ [resSelector, diagSel, ctlSel].forEach(fillResidenteSelect); }
   refreshSelectors();
 
   function currentResidente(sel){ return residentes.find(function(r){ return r.id===sel.value; }); }
@@ -611,8 +641,35 @@
     document.getElementById('btn-guardar-residente').textContent = 'Agregar residente';
     document.getElementById('btn-cancelar-residente').style.display = 'none';
     document.getElementById('btn-eliminar-residente').style.display = 'none';
+    document.getElementById('res-ingreso-consentimiento-wrap').style.display = 'none';
     resSelector.value = '';
   }
+
+  function actualizarVisibilidadRepresentante(){
+    document.getElementById('res-representante-wrap').style.display = document.getElementById('res-puede-consentir').value === 'no' ? 'grid' : 'none';
+  }
+  document.getElementById('res-puede-consentir').addEventListener('change', function(){
+    actualizarVisibilidadRepresentante();
+    if(editandoResidenteId) guardarIngresoConsentimiento();
+  });
+  function guardarIngresoConsentimiento(){
+    var ficha = getFicha(editandoResidenteId);
+    ficha.informeMedico = {
+      recibido: document.getElementById('res-informe-recibido').checked,
+      fecha: document.getElementById('res-informe-fecha').value,
+      emisor: document.getElementById('res-informe-emisor').value.trim()
+    };
+    ficha.puedeConsentir = document.getElementById('res-puede-consentir').value;
+    ficha.representante = {
+      nombre: document.getElementById('res-rep-nombre').value.trim(),
+      rut: document.getElementById('res-rep-rut').value.trim(),
+      tipoPoder: document.getElementById('res-rep-tipo-poder').value
+    };
+    saveFichas();
+  }
+  ['res-informe-recibido','res-informe-fecha','res-informe-emisor','res-rep-nombre','res-rep-rut','res-rep-tipo-poder'].forEach(function(id){
+    document.getElementById(id).addEventListener('change', function(){ if(editandoResidenteId) guardarIngresoConsentimiento(); });
+  });
 
   function cargarResidenteEnForm(r){
     editandoResidenteId = r.id;
@@ -638,6 +695,20 @@
     document.getElementById('btn-guardar-residente').textContent = 'Guardar cambios';
     document.getElementById('btn-cancelar-residente').style.display = 'inline-block';
     document.getElementById('btn-eliminar-residente').style.display = 'inline-block';
+
+    var informeMedico = ficha.informeMedico || {};
+    document.getElementById('res-informe-recibido').checked = !!informeMedico.recibido;
+    document.getElementById('res-informe-fecha').value = informeMedico.fecha || '';
+    document.getElementById('res-informe-emisor').value = informeMedico.emisor || '';
+    document.getElementById('res-puede-consentir').value = ficha.puedeConsentir || 'si';
+    var representante = ficha.representante || {};
+    document.getElementById('res-rep-nombre').value = representante.nombre || '';
+    document.getElementById('res-rep-rut').value = representante.rut || '';
+    document.getElementById('res-rep-tipo-poder').value = representante.tipoPoder || 'poder_simple';
+    actualizarVisibilidadRepresentante();
+    renderContactos(r);
+    document.getElementById('ficha-save-flash').textContent = '';
+    document.getElementById('res-ingreso-consentimiento-wrap').style.display = 'block';
   }
 
   resSelector.addEventListener('change', function(){
@@ -727,25 +798,10 @@
     }).join('');
   }
 
-  function loadAceptacion(){
-    var r = currentResidente(acepSel);
-    var contentEl = document.getElementById('acep-content');
-    var emptyEl = document.getElementById('acep-empty');
-    if(!r){ contentEl.style.display='none'; emptyEl.style.display='block'; return; }
-    contentEl.style.display='block'; emptyEl.style.display='none';
-    var ficha = getFicha(r.id);
-    document.getElementById('acep-info-card').innerHTML = '<div class="info-card">'+
-      '<div class="info-block"><div class="info-label">Residente</div><div class="info-value">'+esc(r.nombre)+'</div></div>'+
-      '<div class="info-block"><div class="info-label">Patología principal</div><div class="info-value">'+esc(ficha.patologiaPrincipal||'—')+'</div></div>'+
-      '<div class="info-block"><div class="info-label">Estado</div><div class="info-value">'+esc(estadoLabel(ficha))+'</div></div>'+
-    '</div>';
-    renderContactos(r);
-    document.getElementById('ficha-save-flash').textContent = '';
-  }
-  acepSel.addEventListener('change', loadAceptacion);
+  function currentResidenteEditado(){ return residentes.find(function(x){ return x.id === editandoResidenteId; }); }
 
   document.getElementById('btn-add-contacto').addEventListener('click', function(){
-    var r = currentResidente(acepSel);
+    var r = currentResidenteEditado();
     if(!r) return;
     var nombre = document.getElementById('contacto-nombre').value.trim();
     if(!nombre) return;
@@ -768,7 +824,7 @@
   document.getElementById('contactos-list').addEventListener('click', function(e){
     var btn = e.target.closest('[data-del-contacto]');
     if(!btn) return;
-    var r = currentResidente(acepSel);
+    var r = currentResidenteEditado();
     if(!r) return;
     r.contactos = r.contactos.filter(function(c){ return c.id !== btn.dataset.delContacto; });
     saveResidentes();
@@ -1070,7 +1126,7 @@
   }
 
   document.getElementById('btn-pdf-ficha').addEventListener('click', async function(){
-    var r = currentResidente(acepSel);
+    var r = currentResidenteEditado();
     if(!r) return;
     try{
       var ficha = getFicha(r.id);
@@ -1097,34 +1153,52 @@
   });
 
   document.getElementById('btn-pdf-consentimiento').addEventListener('click', function(){
-    var r = currentResidente(acepSel);
+    var r = currentResidenteEditado();
     if(!r) return;
     generarDocumentosIngresoResidente(r);
   });
 
+  var TIPO_PODER_LABEL = { poder_simple:'poder simple', poder_notarial:'poder notarial', curaduria:'curaduría/interdicción', otro:'documento habilitante' };
+
   function generarDocumentosIngresoResidente(r){
     try{
       var ficha = getFicha(r.id);
+      var informeMedico = ficha.informeMedico || {};
+      var puedeConsentir = ficha.puedeConsentir !== 'no';
+      var representante = ficha.representante || {};
+
+      var clauseInforme = { title: 'III. ACEPTACIÓN DEL INFORME MÉDICO DE INGRESO', body:
+        informeMedico.recibido
+          ? 'La residencia declara haber recibido y revisado el informe médico externo de ' + r.nombre + ', emitido por ' + (informeMedico.emisor || '[médico/institución no registrado]') + ' con fecha ' + (informeMedico.fecha ? fmtDate(informeMedico.fecha) : '[fecha no registrada]') + ', dejando constancia de que su contenido es compatible con las condiciones de admisión del establecimiento.'
+          : 'A la fecha de este documento no se ha registrado la recepción del informe médico externo de ' + r.nombre + ' — debe solicitarse antes de formalizar el ingreso, conforme al Decreto Supremo N°20/2021, Art. 12 letra b).',
+        note: 'Este informe es un documento distinto y externo, emitido por el médico tratante — no lo genera este sistema, solo se deja constancia de su recepción.' };
+
+      var clauseConsentimiento = puedeConsentir
+        ? { title: 'IV. CONSENTIMIENTO VOLUNTARIO DE INGRESO', body:
+            'Quien suscribe declara: haber recibido información clara y suficiente sobre los servicios, las condiciones de ingreso y el funcionamiento de la Residencia Senior Omar Wall; haber tomado conocimiento del Reglamento Interno y de la Carta de Derechos y Deberes del establecimiento; consentir voluntariamente el ingreso de ' + r.nombre + (r.rut ? ', RUT ' + r.rut : '') + ' a la residencia, en las condiciones informadas; y haber sido informado/a de que el ingreso es voluntario y que puede solicitar el egreso en cualquier momento, sujeto a las condiciones del contrato de prestación de servicios.',
+            note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 12 letra b) y 29. Fecha de ingreso: ' + fmtDate(r.fechaIngreso) + '.' }
+        : { title: 'IV. REPRESENTACIÓN Y CONSENTIMIENTO DE INGRESO POR PODER', body:
+            'Por no encontrarse ' + r.nombre + ' en condiciones de consentir voluntariamente su ingreso, comparece ' + (representante.nombre || '[nombre representante no registrado]') + (representante.rut ? ', RUT ' + representante.rut : '') + ', quien acredita su representación mediante ' + (TIPO_PODER_LABEL[representante.tipoPoder] || 'documento habilitante') + ', y en tal calidad declara: haber recibido información clara y suficiente sobre los servicios, las condiciones de ingreso y el funcionamiento de la Residencia Senior Omar Wall; haber tomado conocimiento del Reglamento Interno y de la Carta de Derechos y Deberes del establecimiento; y consentir en representación de ' + r.nombre + ' su ingreso a la residencia, en las condiciones informadas.',
+            note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 12 letra b) y 29. Verificar la validez del documento habilitante con un abogado antes de firmar.' };
+
       var clauses = [
         { title: 'I. DERECHOS DE LA PERSONA MAYOR RESIDENTE', body:
           'A ser tratada con dignidad, respeto y buen trato, sin discriminación de ningún tipo; a la privacidad y confidencialidad de su información personal y de salud; a recibir información clara sobre su estado de salud, cuidados y tratamiento; a participar en las decisiones sobre su propio cuidado, en la medida de sus capacidades; a mantener sus vínculos familiares y sociales, y su libertad de culto; a recibir atención oportuna en caso de urgencia médica; a un entorno seguro, limpio y adecuado a sus necesidades; a presentar reclamos o sugerencias sin temor a represalias; a conocer el Reglamento Interno del establecimiento; y a decidir voluntariamente su ingreso y, en las condiciones que la ley permita, su egreso del establecimiento.',
           note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 29.' },
         { title: 'II. DEBERES DE LA PERSONA MAYOR RESIDENTE', body:
           'Respetar la convivencia y los derechos de los demás residentes y del personal; cumplir con el Reglamento Interno del establecimiento; informar oportunamente cambios relevantes en su situación de salud, cuando sea posible; mantener al día el pago de la cuota de permanencia acordada; y comunicar oportunamente cualquier decisión de traslado o egreso del establecimiento.' },
-        { title: 'III. ACEPTACIÓN DE INFORME MÉDICO Y CONSENTIMIENTO VOLUNTARIO DE INGRESO', body:
-          'Quien suscribe declara: haber recibido información clara y suficiente sobre los servicios, las condiciones de ingreso y el funcionamiento de la Residencia Senior Omar Wall; haber tomado conocimiento del Reglamento Interno y de la Carta de Derechos y Deberes del establecimiento; conocer y aceptar la patología principal informada — ' + (ficha.patologiaPrincipal || 'sin patología relevante declarada') + ' — y las indicaciones de cuidado asociadas; consentir voluntariamente el ingreso de ' + r.nombre + (r.rut ? ', RUT ' + r.rut : '') + ' a la residencia, en las condiciones informadas; y haber sido informado/a de que el ingreso es voluntario y que puede solicitar el egreso en cualquier momento, sujeto a las condiciones del contrato de prestación de servicios.',
-          note: 'Referencia normativa: Decreto Supremo N°20/2021, MINSAL — Art. 12 letra b) y 29. Fecha de ingreso: ' + fmtDate(r.fechaIngreso) + '.' }
+        clauseInforme,
+        clauseConsentimiento
       ];
       var doc = ReportPDF.buildContractDoc({
-        titulo: 'DOCUMENTOS DE INGRESO Y ACEPTACIÓN DE INFORME MÉDICO',
+        titulo: 'DOCUMENTOS DE INGRESO',
         subtitulo: r.nombre + (r.rut ? ' · RUT ' + r.rut : ''),
         disclaimer: 'Estos documentos se entregan al residente o a su representante legal al momento del ingreso a la Residencia Senior Omar Wall, conforme al Decreto Supremo N°20/2021 del Ministerio de Salud. La Carta de Derechos y Deberes debe entregarse además por escrito y mantenerse exhibida en un lugar visible del establecimiento.',
         clauses: clauses,
         closing: 'En señal de conformidad con lo declarado en los documentos precedentes, firman:',
-        firmas: [
-          { label: 'RESIDENTE (o representante legal)', sub: r.nombre },
-          { label: 'DIRECTOR/A TÉCNICO/A', sub: '[COMPLETAR nombre]' }
-        ]
+        firmas: puedeConsentir
+          ? [{ label: 'RESIDENTE (o representante legal)', sub: r.nombre }, { label: 'DIRECTOR/A TÉCNICO/A', sub: '[COMPLETAR nombre]' }]
+          : [{ label: 'REPRESENTANTE (por poder)', sub: representante.nombre || '[COMPLETAR nombre]' }, { label: 'DIRECTOR/A TÉCNICO/A', sub: '[COMPLETAR nombre]' }]
       });
       (async function(){
         var res2 = await ReportPDF.guardarPDF(doc, ReportPDF.slugify('documentos-ingreso-'+r.nombre)+'.pdf');
